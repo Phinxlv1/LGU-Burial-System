@@ -7,15 +7,35 @@ use Illuminate\Database\Eloquent\Model;
 class BurialPermit extends Model
 {
     protected $fillable = [
-        'permit_number', 'deceased_id', 'applicant_name',
-        'applicant_relationship', 'applicant_contact',
-        'applicant_address', 'issued_date', 'expiry_date',
-        'status', 'remarks', 'processed_by'
+        'permit_number',
+        'deceased_id',
+        'permit_type',
+        'kind_of_burial',
+        'applicant_name',
+        'applicant_relationship',
+        'applicant_contact',
+        'applicant_address',
+        'issued_date',
+        'expiry_date',
+        'status',
+        'remarks',
+        'processed_by',
+        'issued_by',
+    ];
+
+    protected $casts = [
+        'issued_date'  => 'date',
+        'expiry_date'  => 'date',
     ];
 
     public function deceased()
     {
-        return $this->belongsTo(DeceasedPerson::class);
+        return $this->belongsTo(DeceasedPerson::class, 'deceased_id');
+    }
+
+    public function processedBy()
+    {
+        return $this->belongsTo(User::class, 'processed_by');
     }
 
     public function documents()
@@ -31,15 +51,5 @@ class BurialPermit extends Model
     public function smsNotifications()
     {
         return $this->hasMany(SmsNotification::class, 'permit_id');
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($permit) {
-            $year = date('Y');
-            $count = self::whereYear('created_at', $year)->count() + 1;
-            $permit->permit_number = $year . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
-        });
     }
 }

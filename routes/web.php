@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SuperAdminDashboardController;
 use App\Http\Controllers\DeceasedPersonController;
 use App\Http\Controllers\BurialPermitController;
 use App\Http\Controllers\CemeteryMapController;
@@ -20,10 +21,17 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 Route::middleware(['auth'])->group(function () {
 
+    // Shared dashboard — redirects internally based on role
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::middleware(['role:admin'])->group(function () {
+    // ── Super Admin only ──
+    Route::middleware(['role:super_admin'])->group(function () {
+        Route::get('/superadmin/dashboard', [SuperAdminDashboardController::class, 'index'])->name('superadmin.dashboard');
+        Route::resource('users', UserController::class)->names('admin.users');
+    });
 
+    // ── Admin + Super Admin ──
+    Route::middleware(['role:admin|super_admin'])->group(function () {
         Route::resource('deceased', DeceasedPersonController::class);
 
         Route::resource('permits', BurialPermitController::class);
@@ -33,20 +41,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cemetery/map', [CemeteryMapController::class, 'index'])->name('cemetery.map');
 
         Route::post('permits/{permit}/documents', [DocumentController::class, 'upload'])->name('documents.upload');
-
         Route::post('permits/{permit}/sms', [SmsController::class, 'send'])->name('sms.send');
 
         Route::post('/import/excel', [ImportController::class, 'importExcel'])->name('import.excel');
 
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
-
-    });
-
-    Route::middleware(['role:super_admin'])->group(function () {
-
-        Route::resource('users', UserController::class);
-
     });
 
 });

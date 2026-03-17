@@ -1,0 +1,14 @@
+warning: in the working copy of 'resources/views/auth/login.blade.php', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'resources/views/dashboard.blade.php', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'resources/views/dashboard/superadmin-dashboard.blade.php', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'resources/views/welcome.blade.php', CRLF will be replaced by LF the next time Git touches it
+.gitignore
+app/Http/Controllers/BurialPermitController.php
+app/Models/BurialPermit.php
+bootstrap/app.php
+resources/views/auth/login.blade.php
+resources/views/dashboard.blade.php
+resources/views/dashboard/admin.blade.php
+resources/views/dashboard/superadmin-dashboard.blade.php
+resources/views/welcome.blade.php
+routes/web.php
