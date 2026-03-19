@@ -13,6 +13,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+
 // Root → login
 Route::get('/', fn () => redirect()->route('login'));
 
@@ -40,7 +41,10 @@ Route::middleware('auth')->group(function () {
     // ── Admin + Super Admin ──
     Route::middleware('role:admin|super_admin')->group(function () {
 
+        Route::get('/import/excel', [ImportController::class, 'showImport'])->name('import.show');
+
         // Deceased persons
+        Route::get('/deceased/search', [DeceasedPersonController::class, 'search'])->name('deceased.search');
         Route::resource('deceased', DeceasedPersonController::class);
 
         // Burial permits
@@ -61,5 +65,10 @@ Route::middleware('auth')->group(function () {
         // Reports
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+        Route::get('permits/{permit}/print', [BurialPermitController::class, 'print'])->name('permits.print');
+        Route::post('permits/{permit}/renew', [BurialPermitController::class, 'renew'])->name('permits.renew');
+        Route::get('/deceased/search', [DeceasedPersonController::class, 'search'])->name('deceased.search');
+        Route::get('/superadmin/export', [SuperAdminDashboardController::class, 'export'])->name('superadmin.export');
     });
 });
