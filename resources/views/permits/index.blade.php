@@ -94,54 +94,7 @@
 <body>
 
 <aside class="sidebar">
-    <div class="sidebar-brand">
-        <div class="sidebar-brand-top">
-            <img src="{{ asset('images/carmen-seal.png') }}" alt="Carmen Seal" class="sidebar-seal">
-            <h1>LGU Carmen<br>Burial System</h1>
-        </div>
-        <p>Municipal Civil Registrar</p>
-    </div>
-    <nav class="sidebar-nav">
-        <div class="nav-section">Permits</div>
-        <a href="{{ route('permits.index') }}" class="nav-item active">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Burial Permits
-        </a>
-        <a href="{{ route('deceased.index') }}" class="nav-item">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-            Deceased Records
-        </a>
-        <div class="nav-section">Cemetery</div>
-        <a href="{{ route('cemetery.map') }}" class="nav-item">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Cemetery Map
-        </a>
-        <div class="nav-section">Tools</div>
-        <a href="{{ route('reports.index') }}" class="nav-item">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Reports
-        </a>
-        <a href="#" class="nav-item">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Import Excel
-        </a>
-    </nav>
-    <div class="sidebar-footer">
-        <div class="user-info">
-            <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
-            <div>
-                <div class="user-name">{{ auth()->user()->name }}</div>
-                <div class="user-role">Admin</div>
-            </div>
-        </div>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="btn-logout">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Sign Out
-            </button>
-        </form>
-    </div>
+    @include('partials.sidebar')
 </aside>
 
 <div class="main">
