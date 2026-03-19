@@ -10,16 +10,18 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, string $roles): Response
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login');
         }
 
         $allowedRoles = explode('|', $roles);
 
-        if (!in_array(auth()->user()->role, $allowedRoles)) {
-            abort(403, 'Unauthorized.');
+        foreach ($allowedRoles as $role) {
+            if (auth()->user()->hasRole(trim($role))) {
+                return $next($request);
+            }
         }
 
-        return $next($request);
+        abort(403, 'Unauthorized.');
     }
 }

@@ -13,51 +13,53 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+// Root → login
+Route::get('/', fn () => redirect()->route('login'));
 
+// Guest routes
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
-Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-Route::middleware(['auth'])->group(function () {
+// Authenticated routes
+Route::middleware('auth')->group(function () {
 
-    // Shared dashboard — redirects internally based on role
+    // Dashboard — DashboardController redirects super_admin to superadmin.dashboard,
+    // otherwise renders dashboard.admin
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // ── Super Admin only ──
-    Route::middleware(['role:super_admin'])->group(function () {
+    Route::middleware('role:super_admin')->group(function () {
         Route::get('/superadmin/dashboard', [SuperAdminDashboardController::class, 'index'])->name('superadmin.dashboard');
-        Route::get('/superadmin/export', [SuperAdminDashboardController::class, 'export'])->name('superadmin.export');
         Route::resource('users', UserController::class)->names('admin.users');
-        
     });
 
-    // ── Admin ──
-    Route::middleware(['role:admin|super_admin'])->group(function () {
-        Route::get('/deceased/search', [DeceasedPersonController::class, 'search'])->name('deceased.search');
+    // ── Admin + Super Admin ──
+    Route::middleware('role:admin|super_admin')->group(function () {
+
+        // Deceased persons
         Route::resource('deceased', DeceasedPersonController::class);
-        Route::post('permits/{permit}/renew', [BurialPermitController::class, 'renew'])->name('permits.renew');
-        Route::get('permits/{permit}/print', [BurialPermitController::class, 'print'])->name('permits.print');
-        Route::get('/permits/{id}/print', [PermitController::class, 'print'])->name('permits.print');
 
-        
-
+        // Burial permits
         Route::resource('permits', BurialPermitController::class);
         Route::post('permits/{permit}/approve', [BurialPermitController::class, 'approve'])->name('permits.approve');
         Route::post('permits/{permit}/release', [BurialPermitController::class, 'release'])->name('permits.release');
 
+        // Cemetery map
         Route::get('/cemetery/map', [CemeteryMapController::class, 'index'])->name('cemetery.map');
 
+        // Documents & SMS
         Route::post('permits/{permit}/documents', [DocumentController::class, 'upload'])->name('documents.upload');
         Route::post('permits/{permit}/sms', [SmsController::class, 'send'])->name('sms.send');
 
+        // Import
         Route::post('/import/excel', [ImportController::class, 'importExcel'])->name('import.excel');
 
+        // Reports
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
-
-        Route::get('/import/excel', [ImportController::class, 'showImport'])->name('import.show');
-        
     });
-
 });

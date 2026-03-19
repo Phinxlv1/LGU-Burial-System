@@ -3,15 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\BurialPermit;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
+        $user = auth()->user();
 
-        // Shared stats for both roles
+        // Super Admin → dedicated analytics dashboard
+        if ($user->hasRole('super_admin')) {
+            return redirect()->route('superadmin.dashboard');
+        }
+
+        // Admin → full permit processing dashboard
+        $recentPermits = BurialPermit::with('deceased')->latest()->take(10)->get();
+
         $stats = [
             'total'      => BurialPermit::count(),
             'this_month' => BurialPermit::whereMonth('created_at', now()->month)
@@ -27,17 +33,6 @@ class DashboardController extends Controller
             'monthly'    => $this->getMonthlyData(),
         ];
 
-        $recentPermits = BurialPermit::with('deceased')
-                            ->latest()
-                            ->take(5)
-                            ->get();
-
-        // Super Admin → read-only overview dashboard
-        if ($user->role === 'super_admin') {
-    return redirect()->route('superadmin.dashboard');
-}
-
-        // Admin → full permit processing dashboard
         return view('dashboard.admin', compact('stats', 'recentPermits'));
     }
 
