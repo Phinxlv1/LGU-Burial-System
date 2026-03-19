@@ -7,20 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class ImportLog extends Model
 {
     protected $fillable = [
-        'filename',
+        'file_name',
+        'uploaded_by',
         'total_rows',
         'imported',
         'skipped',
-        'skipped_details',
-        'imported_by',
+        'skip_reasons',
     ];
 
     protected $casts = [
-        'skipped_details' => 'array',
+        'skip_reasons' => 'array',
     ];
 
-    public function importedBy()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'imported_by');
+        return $this->belongsTo(User::class, 'uploaded_by');
     }
 }

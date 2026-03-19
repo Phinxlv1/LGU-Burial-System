@@ -18,28 +18,28 @@ class BurialPermitController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'requestor_name'  => 'required|string|max:255',
-            'first_name'      => 'required|string|max:255',
-            'last_name'       => 'required|string|max:255',
-            'date_of_death'   => 'required|date',
-            'burial_fee_type' => 'required|string',
-            'nationality'     => 'nullable|string|max:100',
-            'age'             => 'nullable|integer|min:0',
-            'sex'             => 'nullable|in:Male,Female',
-            'kind_of_burial'  => 'nullable|string|max:100',
+            'requestor_name'   => 'required|string|max:255',
+            'first_name'       => 'required|string|max:255',
+            'last_name'        => 'required|string|max:255',
+            'date_of_death'    => 'required|date',
+            'burial_fee_type'  => 'required|string',
+            'nationality'      => 'nullable|string|max:100',
+            'age'              => 'nullable|integer|min:0',
+            'sex'              => 'nullable|in:Male,Female',
+            'kind_of_burial'   => 'nullable|string|max:100',
         ]);
 
         $deceased = DeceasedPerson::create([
             'first_name'     => $request->first_name,
             'last_name'      => $request->last_name,
             'date_of_death'  => $request->date_of_death,
-            'nationality'    => $request->nationality,
+            'nationality'    => $request->nationality ?? 'Filipino',
             'age'            => $request->age,
             'sex'            => $request->sex,
             'kind_of_burial' => $request->kind_of_burial,
         ]);
 
-        $latest = BurialPermit::whereYear('created_at', now()->year)->count() + 1;
+        $latest       = BurialPermit::whereYear('created_at', now()->year)->count() + 1;
         $permitNumber = 'BP-' . now()->year . '-' . str_pad($latest, 5, '0', STR_PAD_LEFT);
 
         BurialPermit::create([
@@ -48,14 +48,14 @@ class BurialPermitController extends Controller
             'permit_type'            => $request->burial_fee_type,
             'kind_of_burial'         => $request->kind_of_burial,
             'applicant_name'         => $request->requestor_name,
-            'applicant_relationship' => $request->requestor_relationship ?? 'N/A',
-            'applicant_contact'      => $request->requestor_contact ?? 'N/A',
-            'applicant_address'      => $request->requestor_address,
+            'applicant_relationship' => $request->applicant_relationship ?? '',
+            'applicant_contact'      => $request->applicant_contact ?? '',
             'status'                 => 'pending',
             'processed_by'           => Auth::id(),
         ]);
 
-        return redirect()->route('permits.index')->with('success', 'Burial permit created successfully.');
+        return redirect()->route('permits.index')
+            ->with('success', 'Burial permit created successfully.');
     }
 
     public function show(BurialPermit $permit)
@@ -66,106 +66,173 @@ class BurialPermitController extends Controller
 
     public function approve(BurialPermit $permit)
     {
-        abort_if($permit->status !== 'pending', 403);
+        if ($permit->status !== 'pending') {
+            return redirect()->route('permits.show', $permit)
+                ->withErrors(['status' => 'Only pending permits can be approved.']);
+        }
+
         $permit->update([
             'status'       => 'approved',
-            'processed_by' => Auth::id(),
             'issued_date'  => now(),
+            'processed_by' => Auth::id(),
         ]);
-        return redirect()->route('permits.show', $permit)->with('success', 'Permit approved successfully.');
+
+        return redirect()->route('permits.show', $permit)
+            ->with('success', 'Permit approved successfully.');
     }
 
     public function release(BurialPermit $permit)
     {
-        abort_if($permit->status !== 'approved', 403);
+        if (!in_array($permit->status, ['pending', 'approved'])) {
+            return redirect()->route('permits.show', $permit)
+                ->withErrors(['status' => 'This permit cannot be released in its current state.']);
+        }
+
         $permit->update([
             'status'      => 'released',
+            'issued_date' => $permit->issued_date ?? now(),
             'expiry_date' => now()->addYear(),
         ]);
-        return redirect()->route('permits.show', $permit)->with('success', 'Permit released successfully.');
+
+        return redirect()->route('permits.show', $permit)
+            ->with('success', 'Permit released successfully.');
     }
 
+    /**
+     * Generate a filled .docx from the permit template and return as download.
+     */
     public function print(BurialPermit $permit)
-{
-    $permit->load('deceased');
+    {
+        $permit->load('deceased', 'processedBy');
 
-    $templatePath = storage_path('app/templates/permit.docx');
+        $templatePath = storage_path('app/templates/permit.docx');
 
-    if (!file_exists($templatePath)) {
-        abort(500, 'Permit template not found. Please place permit.docx in storage/app/templates/');
+        if (!file_exists($templatePath)) {
+            abort(404, 'Permit template not found at storage/app/templates/permit.docx');
+        }
+
+        // ── Fee table values ──
+        $feeData = [
+            'cemented'    => ['tomb' => '1,000.00', 'permit' => '20.00',  'maint' => '100.00', 'app' => '20.00',  'total' => '1,200.00'],
+            'niche_1st'   => ['tomb' => '8,000.00', 'permit' => '20.00',  'maint' => '100.00', 'app' => '20.00',  'total' => '8,200.00'],
+            'niche_2nd'   => ['tomb' => '6,600.00', 'permit' => '20.00',  'maint' => '100.00', 'app' => '20.00',  'total' => '6,800.00'],
+            'niche_3rd'   => ['tomb' => '5,700.00', 'permit' => '20.00',  'maint' => '100.00', 'app' => '20.00',  'total' => '5,900.00'],
+            'niche_4th'   => ['tomb' => '5,300.00', 'permit' => '20.00',  'maint' => '100.00', 'app' => '20.00',  'total' => '5,500.00'],
+            'bone_niches' => ['tomb' => '5,000.00', 'permit' => '20.00',  'maint' => '100.00', 'app' => '20.00',  'total' => '5,200.00'],
+        ];
+
+        $fees = $feeData[$permit->permit_type] ?? $feeData['cemented'];
+
+        // Checkbox markers
+        $isNew     = in_array($permit->status, ['pending', 'approved', 'released']);
+        $isRenewal = false; // extend logic if you add renewal tracking
+
+        $permitType = $permit->permit_type ?? '';
+        $isCemented = str_contains($permitType, 'cemented') ? '✓' : ' ';
+        $isNiche    = str_contains($permitType, 'niche')    ? '✓' : ' ';
+        $isBone     = str_contains($permitType, 'bone')     ? '✓' : ' ';
+
+        $deceased     = $permit->deceased;
+        $deceasedName = $deceased
+            ? trim($deceased->first_name . ' ' . $deceased->last_name)
+            : '—';
+
+        // Extract reg number from permit_number (e.g. BP-2026-00001 → 00001)
+        $parts  = explode('-', $permit->permit_number ?? '');
+        $year   = $parts[1] ?? now()->year;
+        $regNo  = $parts[2] ?? $permit->permit_number;
+
+        $replacements = [
+            '${renewal_check}' => $isRenewal ? '✓' : ' ',
+            '${new_check}'     => $isNew     ? '✓' : ' ',
+            '${date}'          => now()->format('F d, Y'),
+            '${year}'          => $year,
+            '${reg_no}'        => $regNo,
+
+            '${applicant_name}'    => $permit->applicant_name ?? '—',
+            '${relationship}'      => $permit->applicant_relationship ?? '—',
+            '${applicant_address}' => $permit->applicant_address ?? '—',
+            '${contact}'           => $permit->applicant_contact ?? '—',
+
+            '${check_cemented}'  => $isCemented,
+            '${check_niche}'     => $isNiche,
+            '${check_bone}'      => $isBone,
+
+            '${deceased_name}'   => $deceasedName,
+            '${place_of_death}'  => $deceased->place_of_death ?? 'Carmen, Davao del Norte',
+            '${date_of_death}'   => $deceased && $deceased->date_of_death
+                                        ? \Carbon\Carbon::parse($deceased->date_of_death)->format('F d, Y')
+                                        : '—',
+
+            '${or_number}'   => '—',
+            '${paid_on}'     => $permit->issued_date
+                                    ? \Carbon\Carbon::parse($permit->issued_date)->format('F d, Y')
+                                    : '—',
+            '${amount_paid}' => 'P ' . $fees['total'],
+
+            '${fee_tomb}'   => $fees['tomb'],
+            '${fee_permit}' => $fees['permit'],
+            '${fee_maint}'  => $fees['maint'],
+            '${fee_app}'    => $fees['app'],
+            '${fee_total}'  => $fees['total'],
+
+            '${expiry_date}' => $permit->expiry_date
+                                    ? \Carbon\Carbon::parse($permit->expiry_date)->format('F d, Y')
+                                    : now()->addYear()->format('F d, Y'),
+        ];
+
+        // ── Fill the template via XML string replacement ──
+        $tmpDir  = sys_get_temp_dir() . '/permit_' . $permit->id . '_' . time();
+        $tmpDocx = $tmpDir . '.docx';
+
+        // Copy original template to temp location
+        copy($templatePath, $tmpDocx);
+
+        // Open as ZIP, replace in document.xml, save
+        $zip = new \ZipArchive();
+        if ($zip->open($tmpDocx) !== true) {
+            abort(500, 'Could not open permit template.');
+        }
+
+        $docXml = $zip->getFromName('word/document.xml');
+        if ($docXml === false) {
+            $zip->close();
+            abort(500, 'Template is missing word/document.xml');
+        }
+
+        // Replace placeholders — need to handle split runs in XML
+        // First do direct replacement on the raw XML
+        foreach ($replacements as $placeholder => $value) {
+            $docXml = str_replace(
+                htmlspecialchars($placeholder, ENT_XML1),
+                htmlspecialchars((string) $value, ENT_XML1),
+                $docXml
+            );
+            // Also replace un-encoded version in case it's stored plain
+            $docXml = str_replace($placeholder, htmlspecialchars((string) $value, ENT_XML1), $docXml);
+        }
+
+        $zip->addFromString('word/document.xml', $docXml);
+        $zip->close();
+
+        $filename = 'BurialPermit_' . $permit->permit_number . '.docx';
+
+        return response()->download($tmpDocx, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ])->deleteFileAfterSend(true);
     }
-
-    $template = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
-
-    $fees = [
-        'cemented'   => ['tomb'=>'910.00',  'permit'=>'20.00','maint'=>'50.00','app'=>'20.00','total'=>'1,000.00'],
-        'niche_1st'  => ['tomb'=>'7,960.00','permit'=>'20.00','maint'=>'-',    'app'=>'20.00','total'=>'8,000.00'],
-        'niche_2nd'  => ['tomb'=>'6,560.00','permit'=>'20.00','maint'=>'-',    'app'=>'20.00','total'=>'6,600.00'],
-        'niche_3rd'  => ['tomb'=>'5,660.00','permit'=>'20.00','maint'=>'-',    'app'=>'20.00','total'=>'5,700.00'],
-        'niche_4th'  => ['tomb'=>'5,260.00','permit'=>'20.00','maint'=>'-',    'app'=>'20.00','total'=>'5,300.00'],
-        'bone_niches'=> ['tomb'=>'4,960.00','permit'=>'20.00','maint'=>'-',    'app'=>'20.00','total'=>'5,000.00'],
-    ];
-    $fee  = $fees[$permit->permit_type] ?? $fees['cemented'];
-    $type = $permit->permit_type;
-    $isC  = $type === 'cemented';
-    $isN  = in_array($type, ['niche_1st','niche_2nd','niche_3rd','niche_4th']);
-    $isB  = $type === 'bone_niches';
-    $expiryDate = $permit->expiry_date ? $permit->expiry_date->format('F d, Y') : now()->addYears(5)->format('F d, Y');
-    $expiryYear = $permit->expiry_date ? $permit->expiry_date->format('Y') : now()->addYears(5)->format('Y');
-
-    $template->setValue('permit_no',        $permit->permit_number);
-    $template->setValue('reg_no',           $permit->id);
-    $template->setValue('year',             $permit->created_at->format('Y'));
-    $template->setValue('date',             $permit->created_at->format('F d, Y'));
-    $template->setValue('date_applied',     $permit->created_at->format('Y'));
-    $template->setValue('date_expired',     $expiryYear);
-    $template->setValue('expiry_date',      $expiryDate);
-    $template->setValue('renewal_check',    '');
-    $template->setValue('new_check',        'X');
-    $template->setValue('deceased_name',    optional($permit->deceased)->first_name . ' ' . optional($permit->deceased)->last_name);
-    $template->setValue('date_of_death',    optional(optional($permit->deceased)->date_of_death)?->format('F d, Y') ?? '');
-    $template->setValue('place_of_death',   optional($permit->deceased)->address ?? 'Carmen, Davao del Norte');
-    $template->setValue('age',              optional($permit->deceased)->age ?? '');
-    $template->setValue('sex',              optional($permit->deceased)->sex ?? '');
-    $template->setValue('nationality',      optional($permit->deceased)->nationality ?? '');
-    $template->setValue('applicant_name',   $permit->applicant_name ?? '');
-    $template->setValue('relationship',     $permit->applicant_relationship ?? 'Applicant');
-    $template->setValue('applicant_address',$permit->applicant_address ?? '');
-    $template->setValue('contact',          $permit->applicant_contact ?? '');
-    $template->setValue('check_cemented',   $isC ? 'X' : ' ');
-    $template->setValue('check_niche',      $isN ? 'X' : ' ');
-    $template->setValue('check_bone',       $isB ? 'X' : ' ');
-    $template->setValue('fee_tomb',         $fee['tomb']);
-    $template->setValue('fee_permit',       $fee['permit']);
-    $template->setValue('fee_maint',        $fee['maint']);
-    $template->setValue('fee_app',          $fee['app']);
-    $template->setValue('fee_total',        $fee['total']);
-    $template->setValue('or_number',        $permit->or_number ?? '');
-    $template->setValue('paid_on',          $permit->created_at->format('F d, Y'));
-    $template->setValue('amount_paid',      $fee['total']);
-
-    $fileName = 'BurialPermit-' . $permit->permit_number . '.docx';
-    $tempFile = tempnam(sys_get_temp_dir(), 'permit_');
-    $template->saveAs($tempFile);
-
-    return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
-}
-
-public function renew(BurialPermit $permit)
-{
-    abort_if($permit->status !== 'released', 403);
-    $permit->update(['status' => 'released', 'expiry_date' => now()->addYears(5)]);
-    return redirect()->route('permits.index')->with('success', 'Permit renewed for 5 years.');
-}
 
     public function destroy(BurialPermit $permit)
     {
-        $permit->deceased()->delete();
+        $deceased = $permit->deceased;
         $permit->delete();
-        return redirect()->route('permits.index')->with('success', 'Permit deleted successfully.');
+        if ($deceased) {
+            $deceased->delete();
+        }
+        return redirect()->route('permits.index')
+            ->with('success', 'Permit deleted successfully.');
     }
 
-    // Unused stubs kept for resource route compatibility
     public function create() {}
     public function edit(BurialPermit $permit) {}
     public function update(Request $request, BurialPermit $permit) {}

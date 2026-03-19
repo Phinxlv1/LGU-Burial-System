@@ -8,7 +8,6 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
-
         .sidebar { width: 220px; min-height: 100vh; background: #1a2744; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 50; }
         .sidebar-brand { padding: 1.25rem 1rem 1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
         .sidebar-brand-top { display: flex; align-items: center; gap: 8px; margin-bottom: .3rem; }
@@ -29,63 +28,73 @@
         .user-role { font-size: 10px; color: rgba(255,255,255,.4); }
         .btn-logout { width: 100%; background: none; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; padding: .45rem; font-family: 'Inter', sans-serif; font-size: 12px; color: rgba(255,255,255,.5); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
-
         .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
         .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
         .topbar-title { font-size: 15px; font-weight: 600; color: #111827; }
         .topbar-date { font-size: 12px; color: #9ca3af; }
         .role-tag { background: #1a2744; color: #fff; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: .04em; text-transform: uppercase; }
         .content { padding: 1.5rem; }
-
         .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
         .panel-header { padding: .85rem 1.25rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
         .panel-header h3 { font-size: 13px; font-weight: 600; color: #111827; }
-
         table { width: 100%; border-collapse: collapse; }
         th { font-size: 11px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; padding: .5rem .75rem; text-align: left; background: #fafafa; }
         td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; }
-
         .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 4px; }
         .badge-yellow { background: #fef3c7; color: #92400e; }
         .badge-green  { background: #d1fae5; color: #065f46; }
         .badge-blue   { background: #dbeafe; color: #1e40af; }
         .badge-red    { background: #fee2e2; color: #991b1b; }
-
         .permit-no { font-weight: 600; color: #1a2744; font-size: 12px; }
-
         .btn-action { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; }
         .btn-action:hover { background: #f9fafb; border-color: #1a2744; color: #1a2744; }
-        .btn-action-red { border-color: #fecaca; color: #991b1b; }
-        .btn-action-red:hover { background: #fef2f2; border-color: #ef4444; }
-
         .btn-primary { display: inline-flex; align-items: center; gap: 5px; padding: .55rem 1rem; border-radius: 6px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: #fff; background: #1a2744; cursor: pointer; text-decoration: none; transition: background .15s; }
         .btn-primary:hover { background: #243459; }
 
-        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; border-radius: 6px; padding: .75rem 1rem; margin-bottom: 1rem; font-size: 13px; }
+        /* ── CUSTOM PAGINATION ── */
+        .pager { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.25rem; border-top: 1px solid #f3f4f6; flex-wrap: wrap; gap: .5rem; }
+        .pager-info { font-size: 12px; color: #6b7280; }
+        .pager-btns { display: flex; align-items: center; gap: 3px; }
+        .pager-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 9px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; text-decoration: none; background: #fff; cursor: pointer; transition: border-color .15s, color .15s; white-space: nowrap; line-height: 1; }
+        .pager-btn:hover { border-color: #1a2744; color: #1a2744; }
+        .pager-btn.active { background: #1a2744; color: #fff; border-color: #1a2744; font-weight: 600; cursor: default; }
+        .pager-btn.disabled { color: #d1d5db; cursor: not-allowed; pointer-events: none; }
+
+        /* TOAST */
+        .toast { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 9999; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,.12); width: 320px; overflow: hidden; transform: translateX(calc(100% + 1.5rem)); transition: transform .35s cubic-bezier(.34,1.56,.64,1); pointer-events: none; }
+        .toast.show { transform: translateX(0); pointer-events: auto; }
+        .toast-body { display: flex; align-items: flex-start; gap: .75rem; padding: .9rem 1rem; }
+        .toast-icon { width: 34px; height: 34px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .toast-text { flex: 1; }
+        .toast-title { font-size: 13px; font-weight: 600; color: #111827; }
+        .toast-sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
+        .toast-close { background: none; border: none; cursor: pointer; color: #9ca3af; padding: 2px; line-height: 1; transition: color .15s; flex-shrink: 0; }
+        .toast-close:hover { color: #374151; }
+        .toast-progress { height: 3px; background: #e5e7eb; position: relative; overflow: hidden; }
+        .toast-progress-bar { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: #10b981; transform-origin: left; animation: toastDrain 5s linear forwards; }
+        @keyframes toastDrain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
         /* Modal */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
-        .modal { background: #fff; border-radius: 10px; width: 100%; max-width: 600px; box-shadow: 0 20px 60px rgba(0,0,0,.2); overflow: hidden; animation: modalIn .15s ease; margin: auto; }
+        .modal { background: #fff; border-radius: 10px; width: 100%; max-width: 580px; box-shadow: 0 20px 60px rgba(0,0,0,.2); overflow: hidden; animation: modalIn .15s ease; margin: auto; }
         @keyframes modalIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .modal-header { padding: 1rem 1.25rem; border-bottom: 2px solid #1a2744; display: flex; align-items: center; justify-content: space-between; background: #1a2744; }
         .modal-header h3 { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: .02em; }
         .modal-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.7); padding: 4px; border-radius: 4px; line-height: 1; transition: color .15s; }
         .modal-close:hover { color: #fff; }
-        .modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: .85rem; max-height: 70vh; overflow-y: auto; }
+        .modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: .85rem; }
         .form-group { display: flex; flex-direction: column; gap: 4px; }
         .form-label { font-size: 11px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: .05em; }
         .form-control { font-family: 'Inter', sans-serif; font-size: 13px; color: #111827; padding: .45rem .75rem; border: 1px solid #d1d5db; border-radius: 6px; outline: none; transition: border-color .15s, box-shadow .15s; width: 100%; background: #fff; }
         .form-control:focus { border-color: #1a2744; box-shadow: 0 0 0 3px rgba(26,39,68,.08); }
         .section-divider { font-size: 11px; font-weight: 700; color: #1a2744; text-transform: uppercase; letter-spacing: .08em; padding: .5rem 0 .25rem; border-bottom: 1px solid #e5e7eb; margin-top: .25rem; }
-        .fee-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
-        .fee-grid-full { grid-column: 1 / -1; }
-        .fee-row { display: flex; align-items: center; gap: 9px; padding: .5rem .75rem; border: 1.5px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: background .15s, border-color .15s; background: #fafafa; }
-        .fee-row:hover { background: #f0f4ff; border-color: #a5b4fc; }
-        .fee-row.selected { background: #eff6ff; border-color: #1a2744; }
-        .fee-row input[type=radio] { accent-color: #1a2744; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
-        .fee-row label { font-size: 12px; font-weight: 500; color: #374151; cursor: pointer; flex: 1; }
-        .fee-amount { font-size: 12px; font-weight: 700; color: #1a2744; white-space: nowrap; }
+        .fee-row { display: flex; align-items: center; justify-content: space-between; padding: .5rem .75rem; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: background .15s; }
+        .fee-row:hover { background: #f8faff; border-color: #1a2744; }
+        .fee-row input[type=radio] { accent-color: #1a2744; width: 15px; height: 15px; cursor: pointer; }
+        .fee-row label { font-size: 13px; font-weight: 500; color: #111827; cursor: pointer; flex: 1; margin-left: .6rem; }
+        .fee-amount { font-size: 13px; font-weight: 600; color: #1a2744; }
+        .fee-grid { display: flex; flex-direction: column; gap: .4rem; }
         .modal-footer { padding: .9rem 1.25rem; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; gap: .6rem; }
         .btn-cancel { padding: .5rem 1rem; border-radius: 6px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 13px; color: #374151; background: #fff; cursor: pointer; transition: all .15s; }
         .btn-cancel:hover { background: #f9fafb; }
@@ -93,9 +102,7 @@
 </head>
 <body>
 
-<aside class="sidebar">
-    @include('partials.sidebar')
-</aside>
+@include('partials.sidebar')
 
 <div class="main">
     <div class="topbar">
@@ -106,18 +113,15 @@
         <div style="display:flex;align-items:center;gap:10px">
             <span class="role-tag">Admin</span>
             <button class="btn-primary" onclick="document.getElementById('permitModal').classList.add('open')">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
                 New Permit
             </button>
         </div>
     </div>
 
     <div class="content">
-
-        @if(session('success'))
-            <div class="alert-success">{{ session('success') }}</div>
-        @endif
-
         <div class="panel">
             <div class="panel-header">
                 <h3>All Burial Permits</h3>
@@ -140,8 +144,8 @@
                     <tr>
                         <td><span class="permit-no">{{ $permit->permit_number }}</span></td>
                         <td>{{ optional($permit->deceased)->last_name }}, {{ optional($permit->deceased)->first_name }}</td>
-                        <td style="font-size:12px;color:#6b7280;text-transform:capitalize">{{ str_replace('_',' ', $permit->permit_type) }}</td>
-                        <td style="font-size:12px;color:#6b7280">{{ optional(optional($permit->deceased)->date_of_death)->format('M d, Y') ?? '—' }}</td>
+                        <td style="font-size:12px;color:#6b7280;text-transform:capitalize">{{ $permit->permit_type }}</td>
+                        <td style="font-size:12px;color:#6b7280">{{ optional($permit->deceased->date_of_death)->format('M d, Y') }}</td>
                         <td style="font-size:12px;color:#6b7280">{{ $permit->created_at->format('M d, Y') }}</td>
                         <td>
                             @php $colors = ['pending'=>'badge-yellow','approved'=>'badge-green','released'=>'badge-blue','expired'=>'badge-red']; @endphp
@@ -162,10 +166,6 @@
                                     <button type="submit" class="btn-action" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Release</button>
                                 </form>
                             @endif
-                            <form method="POST" action="{{ route('permits.destroy', $permit) }}" style="display:inline" onsubmit="return confirm('Delete this permit?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn-action btn-action-red">Delete</button>
-                            </form>
                         </td>
                     </tr>
                     @empty
@@ -175,21 +175,89 @@
                     @endforelse
                 </tbody>
             </table>
+
             @if($permits->hasPages())
-            <div style="padding:.75rem 1.25rem;border-top:1px solid #f3f4f6">
-                {{ $permits->links() }}
+            <div class="pager">
+                <span class="pager-info">
+                    Showing {{ $permits->firstItem() }}–{{ $permits->lastItem() }} of {{ $permits->total() }} results
+                </span>
+                <div class="pager-btns">
+                    {{-- Prev --}}
+                    @if($permits->onFirstPage())
+                        <span class="pager-btn disabled">‹ Prev</span>
+                    @else
+                        <a href="{{ $permits->previousPageUrl() }}" class="pager-btn">‹ Prev</a>
+                    @endif
+
+                    {{-- Page numbers (collapse if many pages) --}}
+                    @php
+                        $current  = $permits->currentPage();
+                        $last     = $permits->lastPage();
+                        $window   = 2; // pages on each side of current
+                        $pages    = [];
+                        for ($p = 1; $p <= $last; $p++) {
+                            if ($p == 1 || $p == $last || abs($p - $current) <= $window) {
+                                $pages[] = $p;
+                            }
+                        }
+                        $pages = array_unique($pages);
+                        sort($pages);
+                    @endphp
+
+                    @php $prev = null; @endphp
+                    @foreach($pages as $page)
+                        @if($prev !== null && $page - $prev > 1)
+                            <span class="pager-btn disabled" style="border:none;padding:0 2px;">…</span>
+                        @endif
+                        @if($page == $current)
+                            <span class="pager-btn active">{{ $page }}</span>
+                        @else
+                            <a href="{{ $permits->url($page) }}" class="pager-btn">{{ $page }}</a>
+                        @endif
+                        @php $prev = $page; @endphp
+                    @endforeach
+
+                    {{-- Next --}}
+                    @if($permits->hasMorePages())
+                        <a href="{{ $permits->nextPageUrl() }}" class="pager-btn">Next ›</a>
+                    @else
+                        <span class="pager-btn disabled">Next ›</span>
+                    @endif
+                </div>
             </div>
             @endif
         </div>
-
     </div>
 </div>
+
+{{-- TOAST --}}
+@if(session('success'))
+<div class="toast" id="successToast">
+    <div class="toast-body">
+        <div class="toast-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+        </div>
+        <div class="toast-text">
+            <div class="toast-title">Permit Created</div>
+            <div class="toast-sub">{{ session('success') }}</div>
+        </div>
+        <button class="toast-close" onclick="dismissToast()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    </div>
+    <div class="toast-progress"><div class="toast-progress-bar"></div></div>
+</div>
+@endif
 
 <!-- ADD PERMIT MODAL -->
 <div class="modal-overlay" id="permitModal" onclick="if(event.target===this)closeModal()">
     <div class="modal">
         <div class="modal-header">
-            <h3>🪦 New Burial Permit</h3>
+            <h3>🪦 Burial Permit (New)</h3>
             <button class="modal-close" onclick="closeModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -199,33 +267,15 @@
         <form method="POST" action="{{ route('permits.store') }}">
             @csrf
             <div class="modal-body">
-
-                {{-- Requestor --}}
-                <div class="section-divider">Requestor / Applicant</div>
                 <div class="form-group">
-                    <label class="form-label">Full Name <span style="color:#ef4444">*</span></label>
+                    <label class="form-label">Requestor's Name <span style="color:#ef4444">*</span></label>
                     <input type="text" name="requestor_name" class="form-control" placeholder="Full name of requestor" required>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
-                    <div class="form-group">
-                        <label class="form-label">Relationship to Deceased</label>
-                        <input type="text" name="requestor_relationship" class="form-control" placeholder="e.g. Spouse, Child">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Contact Number</label>
-                        <input type="text" name="requestor_contact" class="form-control" placeholder="09XXXXXXXXX">
-                    </div>
-                </div>
-
-                {{-- Deceased --}}
                 <div class="section-divider">Deceased Information</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
-                    <div class="form-group">
-                        <label class="form-label">First Name <span style="color:#ef4444">*</span></label>
+                <div class="form-group">
+                    <label class="form-label">Deceased Name <span style="color:#ef4444">*</span></label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
                         <input type="text" name="first_name" class="form-control" placeholder="First name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Last Name <span style="color:#ef4444">*</span></label>
                         <input type="text" name="last_name" class="form-control" placeholder="Last name" required>
                     </div>
                 </div>
@@ -262,48 +312,47 @@
                         </select>
                     </div>
                 </div>
-
-                {{-- Fees --}}
                 <div class="section-divider">Burial Permit Fees</div>
                 <div class="fee-grid">
-                    <div class="fee-row fee-grid-full" onclick="selectFee(this)">
-                        <input type="radio" name="burial_fee_type" value="cemented">
-                        <label>Cemented</label>
+                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
+                        <input type="radio" name="burial_fee_type" value="cemented" id="fee_cemented">
+                        <label for="fee_cemented">Cemented</label>
                         <span class="fee-amount">₱1,000.00</span>
                     </div>
-                    <div class="fee-grid-full" style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;padding:.1rem .25rem 0">Niches (New)</div>
-                    <div class="fee-row" onclick="selectFee(this)">
-                        <input type="radio" name="burial_fee_type" value="niche_1st">
-                        <label>1<sup>st</sup> Floor</label>
+                    <div style="font-size:11px;font-weight:600;color:#6b7280;padding:.4rem .25rem 0;text-transform:uppercase;letter-spacing:.05em">Niches (New)</div>
+                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
+                        <input type="radio" name="burial_fee_type" value="niche_1st" id="fee_1st">
+                        <label for="fee_1st">1st Floor</label>
                         <span class="fee-amount">₱8,000.00</span>
                     </div>
-                    <div class="fee-row" onclick="selectFee(this)">
-                        <input type="radio" name="burial_fee_type" value="niche_2nd">
-                        <label>2<sup>nd</sup> Floor</label>
+                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
+                        <input type="radio" name="burial_fee_type" value="niche_2nd" id="fee_2nd">
+                        <label for="fee_2nd">2nd Floor</label>
                         <span class="fee-amount">₱6,600.00</span>
                     </div>
-                    <div class="fee-row" onclick="selectFee(this)">
-                        <input type="radio" name="burial_fee_type" value="niche_3rd">
-                        <label>3<sup>rd</sup> Floor</label>
+                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
+                        <input type="radio" name="burial_fee_type" value="niche_3rd" id="fee_3rd">
+                        <label for="fee_3rd">3rd Floor</label>
                         <span class="fee-amount">₱5,700.00</span>
                     </div>
-                    <div class="fee-row" onclick="selectFee(this)">
-                        <input type="radio" name="burial_fee_type" value="niche_4th">
-                        <label>4<sup>th</sup> Floor</label>
+                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
+                        <input type="radio" name="burial_fee_type" value="niche_4th" id="fee_4th">
+                        <label for="fee_4th">4th Floor</label>
                         <span class="fee-amount">₱5,300.00</span>
                     </div>
-                    <div class="fee-row fee-grid-full" onclick="selectFee(this)">
-                        <input type="radio" name="burial_fee_type" value="bone_niches">
-                        <label>Bone Niches</label>
+                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
+                        <input type="radio" name="burial_fee_type" value="bone_niches" id="fee_bone">
+                        <label for="fee_bone">Bone Niches</label>
                         <span class="fee-amount">₱5,000.00</span>
                     </div>
                 </div>
-
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
                 <button type="submit" class="btn-primary">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
                     Create Permit
                 </button>
             </div>
@@ -313,13 +362,20 @@
 
 <script>
     function closeModal() { document.getElementById('permitModal').classList.remove('open'); }
-    function selectFee(row) {
-        document.querySelectorAll('.fee-row').forEach(r => r.classList.remove('selected'));
-        row.classList.add('selected');
-        row.querySelector('input[type=radio]').checked = true;
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+    (function () {
+        const toast = document.getElementById('successToast');
+        if (!toast) return;
+        requestAnimationFrame(() => setTimeout(() => toast.classList.add('show'), 50));
+        window._toastTimer = setTimeout(dismissToast, 5000);
+    })();
+    function dismissToast() {
+        clearTimeout(window._toastTimer);
+        const toast = document.getElementById('successToast');
+        if (!toast) return;
+        toast.classList.remove('show');
+        toast.addEventListener('transitionend', () => toast.remove(), { once: true });
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 </script>
-
 </body>
 </html>
