@@ -33,9 +33,9 @@ class DashboardController extends Controller
                             ->get();
 
         // Super Admin → read-only overview dashboard
-        if ($user->hasRole('super_admin')) {
-            return view('dashboard.superadmin', compact('stats', 'recentPermits'));
-        }
+        if ($user->role === 'super_admin') {
+    return redirect()->route('superadmin.dashboard');
+}
 
         // Admin → full permit processing dashboard
         return view('dashboard.admin', compact('stats', 'recentPermits'));

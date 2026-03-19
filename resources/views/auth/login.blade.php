@@ -11,16 +11,35 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f0f2f5;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            -webkit-font-smoothing: antialiased;
-        }
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url('{{ asset("images/lgu-building.jpg") }}') center/cover no-repeat;
+    filter: blur(6px);
+    transform: scale(1.05);
+    z-index: -1;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 31, 61, 0.45);
+    z-index: -1;
+}
 
         .top-bar {
             width: 100%;
@@ -40,17 +59,17 @@
         }
 
         .gov-text h1 {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1a2744;
-            line-height: 1.3;
-        }
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+}
 
-        .gov-text p {
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 2px;
-        }
+.gov-text p {
+    font-size: 11px;
+    color: rgba(255,255,255,.7);
+    margin-top: 2px;
+}
 
         .card {
             width: 100%;
@@ -228,12 +247,12 @@
         }
 
         .bottom-strip {
-            margin-top: 18px;
-            font-size: 11px;
-            color: #9ca3af;
-            opacity: 0;
-            animation: fadeIn .4s ease .35s forwards;
-        }
+    margin-top: 18px;
+    font-size: 11px;
+    color: rgba(255,255,255,.5);
+    opacity: 0;
+    animation: fadeIn .4s ease .35s forwards;
+}
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
@@ -250,7 +269,7 @@
 <body>
 
     <div class="top-bar">
-        <svg class="gov-seal" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+       <img src="{{ asset('images/carmen-seal.png') }}" alt="Municipality of Carmen Seal" class="gov-seal" style="border-radius:50%;object-fit:cover;">
             <circle cx="24" cy="24" r="22" stroke="#1a2744" stroke-width="1.5"/>
             <circle cx="24" cy="24" r="15" stroke="#1a2744" stroke-width="1"/>
             <circle cx="24" cy="24" r="4" fill="#1a2744"/>

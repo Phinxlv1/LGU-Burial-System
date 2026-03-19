@@ -13,7 +13,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn() => redirect()->route('login'));
+
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
@@ -27,12 +27,20 @@ Route::middleware(['auth'])->group(function () {
     // ── Super Admin only ──
     Route::middleware(['role:super_admin'])->group(function () {
         Route::get('/superadmin/dashboard', [SuperAdminDashboardController::class, 'index'])->name('superadmin.dashboard');
+        Route::get('/superadmin/export', [SuperAdminDashboardController::class, 'export'])->name('superadmin.export');
         Route::resource('users', UserController::class)->names('admin.users');
+        
     });
 
-    // ── Admin + Super Admin ──
+    // ── Admin ──
     Route::middleware(['role:admin|super_admin'])->group(function () {
+        Route::get('/deceased/search', [DeceasedPersonController::class, 'search'])->name('deceased.search');
         Route::resource('deceased', DeceasedPersonController::class);
+        Route::post('permits/{permit}/renew', [BurialPermitController::class, 'renew'])->name('permits.renew');
+        Route::get('permits/{permit}/print', [BurialPermitController::class, 'print'])->name('permits.print');
+        Route::get('/permits/{id}/print', [PermitController::class, 'print'])->name('permits.print');
+
+        
 
         Route::resource('permits', BurialPermitController::class);
         Route::post('permits/{permit}/approve', [BurialPermitController::class, 'approve'])->name('permits.approve');
@@ -47,6 +55,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+        Route::get('/import/excel', [ImportController::class, 'showImport'])->name('import.show');
+        
     });
 
 });

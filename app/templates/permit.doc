@@ -1,0 +1,32 @@
+Republic of the Philippines
+Municipality of Carmen
+Office of the Municipal Civil Registrar
+
+--------------------------------------------
+
+                     BURIAL PERMIT
+
+Permit No: ${permit_no}
+
+This is to certify that the burial of the deceased named below is hereby authorized.
+
+Name of Deceased: ${name}
+Date of Death: ${date_of_death}
+Age: ${age}
+Sex: ${sex}
+Nationality: ${nationality}
+
+Requesting Party: ${applicant}
+Address: ${address}
+Contact No: ${contact}
+
+Kind of Burial: ${type}
+
+--------------------------------------------
+
+Issued this ${date} at Municipality of Carmen.
+
+Authorized By:
+
+_________________________
+Municipal Officer

@@ -12,13 +12,18 @@ class DeceasedPerson extends Model
     protected $table = 'deceased_persons';
 
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'date_of_death',
-        'nationality',
-        'age',
-        'sex',
-        'kind_of_burial',
+    'first_name',
+    'middle_name',
+    'last_name',
+    'date_of_death',
+    'nationality',
+    'age',
+    'sex',
+    'kind_of_burial',
+];
+
+    protected $casts = [
+        'date_of_death' => 'date',
     ];
 
     public function permits()

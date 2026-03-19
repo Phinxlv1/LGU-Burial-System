@@ -60,23 +60,25 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Create Super Admin user
         $superAdminUser = User::firstOrCreate(
-            ['email' => 'superadmin@lgucarmen.gov.ph'],
-            [
-                'name'     => 'Super Admin',
-                'password' => bcrypt('superadmin123'),
-            ]
-        );
-        $superAdminUser->assignRole('super_admin');
+    ['email' => 'superadmin@lgucarmen.gov.ph'],
+    [
+        'name'     => 'Super Admin',
+        'password' => bcrypt('superadmin123'),
+        'role'     => 'super_admin',
+    ]
+);
+$superAdminUser->update(['role' => 'super_admin']);
 
         // Create Admin user
         $adminUser = User::firstOrCreate(
-            ['email' => 'admin@lgucarmen.gov.ph'],
-            [
-                'name'     => 'MCR Admin',
-                'password' => bcrypt('admin123'),
-            ]
-        );
-        $adminUser->assignRole('admin');
+    ['email' => 'admin@lgucarmen.gov.ph'],
+    [
+        'name'     => 'MCR Admin',
+        'password' => bcrypt('admin123'),
+        'role'     => 'admin',
+    ]
+);
+$adminUser->update(['role' => 'admin']);
 
         $this->command->info('Roles and users created!');
         $this->command->info('Super Admin: superadmin@lgucarmen.gov.ph / superadmin123');
