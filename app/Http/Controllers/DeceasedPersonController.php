@@ -11,7 +11,7 @@ class DeceasedPersonController extends Controller
     {
         $deceased = DeceasedPerson::withCount('permits')
             ->latest()
-            ->paginate(15);
+            ->paginate(9);
 
         return view('deceased.index', compact('deceased'));
     }

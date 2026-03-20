@@ -58,7 +58,7 @@
         .btn-action:hover { background: #f9fafb; border-color: #1a2744; color: #1a2744; }
 
         /* Custom pagination — no SVG arrows */
-        .pager { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.25rem; border-top: 1px solid #f3f4f6; flex-wrap: wrap; gap: .5rem; }
+        .pager { display: flex; align-items: center; justify-content: center; padding: .75rem 1.25rem; border-top: 1px solid #f3f4f6; flex-wrap: wrap; gap: 1.5rem; }
         .pager-info { font-size: 12px; color: #6b7280; }
         .pager-btns { display: flex; align-items: center; gap: 3px; }
         .pager-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 9px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; text-decoration: none; background: #fff; cursor: pointer; transition: border-color .15s, color .15s; white-space: nowrap; line-height: 1; }
@@ -143,9 +143,7 @@
 
             @if($deceased->hasPages())
             <div class="pager">
-                <span class="pager-info">
-                    Showing {{ $deceased->firstItem() }}–{{ $deceased->lastItem() }} of {{ $deceased->total() }} results
-                </span>
+                
                 <div class="pager-btns">
                     @if($deceased->onFirstPage())
                         <span class="pager-btn disabled">‹ Prev</span>

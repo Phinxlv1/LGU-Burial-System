@@ -8,26 +8,6 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
-        .sidebar { width: 220px; min-height: 100vh; background: #1a2744; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 50; }
-        .sidebar-brand { padding: 1.25rem 1rem 1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
-        .sidebar-brand-top { display: flex; align-items: center; gap: 8px; margin-bottom: .3rem; }
-        .sidebar-seal { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.2); }
-        .sidebar-brand h1 { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.3; }
-        .sidebar-brand p { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 2px; padding-left: 42px; }
-        .sidebar-nav { flex: 1; padding: .75rem 0; }
-        .nav-section { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); padding: .75rem 1rem .3rem; }
-        .nav-item { display: flex; align-items: center; gap: 9px; padding: .55rem 1rem; font-size: 13px; color: rgba(255,255,255,.65); text-decoration: none; border-radius: 6px; margin: 1px .5rem; transition: background .15s, color .15s; cursor: pointer; }
-        .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
-        .nav-item.active { background: rgba(255,255,255,.12); color: #fff; font-weight: 500; }
-        .nav-item svg { flex-shrink: 0; opacity: .7; }
-        .nav-item.active svg { opacity: 1; }
-        .sidebar-footer { padding: .75rem; border-top: 1px solid rgba(255,255,255,.08); }
-        .user-info { display: flex; align-items: center; gap: 8px; padding: .5rem .75rem; background: rgba(255,255,255,.06); border-radius: 6px; margin-bottom: .5rem; }
-        .user-avatar { width: 28px; height: 28px; background: rgba(255,255,255,.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
-        .user-name { font-size: 12px; color: #fff; font-weight: 500; }
-        .user-role { font-size: 10px; color: rgba(255,255,255,.4); }
-        .btn-logout { width: 100%; background: none; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; padding: .45rem; font-family: 'Inter', sans-serif; font-size: 12px; color: rgba(255,255,255,.5); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
         .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
         .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
         .topbar-title { font-size: 15px; font-weight: 600; color: #111827; }
@@ -37,28 +17,63 @@
         .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
         .panel-header { padding: .85rem 1.25rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
         .panel-header h3 { font-size: 13px; font-weight: 600; color: #111827; }
-        table { width: 100%; border-collapse: collapse; }
-        th { font-size: 11px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; padding: .5rem .75rem; text-align: left; background: #fafafa; }
-        td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        table colgroup col:nth-child(1) { width: 160px; }
+        table colgroup col:nth-child(2) { width: 200px; }
+        table colgroup col:nth-child(3) { width: 130px; }
+        table colgroup col:nth-child(4) { width: 130px; }
+        table colgroup col:nth-child(5) { width: 120px; }
+        table colgroup col:nth-child(6) { width: 150px; }
+        table colgroup col:nth-child(7) { width: 120px; }
+        td, th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        th { font-size: 11px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; padding: .5rem .75rem; text-align: left; background: #fafafa; cursor: pointer; }
+        td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; vertical-align: middle; }
+
+        /* ── EXPIRED ROW HIGHLIGHT ── */
+        tr.row-expired td {
+            background: #fff5f5;
+            border-top-color: #fecaca;
+        }
+        tr.row-expired td:first-child {
+            border-left: 3px solid #ef4444;
+        }
+
         .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 4px; }
         .badge-yellow { background: #fef3c7; color: #92400e; }
         .badge-green  { background: #d1fae5; color: #065f46; }
         .badge-blue   { background: #dbeafe; color: #1e40af; }
         .badge-red    { background: #fee2e2; color: #991b1b; }
         .permit-no { font-weight: 600; color: #1a2744; font-size: 12px; }
-        .btn-action { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; }
+
+        .btn-action { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; white-space: nowrap; }
         .btn-action:hover { background: #f9fafb; border-color: #1a2744; color: #1a2744; }
+        .btn-renew { background: #fff1f2; border-color: #fca5a5; color: #b91c1c; font-weight: 600; }
+        .btn-renew:hover { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+
         .btn-primary { display: inline-flex; align-items: center; gap: 5px; padding: .55rem 1rem; border-radius: 6px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: #fff; background: #1a2744; cursor: pointer; text-decoration: none; transition: background .15s; }
         .btn-primary:hover { background: #243459; }
 
-        /* ── CUSTOM PAGINATION ── */
-        .pager { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.25rem; border-top: 1px solid #f3f4f6; flex-wrap: wrap; gap: .5rem; }
+        /* PAGINATION */
+        .pager { display: flex; align-items: center; justify-content: center; padding: .75rem 1.25rem; border-top: 1px solid #f3f4f6; flex-wrap: wrap; gap: 1.5rem; }
         .pager-info { font-size: 12px; color: #6b7280; }
         .pager-btns { display: flex; align-items: center; gap: 3px; }
         .pager-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 9px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; text-decoration: none; background: #fff; cursor: pointer; transition: border-color .15s, color .15s; white-space: nowrap; line-height: 1; }
         .pager-btn:hover { border-color: #1a2744; color: #1a2744; }
         .pager-btn.active { background: #1a2744; color: #fff; border-color: #1a2744; font-weight: 600; cursor: default; }
         .pager-btn.disabled { color: #d1d5db; cursor: not-allowed; pointer-events: none; }
+
+        /* SEARCH */
+        .search-input { font-family: 'Inter', sans-serif; font-size: 13px; padding: .38rem .75rem; border: 1px solid #e5e7eb; border-radius: 6px; outline: none; width: 220px; color: #111827; }
+        .search-input:focus { border-color: #1a2744; box-shadow: 0 0 0 3px rgba(26,39,68,.07); }
+
+        /* SORTABLE HEADERS */
+        .sort-link { display: inline-flex; align-items: center; gap: 4px; color: #9ca3af; text-decoration: none; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; transition: color .15s; white-space: nowrap; }
+        .sort-link:hover { color: #1a2744; }
+        .sort-link.active { color: #1a2744; font-weight: 700; }
+        .sort-icon { opacity: .4; font-size: 10px; }
+        .sort-icon.asc::after  { content: ' ↑'; }
+        .sort-icon.desc::after { content: ' ↓'; }
+        .sort-icon.none::after { content: ' ↕'; }
 
         /* TOAST */
         .toast { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 9999; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,.12); width: 320px; overflow: hidden; transform: translateX(calc(100% + 1.5rem)); transition: transform .35s cubic-bezier(.34,1.56,.64,1); pointer-events: none; }
@@ -74,7 +89,7 @@
         .toast-progress-bar { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: #10b981; transform-origin: left; animation: toastDrain 5s linear forwards; }
         @keyframes toastDrain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
-        /* Modal */
+        /* MODAL */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
         .modal { background: #fff; border-radius: 10px; width: 100%; max-width: 580px; box-shadow: 0 20px 60px rgba(0,0,0,.2); overflow: hidden; animation: modalIn .15s ease; margin: auto; }
@@ -124,46 +139,68 @@
     <div class="content">
         <div class="panel">
             <div class="panel-header">
-                <h3>All Burial Permits</h3>
-                <span style="font-size:12px;color:#9ca3af">{{ $permits->total() }} total</span>
+                <h3>All Burial Permits
+                    <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:.5rem">{{ $permits->total() }} total</span>
+                </h3>
+                <input type="text" class="search-input" placeholder="Search by name or permit no…" oninput="filterTable(this.value)">
             </div>
             <table>
+                <colgroup>
+                    <col/><col/><col/><col/><col/><col/><col/>
+                </colgroup>
                 <thead>
                     <tr>
-                        <th>Permit No.</th>
-                        <th>Deceased</th>
-                        <th>Type</th>
-                        <th>Date of Death</th>
-                        <th>Issued</th>
-                        <th>Status</th>
+                        <th><a href="{{ $sortUrl('permit_number') }}" class="sort-link">Permit No. {!! $sortIcon('permit_number') !!}</a></th>
+                        <th><a href="{{ $sortUrl('last_name') }}" class="sort-link">Deceased {!! $sortIcon('last_name') !!}</a></th>
+                        <th><a href="{{ $sortUrl('permit_type') }}" class="sort-link">Type {!! $sortIcon('permit_type') !!}</a></th>
+                        <th><a href="{{ $sortUrl('date_of_death') }}" class="sort-link">Date of Death {!! $sortIcon('date_of_death') !!}</a></th>
+                        <th><a href="{{ $sortUrl('created_at') }}" class="sort-link">Issued {!! $sortIcon('created_at') !!}</a></th>
+                        <th><a href="{{ $sortUrl('status') }}" class="sort-link">Status {!! $sortIcon('status') !!}</a></th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($permits as $permit)
-                    <tr>
-                        <td><span class="permit-no">{{ $permit->permit_number }}</span></td>
+                    <tr class="permit-row {{ $permit->status === 'expired' ? 'row-expired' : '' }}">
+                        <td>
+                            <span class="permit-no">{{ $permit->permit_number }}</span>
+                            @if($permit->status === 'expired')
+                                <span style="font-size:10px;font-weight:700;color:#ef4444;margin-left:5px;vertical-align:middle">⚠ RENEWAL NEEDED</span>
+                            @endif
+                        </td>
                         <td>{{ optional($permit->deceased)->last_name }}, {{ optional($permit->deceased)->first_name }}</td>
-                        <td style="font-size:12px;color:#6b7280;text-transform:capitalize">{{ $permit->permit_type }}</td>
-                        <td style="font-size:12px;color:#6b7280">{{ optional($permit->deceased->date_of_death)->format('M d, Y') }}</td>
+                        <td style="font-size:12px;color:#6b7280;text-transform:capitalize">{{ ucfirst(str_replace('_',' ',$permit->permit_type)) }}</td>
+                        <td style="font-size:12px;color:#6b7280">{{ optional(optional($permit->deceased)->date_of_death)->format('M d, Y') ?? '—' }}</td>
                         <td style="font-size:12px;color:#6b7280">{{ $permit->created_at->format('M d, Y') }}</td>
                         <td>
-                            @php $colors = ['pending'=>'badge-yellow','approved'=>'badge-green','released'=>'badge-blue','expired'=>'badge-red']; @endphp
-                            <span class="badge {{ $colors[$permit->status] ?? 'badge-yellow' }}">
-                                {{ ucfirst($permit->status) }}
-                            </span>
+                            @if($permit->status === 'expired')
+                                <span class="badge badge-red" style="font-weight:700;letter-spacing:.02em">
+                                    ⚠ Expired
+                                </span>
+                            @elseif($permit->status === 'released')
+                                @php
+                                    $expiring = $permit->expiry_date && $permit->expiry_date->diffInDays(now()) <= 30 && $permit->expiry_date->isFuture();
+                                @endphp
+                                <span class="badge badge-blue" style="{{ $expiring ? 'background:#fef3c7;color:#92400e;' : '' }}">
+                                    {{ $expiring ? '⏳ Expiring Soon' : 'Released' }}
+                                </span>
+                            @else
+                                @php $colors = ['pending'=>'badge-yellow','approved'=>'badge-green','released'=>'badge-blue']; @endphp
+                                <span class="badge {{ $colors[$permit->status] ?? 'badge-yellow' }}">
+                                    {{ ucfirst($permit->status) }}
+                                </span>
+                            @endif
                         </td>
                         <td style="display:flex;gap:5px;align-items:center">
                             <a href="{{ route('permits.show', $permit) }}" class="btn-action">View</a>
-                            @if($permit->status === 'pending')
-                                <form method="POST" action="{{ route('permits.approve', $permit) }}" style="display:inline">
+                            @if($permit->status === 'expired')
+                                <form method="POST" action="{{ route('permits.renew', $permit) }}" style="display:inline"
+                                      onsubmit="return confirm('Renew this permit?')">
                                     @csrf
-                                    <button type="submit" class="btn-action" style="background:#d1fae5;border-color:#6ee7b7;color:#065f46">Approve</button>
-                                </form>
-                            @elseif($permit->status === 'approved')
-                                <form method="POST" action="{{ route('permits.release', $permit) }}" style="display:inline">
-                                    @csrf
-                                    <button type="submit" class="btn-action" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">Release</button>
+                                    <button type="submit" class="btn-action btn-renew">
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>
+                                        Renew
+                                    </button>
                                 </form>
                             @endif
                         </td>
@@ -182,26 +219,20 @@
                     Showing {{ $permits->firstItem() }}–{{ $permits->lastItem() }} of {{ $permits->total() }} results
                 </span>
                 <div class="pager-btns">
-                    {{-- Prev --}}
                     @if($permits->onFirstPage())
                         <span class="pager-btn disabled">‹ Prev</span>
                     @else
                         <a href="{{ $permits->previousPageUrl() }}" class="pager-btn">‹ Prev</a>
                     @endif
 
-                    {{-- Page numbers (collapse if many pages) --}}
                     @php
-                        $current  = $permits->currentPage();
-                        $last     = $permits->lastPage();
-                        $window   = 2; // pages on each side of current
-                        $pages    = [];
+                        $current = $permits->currentPage();
+                        $last    = $permits->lastPage();
+                        $pages   = [];
                         for ($p = 1; $p <= $last; $p++) {
-                            if ($p == 1 || $p == $last || abs($p - $current) <= $window) {
-                                $pages[] = $p;
-                            }
+                            if ($p == 1 || $p == $last || abs($p - $current) <= 2) $pages[] = $p;
                         }
-                        $pages = array_unique($pages);
-                        sort($pages);
+                        $pages = array_unique($pages); sort($pages);
                     @endphp
 
                     @php $prev = null; @endphp
@@ -217,7 +248,6 @@
                         @php $prev = $page; @endphp
                     @endforeach
 
-                    {{-- Next --}}
                     @if($permits->hasMorePages())
                         <a href="{{ $permits->nextPageUrl() }}" class="pager-btn">Next ›</a>
                     @else
@@ -235,25 +265,21 @@
 <div class="toast" id="successToast">
     <div class="toast-body">
         <div class="toast-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.5">
-                <polyline points="20 6 9 17 4 12"/>
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div class="toast-text">
-            <div class="toast-title">Permit Created</div>
+            <div class="toast-title">Success</div>
             <div class="toast-sub">{{ session('success') }}</div>
         </div>
         <button class="toast-close" onclick="dismissToast()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
     </div>
     <div class="toast-progress"><div class="toast-progress-bar"></div></div>
 </div>
 @endif
 
-<!-- ADD PERMIT MODAL -->
+<!-- NEW PERMIT MODAL -->
 <div class="modal-overlay" id="permitModal" onclick="if(event.target===this)closeModal()">
     <div class="modal">
         <div class="modal-header">
@@ -361,21 +387,37 @@
 </div>
 
 <script>
-    function closeModal() { document.getElementById('permitModal').classList.remove('open'); }
-    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
-    (function () {
-        const toast = document.getElementById('successToast');
-        if (!toast) return;
-        requestAnimationFrame(() => setTimeout(() => toast.classList.add('show'), 50));
-        window._toastTimer = setTimeout(dismissToast, 5000);
-    })();
-    function dismissToast() {
-        clearTimeout(window._toastTimer);
-        const toast = document.getElementById('successToast');
-        if (!toast) return;
-        toast.classList.remove('show');
-        toast.addEventListener('transitionend', () => toast.remove(), { once: true });
-    }
+function closeModal() { document.getElementById('permitModal').classList.remove('open'); }
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+(function () {
+    const toast = document.getElementById('successToast');
+    if (!toast) return;
+    requestAnimationFrame(() => setTimeout(() => toast.classList.add('show'), 50));
+    window._toastTimer = setTimeout(dismissToast, 5000);
+})();
+function dismissToast() {
+    clearTimeout(window._toastTimer);
+    const toast = document.getElementById('successToast');
+    if (!toast) return;
+    toast.classList.remove('show');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+}
+
+if (window.location.hash === '#new') {
+    document.getElementById('permitModal').classList.add('open');
+    history.replaceState(null, '', window.location.pathname);
+}
+
+function filterTable(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.permit-row').forEach(row => {
+        const permitNo = row.querySelector('.permit-no')?.textContent.toLowerCase() ?? '';
+        const deceased = row.querySelectorAll('td')[1]?.textContent.toLowerCase() ?? '';
+        row.style.display = (permitNo.includes(q) || deceased.includes(q)) ? '' : 'none';
+    });
+}
 </script>
+
 </body>
 </html>

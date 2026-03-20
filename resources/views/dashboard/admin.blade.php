@@ -9,7 +9,6 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
 
-        /* ── SIDEBAR ── */
         .sidebar { width: 220px; min-height: 100vh; background: #1a2744; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 50; }
         .sidebar-brand { padding: 1.25rem 1rem 1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
         .sidebar-brand-top { display: flex; align-items: center; gap: 8px; margin-bottom: .3rem; }
@@ -31,7 +30,6 @@
         .btn-logout { width: 100%; background: none; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; padding: .45rem; font-family: 'Inter', sans-serif; font-size: 12px; color: rgba(255,255,255,.5); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
 
-        /* ── MAIN ── */
         .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
         .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
         .topbar-left { display: flex; flex-direction: column; }
@@ -41,33 +39,12 @@
 
         .content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
 
-        /* ── WELCOME BANNER ── */
-        .welcome { background: #1a2744; border-radius: 10px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
-        .welcome-text h2 { font-size: 18px; font-weight: 700; color: #fff; }
-        .welcome-text p { font-size: 12px; color: rgba(255,255,255,.5); margin-top: .2rem; }
-        .welcome-action { display: inline-flex; align-items: center; gap: 6px; padding: .55rem 1.1rem; background: #fff; color: #1a2744; border-radius: 7px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background .15s; }
-        .welcome-action:hover { background: #f0f4ff; }
+        /* WELCOME BANNER */
+        .welcome { background: #1a2744; border-radius: 10px; padding: 1.25rem 1.5rem; }
+        .welcome h2 { font-size: 18px; font-weight: 700; color: #fff; }
+        .welcome p { font-size: 12px; color: rgba(255,255,255,.5); margin-top: .2rem; }
 
-        /* ── STAT CARDS ── */
-        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-        .stat-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: 1rem; position: relative; overflow: hidden; }
-        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-        .stat-card.blue::before  { background: #3b82f6; }
-        .stat-card.amber::before { background: #f59e0b; }
-        .stat-card.green::before { background: #10b981; }
-        .stat-card.red::before   { background: #ef4444; }
-        .stat-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .stat-icon.blue  { background: #eff6ff; }
-        .stat-icon.amber { background: #fef3c7; }
-        .stat-icon.green { background: #d1fae5; }
-        .stat-icon.red   { background: #fee2e2; }
-        .stat-info { flex: 1; }
-        .stat-value { font-size: 26px; font-weight: 800; color: #111827; line-height: 1; }
-        .stat-label { font-size: 11px; font-weight: 500; color: #6b7280; margin-top: 3px; }
-        .stat-sub { font-size: 10px; color: #10b981; font-weight: 600; margin-top: 2px; }
-        .stat-sub.warn { color: #f59e0b; }
-
-        /* ── RECENT TABLE ── */
+        /* RECENT TABLE */
         .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
         .panel-head { padding: .85rem 1.25rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
         .panel-head h3 { font-size: 13px; font-weight: 700; color: #111827; }
@@ -77,7 +54,7 @@
         th { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .07em; padding: .5rem .75rem; text-align: left; background: #fafafa; }
         td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; }
         .permit-no { font-weight: 700; color: #1a2744; font-size: 12px; }
-        .badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+        .badge { display: inline-flex; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
         .badge-yellow { background: #fef3c7; color: #92400e; }
         .badge-green  { background: #d1fae5; color: #065f46; }
         .badge-blue   { background: #dbeafe; color: #1e40af; }
@@ -85,12 +62,54 @@
         .btn-view { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; }
         .btn-view:hover { background: #f9fafb; border-color: #1a2744; color: #1a2744; }
         .empty-row { text-align: center; color: #9ca3af; padding: 2.5rem; font-size: 13px; }
+
+        /* FLOATING + BUTTON */
+        .fab {
+            position: fixed; bottom: 2rem; right: 2rem;
+            width: 54px; height: 54px;
+            background: #1a2744; color: #fff;
+            border: none; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: 300; line-height: 1;
+            box-shadow: 0 4px 20px rgba(26,39,68,.45);
+            cursor: pointer; z-index: 999;
+            transition: transform .15s, box-shadow .15s;
+            text-decoration: none;
+        }
+        .fab:hover { transform: scale(1.1); box-shadow: 0 8px 28px rgba(26,39,68,.55); }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: #fff; border-radius: 10px; width: 100%; max-width: 580px; box-shadow: 0 20px 60px rgba(0,0,0,.2); overflow: hidden; animation: modalIn .15s ease; margin: auto; }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { padding: 1rem 1.25rem; border-bottom: 2px solid #1a2744; display: flex; align-items: center; justify-content: space-between; background: #1a2744; }
+        .modal-header h3 { font-size: 15px; font-weight: 700; color: #fff; }
+        .modal-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.7); font-size: 20px; line-height: 1; transition: color .15s; }
+        .modal-close:hover { color: #fff; }
+        .modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: .85rem; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-label { font-size: 11px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: .05em; }
+        .form-control { font-family: 'Inter', sans-serif; font-size: 13px; color: #111827; padding: .45rem .75rem; border: 1px solid #d1d5db; border-radius: 6px; outline: none; transition: border-color .15s, box-shadow .15s; width: 100%; }
+        .form-control:focus { border-color: #1a2744; box-shadow: 0 0 0 3px rgba(26,39,68,.08); }
+        .section-divider { font-size: 11px; font-weight: 700; color: #1a2744; text-transform: uppercase; letter-spacing: .08em; padding: .5rem 0 .25rem; border-bottom: 1px solid #e5e7eb; margin-top: .25rem; }
+        .fee-grid { display: flex; flex-direction: column; gap: .4rem; }
+        .fee-row { display: flex; align-items: center; gap: 9px; padding: .5rem .75rem; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: background .15s; }
+        .fee-row:hover { background: #f8faff; border-color: #1a2744; }
+        .fee-row.selected { background: #eff6ff; border-color: #1a2744; }
+        .fee-row input[type=radio] { accent-color: #1a2744; width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+        .fee-row label { font-size: 13px; font-weight: 500; color: #111827; cursor: pointer; flex: 1; }
+        .fee-amount { font-size: 13px; font-weight: 600; color: #1a2744; }
+        .modal-footer { padding: .9rem 1.25rem; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; gap: .6rem; }
+        .btn-cancel { padding: .5rem 1rem; border-radius: 6px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 13px; color: #374151; background: #fff; cursor: pointer; }
+        .btn-cancel:hover { background: #f9fafb; }
+        .btn-primary { display: inline-flex; align-items: center; gap: 5px; padding: .5rem 1rem; border-radius: 6px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: #fff; background: #1a2744; cursor: pointer; transition: background .15s; }
+        .btn-primary:hover { background: #243459; }
     </style>
 </head>
 <body>
 
 @include('partials.sidebar')
-
 
 <div class="main">
     <div class="topbar">
@@ -105,64 +124,8 @@
 
         {{-- WELCOME BANNER --}}
         <div class="welcome">
-            <div class="welcome-text">
-                <h2>Welcome back, {{ auth()->user()->name }} 👋</h2>
-                <p>Here's what's happening with burial permits today.</p>
-            </div>
-            <a href="{{ route('permits.index') }}" class="welcome-action">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                New Permit
-            </a>
-        </div>
-
-        {{-- STAT CARDS --}}
-        @php
-            $total    = \App\Models\BurialPermit::count();
-            $pending  = \App\Models\BurialPermit::where('status','pending')->count();
-            $approved = \App\Models\BurialPermit::where('status','approved')->count();
-            $released = \App\Models\BurialPermit::where('status','released')->count();
-        @endphp
-        <div class="stat-grid">
-            <div class="stat-card blue">
-                <div class="stat-icon blue">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-value">{{ $total }}</div>
-                    <div class="stat-label">Total Permits</div>
-                    <div class="stat-sub">All time</div>
-                </div>
-            </div>
-            <div class="stat-card amber">
-                <div class="stat-icon amber">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-value">{{ $pending }}</div>
-                    <div class="stat-label">Pending</div>
-                    <div class="stat-sub warn">Needs action</div>
-                </div>
-            </div>
-            <div class="stat-card green">
-                <div class="stat-icon green">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-value">{{ $approved }}</div>
-                    <div class="stat-label">Approved</div>
-                    <div class="stat-sub">Awaiting release</div>
-                </div>
-            </div>
-            <div class="stat-card red">
-                <div class="stat-icon red">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-value">{{ $released }}</div>
-                    <div class="stat-label">Released</div>
-                    <div class="stat-sub">{{ $total > 0 ? round(($released/$total)*100) : 0 }}% of total</div>
-                </div>
-            </div>
+            <h2>Welcome back, {{ auth()->user()->name }} 👋</h2>
+            <p>Here's what's happening with burial permits today.</p>
         </div>
 
         {{-- RECENT PERMITS --}}
@@ -193,9 +156,7 @@
                             @php $colors=['pending'=>'badge-yellow','approved'=>'badge-green','released'=>'badge-blue','expired'=>'badge-red']; @endphp
                             <span class="badge {{ $colors[$permit->status] ?? 'badge-yellow' }}">{{ ucfirst($permit->status) }}</span>
                         </td>
-                        <td>
-                            <a href="{{ route('permits.show', $permit) }}" class="btn-view">View</a>
-                        </td>
+                        <td><a href="{{ route('permits.show', $permit) }}" class="btn-view">View</a></td>
                     </tr>
                     @empty
                     <tr><td colspan="6" class="empty-row">No permits yet.</td></tr>
@@ -206,6 +167,11 @@
 
     </div>
 </div>
+
+{{-- FLOATING + BUTTON — goes to permits page and auto-opens modal --}}
+<a href="{{ route('permits.index') }}#new" class="fab" title="New Permit">+</a>
+
+
 
 </body>
 </html>

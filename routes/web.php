@@ -42,6 +42,7 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/cemetery/plots/{plot}',  [CemeteryMapController::class, 'update'])->name('cemetery.update');
         Route::delete('/cemetery/plots/{plot}', [CemeteryMapController::class, 'destroy'])->name('cemetery.destroy');
         Route::get('/cemetery/search-deceased', [CemeteryMapController::class, 'searchDeceased'])->name('cemetery.search-deceased');
+        Route::post('permits/{permit}/renew', [BurialPermitController::class, 'renew'])->name('permits.renew');
 
         Route::resource('deceased', DeceasedPersonController::class);
 

@@ -9,11 +9,38 @@ use Illuminate\Support\Facades\Auth;
 
 class BurialPermitController extends Controller
 {
-    public function index()
-    {
-        $permits = BurialPermit::with('deceased')->latest()->paginate(15);
-        return view('permits.index', compact('permits'));
+    public function index(Request $request)
+{
+    $sort      = $request->get('sort', 'created_at');
+    $direction = $request->get('direction', 'desc') === 'asc' ? 'asc' : 'desc';
+
+    $query = BurialPermit::with('deceased');
+
+    // Sort by deceased columns via subquery to avoid join duplicates
+    if ($sort === 'last_name') {
+        $query->orderByRaw("(SELECT last_name FROM deceased_persons WHERE deceased_persons.id = burial_permits.deceased_id) {$direction}");
+    } elseif ($sort === 'date_of_death') {
+        $query->orderByRaw("(SELECT date_of_death FROM deceased_persons WHERE deceased_persons.id = burial_permits.deceased_id) {$direction}");
+    } elseif (in_array($sort, ['permit_number', 'permit_type', 'created_at', 'status'])) {
+        $query->orderBy($sort, $direction);
+    } else {
+        $query->orderBy('created_at', 'desc');
     }
+
+    $permits = $query->paginate(11)->withQueryString();
+
+    $sortUrl = fn(string $col) => request()->fullUrlWithQuery([
+        'sort'      => $col,
+        'direction' => (request()->get('sort') === $col && request()->get('direction') === 'asc') ? 'desc' : 'asc',
+        'page'      => 1,
+    ]);
+
+    $sortIcon = fn(string $col) => request()->get('sort') === $col
+        ? '<span class="sort-icon ' . request()->get('direction', 'desc') . '"></span>'
+        : '<span class="sort-icon none"></span>';
+
+    return view('permits.index', compact('permits', 'sortUrl', 'sortIcon'));
+}
 
     public function store(Request $request)
     {
@@ -231,7 +258,40 @@ class BurialPermitController extends Controller
         }
         return redirect()->route('permits.index')
             ->with('success', 'Permit deleted successfully.');
+            
     }
+
+    public function renew(BurialPermit $permit)
+{
+    abort_if($permit->status !== 'expired', 403);
+ 
+    $permit->update([
+        'status'      => 'approved',
+        'expiry_date' => now()->addYear(),
+        'processed_by' => Auth::id(),
+    ]);
+ 
+    return redirect()->route('permits.show', $permit)
+                     ->with('success', 'Permit renewed successfully. Status reset to Approved.');
+}
+
+
+private function sortUrl(string $col): string
+{
+    $current   = request()->get('sort', 'created_at');
+    $direction = request()->get('direction', 'desc');
+    $newDir    = ($current === $col && $direction === 'asc') ? 'desc' : 'asc';
+    return request()->fullUrlWithQuery(['sort' => $col, 'direction' => $newDir, 'page' => 1]);
+}
+ 
+private function sortIcon(string $col): string
+{
+    $current   = request()->get('sort', 'created_at');
+    $direction = request()->get('direction', 'desc');
+    if ($current !== $col) return '<span class="sort-icon none"></span>';
+    $cls = $direction === 'asc' ? 'asc' : 'desc';
+    return "<span class=\"sort-icon {$cls}\"></span>";
+}
 
     public function create() {}
     public function edit(BurialPermit $permit) {}
