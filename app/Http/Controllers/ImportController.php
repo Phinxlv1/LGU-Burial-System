@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 class ImportController extends Controller
 {
-    /** GET /import/excel */
     public function showImport()
     {
         $logs = $this->getHistory();
@@ -23,9 +22,9 @@ class ImportController extends Controller
         return $this->showImport();
     }
 
-    /** POST /import/excel */
     public function importExcel(Request $request)
     {
+        // Validate file presence and basic type
         $request->validate([
             'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
         ]);
@@ -36,17 +35,22 @@ class ImportController extends Controller
         $path         = $file->store('imports', 'local');
         $fullPath     = storage_path('app/private/' . $path);
 
+        // ── Read raw rows ──
         try {
             $rows = $ext === 'csv' ? $this->readCsv($fullPath) : $this->readXlsx($fullPath);
         } catch (\Throwable $e) {
-            return back()->withErrors(['file' => 'Could not read file: ' . $e->getMessage()]);
+            return back()
+                ->with('import_error', 'Could not read file: ' . $e->getMessage())
+                ->withErrors(['file' => 'Could not read file: ' . $e->getMessage()]);
         }
 
         if (empty($rows)) {
-            return back()->withErrors(['file' => 'The file appears to be empty.']);
+            return back()
+                ->with('import_error', 'The file appears to be empty.')
+                ->withErrors(['file' => 'The file appears to be empty.']);
         }
 
-        // ── Find header row (scan first 5 rows for "first_name") ──
+        // ── Find header row ──
         $headerRowIndex = null;
         $headerMap      = [];
 
@@ -60,9 +64,9 @@ class ImportController extends Controller
         }
 
         if ($headerRowIndex === null) {
-            return back()->withErrors([
-                'file' => 'Header row not found. Make sure row 1 contains: first_name, last_name, date_of_death …',
-            ]);
+            return back()
+                ->with('import_error', 'Header row not found. Make sure row 1 contains: first_name, last_name, date_of_death …')
+                ->withErrors(['file' => 'Header row not found. Expected columns: first_name, last_name, date_of_death, etc.']);
         }
 
         foreach ($rows[$headerRowIndex] as $colIdx => $cellVal) {
@@ -154,6 +158,7 @@ class ImportController extends Controller
             }
         }
 
+        // Save log
         try {
             ImportLog::create([
                 'file_name'    => $originalName,
@@ -168,7 +173,11 @@ class ImportController extends Controller
         $msg = "{$imported} permit(s) imported successfully.";
         if ($skipped > 0) $msg .= " {$skipped} row(s) skipped.";
 
-        return back()->with('import_success', $msg)->with('skip_reasons', $skipReasons);
+        return back()
+            ->with('import_success', $msg)
+            ->with('skip_reasons', $skipReasons)
+            ->with('_import_imported', $imported)   // for toast logic
+            ->with('_import_skipped', $skipped);    // for toast logic
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -176,9 +185,10 @@ class ImportController extends Controller
     private function getHistory()
     {
         try {
-            return ImportLog::with('user')->latest()->paginate(20);
+            // Only the 5 most recent, but paginator so $logs->total() works
+            return ImportLog::with('user')->latest()->paginate(5);
         } catch (\Throwable) {
-            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 5);
         }
     }
 
@@ -242,4 +252,29 @@ class ImportController extends Controller
         $ts = strtotime($str);
         return $ts !== false ? date('Y-m-d', $ts) : null;
     }
+
+    public function historyJson()
+    {
+        try {
+            $logs = \App\Models\ImportLog::with('user')->latest()->take(5)->get();
+            return response()->json([
+                'total' => \App\Models\ImportLog::count(),
+                'rows'  => $logs->map(fn($log) => [
+                    'id'           => $log->id,
+                    'file_name'    => $log->file_name,
+                    'uploaded_by'  => optional($log->user)->name ?? 'Admin',
+                    'date'         => $log->created_at->format('M d, Y · g:i A'),
+                    'total_rows'   => $log->total_rows,
+                    'imported'     => $log->imported,
+                    'skipped'      => $log->skipped,
+                    'skip_reasons' => is_array($log->skip_reasons)
+                                        ? $log->skip_reasons
+                                        : json_decode($log->skip_reasons ?? '[]', true),
+                ]),
+            ]);
+        } catch (\Throwable) {
+            return response()->json(['total' => 0, 'rows' => []]);
+        }
+    }
+
 }

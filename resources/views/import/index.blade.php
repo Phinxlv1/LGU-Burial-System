@@ -41,12 +41,7 @@
         .upload-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.25rem 1.5rem; }
         .upload-card h3 { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 1rem; }
 
-        .dropzone {
-            border: 2px dashed #d1d5db; border-radius: 8px;
-            padding: 2.5rem 1rem; text-align: center;
-            cursor: pointer; transition: border-color .15s, background .15s;
-            position: relative;
-        }
+        .dropzone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; position: relative; }
         .dropzone:hover, .dropzone.drag-over { border-color: #1a2744; background: #f8faff; }
         .dropzone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
         .dropzone-icon { width: 44px; height: 44px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto .75rem; }
@@ -56,16 +51,9 @@
 
         .upload-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; flex-wrap: wrap; gap: .5rem; }
         .upload-note   { font-size: 12px; color: #9ca3af; }
-
         .btn-upload { display: inline-flex; align-items: center; gap: 6px; padding: .55rem 1.1rem; background: #1a2744; color: #fff; border: none; border-radius: 7px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s; }
         .btn-upload:hover { background: #243459; }
         .btn-upload:disabled { opacity: .5; cursor: not-allowed; }
-
-        /* Alerts */
-        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; border-radius: 7px; padding: .75rem 1rem; font-size: 13px; }
-        .alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; border-radius: 7px; padding: .75rem 1rem; font-size: 13px; }
-        .skip-list { margin-top: .5rem; font-size: 12px; max-height: 120px; overflow-y: auto; list-style: none; }
-        .skip-list li { padding: 2px 0; border-top: 1px solid rgba(0,0,0,.06); }
 
         /* History table */
         .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
@@ -85,8 +73,73 @@
         .reasons-list { font-size: 11px; color: #6b7280; margin-top: 4px; display: none; list-style: none; }
         .reasons-list li { padding: 1px 0; }
         .reasons-list.open { display: block; }
+        .empty-row td { text-align: center; color: #9ca3af; padding: 2rem; }
 
-        .empty-row td { text-align: center; color: #9ca3af; padding: 2.5rem; }
+        /* ── TOAST NOTIFICATIONS (top-left) ── */
+        .toast-stack {
+            position: fixed;
+            top: 1rem;
+            left: calc(220px + 1rem); /* sidebar width + gap */
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: .6rem;
+            pointer-events: none;
+        }
+        .toast {
+            display: flex;
+            align-items: flex-start;
+            gap: .65rem;
+            padding: .75rem 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.12);
+            min-width: 280px;
+            max-width: 420px;
+            pointer-events: auto;
+            transform: translateX(-120%);
+            transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+            position: relative;
+            overflow: hidden;
+        }
+        .toast.show { transform: translateX(0); }
+
+        .toast-green  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .toast-yellow { background: #fffbeb; border: 1px solid #fde68a; }
+        .toast-red    { background: #fef2f2; border: 1px solid #fecaca; }
+
+        .toast-icon {
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .toast-green  .toast-icon { background: #dcfce7; }
+        .toast-yellow .toast-icon { background: #fef9c3; }
+        .toast-red    .toast-icon { background: #fee2e2; }
+
+        .toast-content { flex: 1; }
+        .toast-title { font-size: 13px; font-weight: 600; }
+        .toast-green  .toast-title { color: #15803d; }
+        .toast-yellow .toast-title { color: #92400e; }
+        .toast-red    .toast-title { color: #991b1b; }
+        .toast-msg  { font-size: 12px; margin-top: 2px; color: #374151; }
+
+        .toast-close {
+            background: none; border: none; cursor: pointer;
+            font-size: 16px; line-height: 1; color: #9ca3af;
+            padding: 0; flex-shrink: 0; transition: color .15s;
+        }
+        .toast-close:hover { color: #374151; }
+
+        .toast-bar {
+            position: absolute; bottom: 0; left: 0;
+            height: 3px; width: 100%;
+            transform-origin: left;
+            animation: drainBar 6s linear forwards;
+        }
+        .toast-green  .toast-bar { background: #22c55e; }
+        .toast-yellow .toast-bar { background: #f59e0b; }
+        .toast-red    .toast-bar { background: #ef4444; }
+        @keyframes drainBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
     </style>
 </head>
 <body>
@@ -103,24 +156,6 @@
     </div>
 
     <div class="content">
-
-        {{-- Alerts --}}
-        @if(session('import_success'))
-        <div class="alert-success">
-            {{ session('import_success') }}
-            @if(session('skip_reasons') && count(session('skip_reasons')) > 0)
-                <ul class="skip-list">
-                    @foreach(session('skip_reasons') as $r)
-                        <li>· {{ $r }}</li>
-                    @endforeach
-                </ul>
-            @endif
-        </div>
-        @endif
-
-        @if($errors->has('file'))
-        <div class="alert-error">{{ $errors->first('file') }}</div>
-        @endif
 
         {{-- Upload Card --}}
         <div class="upload-card">
@@ -157,11 +192,11 @@
             </form>
         </div>
 
-        {{-- Upload History --}}
+        {{-- Upload History — last 5 only --}}
         <div class="panel">
             <div class="panel-head">
                 <h3>Upload History</h3>
-                <span class="panel-head-sub">{{ $logs->total() }} uploads</span>
+                <span class="panel-head-sub" id="historyCount">{{ $logs->total() }} total uploads</span>
             </div>
             <table>
                 <thead>
@@ -174,10 +209,12 @@
                         <th>Skipped</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="historyTbody">
                     @forelse($logs as $log)
                     <tr>
-                        <td style="font-weight:500;color:#1a2744;max-width:220px;word-break:break-all">{{ $log->file_name }}</td>
+                        <td style="font-weight:500;color:#1a2744;max-width:200px;word-break:break-all">
+                            {{ $log->file_name }}
+                        </td>
                         <td style="color:#6b7280">{{ optional($log->user)->name ?? 'Admin' }}</td>
                         <td style="color:#6b7280;white-space:nowrap">{{ $log->created_at->format('M d, Y · g:i A') }}</td>
                         <td style="text-align:center">{{ $log->total_rows }}</td>
@@ -192,9 +229,9 @@
                             @if($log->skipped > 0)
                                 <span class="badge-yellow">{{ $log->skipped }} skipped</span>
                                 @php
-                                    $reasons = is_string($log->skip_reasons)
-                                        ? json_decode($log->skip_reasons, true)
-                                        : ($log->skip_reasons ?? []);
+                                    $reasons = is_array($log->skip_reasons)
+                                        ? $log->skip_reasons
+                                        : json_decode($log->skip_reasons ?? '[]', true);
                                 @endphp
                                 @if(!empty($reasons))
                                     <span class="reasons-toggle" onclick="toggleReasons(this)">show reasons</span>
@@ -219,13 +256,17 @@
     </div>
 </div>
 
+{{-- ── TOAST STACK (top-left, after sidebar) ── --}}
+<div class="toast-stack" id="toastStack"></div>
+
 <script>
+// ── File picker helpers ──
 function handleFile(input) {
     const file = input.files[0];
     if (!file) return;
     document.getElementById('fileName').style.display = 'block';
-    document.getElementById('fileName').textContent = '📎 ' + file.name;
-    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('fileName').textContent   = '📎 ' + file.name;
+    document.getElementById('submitBtn').disabled     = false;
 }
 function handleDrop(e) {
     e.preventDefault();
@@ -244,9 +285,148 @@ function toggleReasons(el) {
     el.textContent = list.classList.contains('open') ? 'hide reasons' : 'show reasons';
 }
 document.getElementById('importForm').addEventListener('submit', function() {
-    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').disabled    = true;
     document.getElementById('submitBtn').textContent = 'Importing…';
 });
+
+// ── Toast system ──
+function showToast(type, title, message, duration = 6000) {
+    // type: 'green' | 'yellow' | 'red'
+    const icons = {
+        green:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+        yellow: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+        red:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#991b1b" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <div class="toast-icon">${icons[type]}</div>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            ${message ? `<div class="toast-msg">${message}</div>` : ''}
+        </div>
+        <button class="toast-close" onclick="dismissToast(this.closest('.toast'))">×</button>
+        <div class="toast-bar"></div>
+    `;
+
+    document.getElementById('toastStack').appendChild(toast);
+    requestAnimationFrame(() => setTimeout(() => toast.classList.add('show'), 30));
+
+    const timer = setTimeout(() => dismissToast(toast), duration);
+    toast._timer = timer;
+}
+
+function dismissToast(toast) {
+    if (!toast) return;
+    clearTimeout(toast._timer);
+    toast.classList.remove('show');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+}
+
+// ── Fire toasts from server session data ──
+window.addEventListener('DOMContentLoaded', () => {
+
+    @if(session('import_success'))
+        @php
+            $imported = (int) session('_import_imported', 0);
+            $skipped  = (int) session('_import_skipped', 0);
+            $reasons  = session('skip_reasons', []);
+            $preview  = collect($reasons)->take(3)->implode(' | ');
+            $extra    = count($reasons) > 3 ? ' …+' . (count($reasons) - 3) . ' more' : '';
+        @endphp
+
+        @if($skipped > 0)
+            {{-- YELLOW: any rows were skipped — partial or total failure --}}
+            @if($imported > 0)
+                {{-- Some got in, some didn't --}}
+                showToast('yellow',
+                    '{{ $imported }} Imported, {{ $skipped }} Skipped',
+                    '{{ addslashes($preview . $extra) }}',
+                    9000);
+            @else
+                {{-- Nothing imported, everything skipped --}}
+                showToast('yellow',
+                    '{{ $skipped }} Row(s) Skipped — Nothing Imported',
+                    '{{ addslashes($preview . $extra) }}',
+                    9000);
+            @endif
+
+        @elseif($imported > 0)
+            {{-- GREEN: all rows imported, zero skips --}}
+            showToast('green',
+                '{{ $imported }} Permit(s) Imported Successfully',
+                'All rows were valid and saved to the database.');
+
+        @else
+            {{-- RED: no rows at all (empty file after header) --}}
+            showToast('red', 'Nothing Imported', 'No valid rows found. Check file format.');
+        @endif
+
+    @endif
+
+    {{-- Red: only ONE toast (import_error takes priority) --}}
+    @if(session('import_error'))
+        showToast('red', 'Import Failed', '{{ addslashes(session("import_error")) }}');
+    @elseif($errors->has('file'))
+        showToast('red', 'Invalid File', '{{ addslashes($errors->first("file")) }}');
+    @endif
+});
+
+// ── Live-refresh history table every 4 seconds ──
+function refreshHistory() {
+    fetch('/import/history-json', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (!data) return;
+
+            // Update count badge
+            const countEl = document.getElementById('historyCount');
+            if (countEl) countEl.textContent = data.total + ' total uploads';
+
+            // Rebuild tbody
+            const tbody = document.getElementById('historyTbody');
+            if (!tbody) return;
+
+            if (data.rows.length === 0) {
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No uploads yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.rows.map(log => {
+                const importedBadge = log.imported > 0
+                    ? `<span class="badge-green">${log.imported} imported</span>`
+                    : `<span class="badge-red">0 imported</span>`;
+
+                let skippedCell = '<span style="color:#d1d5db;font-size:12px">—</span>';
+                if (log.skipped > 0) {
+                    const rid = 'r_' + log.id;
+                    const reasons = log.skip_reasons || [];
+                    const reasonsHtml = reasons.length
+                        ? `<span class="reasons-toggle" onclick="toggleReasons(this)">show reasons</span>
+                           <ul class="reasons-list" id="${rid}">
+                             ${reasons.map(r => `<li>· ${r}</li>`).join('')}
+                           </ul>`
+                        : '';
+                    skippedCell = `<span class="badge-yellow">${log.skipped} skipped</span>${reasonsHtml}`;
+                }
+
+                return `<tr>
+                    <td style="font-weight:500;color:#1a2744;max-width:200px;word-break:break-all">${log.file_name}</td>
+                    <td style="color:#6b7280">${log.uploaded_by}</td>
+                    <td style="color:#6b7280;white-space:nowrap">${log.date}</td>
+                    <td style="text-align:center">${log.total_rows}</td>
+                    <td style="text-align:center">${importedBadge}</td>
+                    <td>${skippedCell}</td>
+                </tr>`;
+            }).join('');
+        })
+        .catch(() => {});
+}
+
+// Poll every 4 seconds
+setInterval(refreshHistory, 4000);
+
 </script>
 
 </body>

@@ -32,6 +32,17 @@ Route::middleware(['auth'])->group(function () {
     // ── Admin + Super Admin ──
     Route::middleware(['role:admin|super_admin'])->group(function () {
 
+        Route::get('/import/excel',        [ImportController::class, 'showImport'])->name('import.show');
+        Route::post('/import/excel',       [ImportController::class, 'importExcel'])->name('import.excel');
+        Route::get('/import/history-json', [ImportController::class, 'historyJson'])->name('import.history-json');
+
+        Route::get('/cemetery/map',             [CemeteryMapController::class, 'index'])->name('cemetery.map');
+        Route::get('/cemetery/plots',           [CemeteryMapController::class, 'plots'])->name('cemetery.plots');
+        Route::post('/cemetery/plots',          [CemeteryMapController::class, 'store'])->name('cemetery.store');
+        Route::patch('/cemetery/plots/{plot}',  [CemeteryMapController::class, 'update'])->name('cemetery.update');
+        Route::delete('/cemetery/plots/{plot}', [CemeteryMapController::class, 'destroy'])->name('cemetery.destroy');
+        Route::get('/cemetery/search-deceased', [CemeteryMapController::class, 'searchDeceased'])->name('cemetery.search-deceased');
+
         Route::resource('deceased', DeceasedPersonController::class);
 
         Route::resource('permits', BurialPermitController::class);
