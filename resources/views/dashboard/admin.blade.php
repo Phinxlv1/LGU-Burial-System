@@ -52,13 +52,25 @@
         .panel-head a:hover { text-decoration: underline; }
         table { width: 100%; border-collapse: collapse; }
         th { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .07em; padding: .5rem .75rem; text-align: left; background: #fafafa; }
-        td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; }
+        td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; vertical-align: middle; }
+
         .permit-no { font-weight: 700; color: #1a2744; font-size: 12px; }
-        .badge { display: inline-flex; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+
+        .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 4px; }
         .badge-yellow { background: #fef3c7; color: #92400e; }
         .badge-green  { background: #d1fae5; color: #065f46; }
         .badge-blue   { background: #dbeafe; color: #1e40af; }
         .badge-red    { background: #fee2e2; color: #991b1b; }
+
+        /* ── EXPIRED ROW HIGHLIGHT ── */
+        tr.row-expired td {
+            background: #fff5f5;
+            border-top-color: #fecaca;
+        }
+        tr.row-expired td:first-child {
+            border-left: 3px solid #ef4444;
+        }
+
         .btn-view { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; }
         .btn-view:hover { background: #f9fafb; border-color: #1a2744; color: #1a2744; }
         .empty-row { text-align: center; color: #9ca3af; padding: 2.5rem; font-size: 13px; }
@@ -147,14 +159,38 @@
                 </thead>
                 <tbody>
                     @forelse($recentPermits as $permit)
-                    <tr>
-                        <td><span class="permit-no">{{ $permit->permit_number }}</span></td>
+                    @php
+                        $expiring = $permit->status === 'released'
+                            && $permit->expiry_date
+                            && $permit->expiry_date->diffInDays(now()) <= 30
+                            && $permit->expiry_date->isFuture();
+                    @endphp
+                    <tr class="{{ $permit->status === 'expired' ? 'row-expired' : '' }}">
+                        <td>
+                            <span class="permit-no">{{ $permit->permit_number }}</span>
+                            @if($permit->status === 'expired')
+                                <span style="font-size:10px;font-weight:700;color:#ef4444;margin-left:5px;vertical-align:middle">⚠ RENEWAL NEEDED</span>
+                            @endif
+                        </td>
                         <td>{{ optional($permit->deceased)->last_name }}, {{ optional($permit->deceased)->first_name }}</td>
                         <td style="color:#6b7280;font-size:12px">{{ ucfirst(str_replace('_',' ',$permit->permit_type)) }}</td>
                         <td style="color:#6b7280;font-size:12px">{{ $permit->created_at->format('M d, Y') }}</td>
                         <td>
-                            @php $colors=['pending'=>'badge-yellow','approved'=>'badge-green','released'=>'badge-blue','expired'=>'badge-red']; @endphp
-                            <span class="badge {{ $colors[$permit->status] ?? 'badge-yellow' }}">{{ ucfirst($permit->status) }}</span>
+                            @if($permit->status === 'expired')
+                                <span class="badge badge-red" style="font-weight:700;letter-spacing:.02em">
+                                    ⚠ Expired
+                                </span>
+                            @elseif($expiring)
+                                <span class="badge badge-yellow">
+                                    ⏳ Expiring Soon
+                                </span>
+                            @elseif($permit->status === 'released')
+                                <span class="badge badge-blue">Released</span>
+                            @elseif($permit->status === 'approved')
+                                <span class="badge badge-green">Approved</span>
+                            @else
+                                <span class="badge badge-yellow">{{ ucfirst($permit->status) }}</span>
+                            @endif
                         </td>
                         <td><a href="{{ route('permits.show', $permit) }}" class="btn-view">View</a></td>
                     </tr>
@@ -170,8 +206,6 @@
 
 {{-- FLOATING + BUTTON — goes to permits page and auto-opens modal --}}
 <a href="{{ route('permits.index') }}#new" class="fab" title="New Permit">+</a>
-
-
 
 </body>
 </html>

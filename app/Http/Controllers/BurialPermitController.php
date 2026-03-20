@@ -27,7 +27,7 @@ class BurialPermitController extends Controller
         $query->orderBy('created_at', 'desc');
     }
 
-    $permits = $query->paginate(11)->withQueryString();
+    $permits = $query->paginate(10)->withQueryString();
 
     $sortUrl = fn(string $col) => request()->fullUrlWithQuery([
         'sort'      => $col,

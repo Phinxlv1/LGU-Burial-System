@@ -12,6 +12,8 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SettingsController;
+
 
 Route::get('/', fn() => redirect()->route('login'));
 
@@ -31,6 +33,18 @@ Route::middleware(['auth'])->group(function () {
 
     // ── Admin + Super Admin ──
     Route::middleware(['role:admin|super_admin'])->group(function () {
+
+
+        Route::post('permits/{permit}/documents',      [DocumentController::class, 'upload'])->name('documents.upload');
+        Route::get('documents/{document}/download',    [DocumentController::class, 'download'])->name('documents.download');
+        Route::delete('documents/{document}',          [DocumentController::class, 'destroy'])->name('documents.destroy');
+
+
+
+
+        Route::get('/settings/dataquality/scan', [SettingsController::class, 'dataQualityScan'])->name('settings.dataquality.scan');
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        
 
         Route::get('/import/excel',        [ImportController::class, 'showImport'])->name('import.show');
         Route::post('/import/excel',       [ImportController::class, 'importExcel'])->name('import.excel');
@@ -61,6 +75,16 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/reports',        [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+        // Settings
+        Route::get('/settings',                       [SettingsController::class, 'index'])->name('settings.index');
+        Route::put('/settings/{section}',             [SettingsController::class, 'update'])->name('settings.update');
+        Route::post('/settings/reset/{target}',       [SettingsController::class, 'reset'])->name('settings.reset');
+        
+        // User management (within settings)
+        Route::post('/settings/users',                [SettingsController::class, 'storeUser'])->name('settings.users.store');
+        Route::delete('/settings/users/{user}',       [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
+        Route::get('permits/{permit}/print', [BurialPermitController::class, 'print'])->name('permits.print');
     });
 
 });
