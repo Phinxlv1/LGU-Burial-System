@@ -35,11 +35,8 @@ class ImportController extends Controller
         $ext          = strtolower($file->getClientOriginalExtension());
         $tmpPath      = $file->getRealPath();
 
-        // ── 1. Read rows ──
         try {
-            $rows = $ext === 'csv'
-                ? $this->readCsv($tmpPath)
-                : $this->readXlsx($tmpPath);
+            $rows = $ext === 'csv' ? $this->readCsv($tmpPath) : $this->readXlsx($tmpPath);
         } catch (\Throwable $e) {
             $this->saveLog($originalName, 0, 0, 0, ['Could not read file: ' . $e->getMessage()]);
             return back()->with('import_error', 'Could not read file: ' . $e->getMessage());
@@ -50,7 +47,7 @@ class ImportController extends Controller
             return back()->with('import_error', 'The file appears to be empty.');
         }
 
-        // ── 2. Find header row ──
+        // Find header row
         $headerRowIdx = null;
         $headerMap    = [];
 
@@ -64,9 +61,9 @@ class ImportController extends Controller
         }
 
         if ($headerRowIdx === null) {
-            $this->saveLog($originalName, 0, 0, 0, ['Header row not found. File must contain: first_name, last_name, date_of_death']);
+            $this->saveLog($originalName, 0, 0, 0, ['Header row not found']);
             return back()->with('import_error',
-                'Header row not found. Your file must have a row containing: first_name, last_name, date_of_death'
+                'Header row not found. File must contain: first_name, last_name, date_of_death'
             );
         }
 
@@ -75,7 +72,6 @@ class ImportController extends Controller
             if ($k !== '') $headerMap[$k] = $col;
         }
 
-        // ── 3. Process data rows ──
         $dataRows    = array_slice($rows, $headerRowIdx + 1, null, true);
         $imported    = 0;
         $skipped     = 0;
@@ -86,29 +82,22 @@ class ImportController extends Controller
             $row     = (array) $row;
             $display = $rowIdx + 1;
 
-            // Skip blank rows silently
-            if (empty(array_filter($row, fn($v) => trim((string) $v) !== ''))) {
-                continue;
-            }
+            if (empty(array_filter($row, fn($v) => trim((string) $v) !== ''))) continue;
 
             $firstName   = trim((string) $this->col($row, $headerMap, 'first_name', ''));
             $lastName    = trim((string) $this->col($row, $headerMap, 'last_name',  ''));
             $dateOfDeath = $this->parseDate($this->col($row, $headerMap, 'date_of_death'));
 
             if ($firstName === '' || $lastName === '') {
-                $skipped++;
-                $skipReasons[] = "Row {$display}: Missing first_name or last_name";
-                continue;
+                $skipped++; $skipReasons[] = "Row {$display}: Missing first_name or last_name"; continue;
             }
             if (!$dateOfDeath) {
-                $skipped++;
-                $skipReasons[] = "Row {$display}: Invalid or missing date_of_death ({$firstName} {$lastName})";
-                continue;
+                $skipped++; $skipReasons[] = "Row {$display}: Invalid date_of_death ({$firstName} {$lastName})"; continue;
             }
 
-            $validTypes    = ['cemented','niche_1st','niche_2nd','niche_3rd','niche_4th','bone_niches'];
-            $rawType       = strtolower(trim((string) $this->col($row, $headerMap, 'permit_type', 'cemented')));
-            $permitType    = in_array($rawType, $validTypes) ? $rawType : 'cemented';
+            $validTypes = ['cemented','niche_1st','niche_2nd','niche_3rd','niche_4th','bone_niches'];
+            $rawType    = strtolower(trim((string) $this->col($row, $headerMap, 'permit_type', 'cemented')));
+            $permitType = in_array($rawType, $validTypes) ? $rawType : 'cemented';
 
             $validStatuses = ['pending','approved','released','expired'];
             $rawStatus     = strtolower(trim((string) $this->col($row, $headerMap, 'status', 'pending')));
@@ -125,14 +114,11 @@ class ImportController extends Controller
                         'last_name'      => $lastName,
                         'date_of_death'  => $dateOfDeath,
                         'nationality'    => (string)($this->col($row, $headerMap, 'nationality', 'Filipino') ?: 'Filipino'),
-                        'age'            => is_numeric($this->col($row, $headerMap, 'age'))
-                                                ? (int) $this->col($row, $headerMap, 'age') : null,
+                        'age'            => is_numeric($this->col($row, $headerMap, 'age')) ? (int)$this->col($row, $headerMap, 'age') : null,
                         'sex'            => $this->col($row, $headerMap, 'sex')            ?? null,
                         'kind_of_burial' => $this->col($row, $headerMap, 'kind_of_burial') ?? null,
                     ]);
 
-                    // ── Generate a guaranteed-unique permit number ──
-                    // Use DB lock to prevent race conditions when importing multiple rows
                     $permitNo = $this->generateUniquePermitNumber($year);
 
                     BurialPermit::create([
@@ -158,7 +144,7 @@ class ImportController extends Controller
             }
         }
 
-        // ── 4. ALWAYS save the import log ──
+        // Always save the log
         $this->saveLog($originalName, count($dataRows), $imported, $skipped, $skipReasons);
 
         return back()
@@ -168,30 +154,7 @@ class ImportController extends Controller
             ->with('_import_skipped',  $skipped);
     }
 
-    // ── Generate a unique permit number using DB-level uniqueness ────
-    private function generateUniquePermitNumber(int $year): string
-    {
-        $maxAttempts = 50;
-
-        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
-            // Count ALL permits for this year (including ones being inserted right now)
-            $count = BurialPermit::whereYear('created_at', $year)->count()
-                   + BurialPermit::whereYear('updated_at', $year)->count();
-
-            // Use a timestamp-based suffix to ensure uniqueness
-            $number = 'BP-' . $year . '-' . str_pad($count + $attempt + 1, 5, '0', STR_PAD_LEFT);
-
-            // Check it doesn't already exist
-            if (!BurialPermit::where('permit_number', $number)->exists()) {
-                return $number;
-            }
-        }
-
-        // Absolute fallback: use microsecond timestamp — guaranteed unique
-        return 'BP-' . $year . '-' . substr((string) now()->valueOf(), -6);
-    }
-
-    // ── JSON endpoint ────────────────────────────────────────────────
+    // Returns JSON for the live-refresh fetch call
     public function historyJson()
     {
         try {
@@ -199,7 +162,7 @@ class ImportController extends Controller
                 return response()->json(['total' => 0, 'rows' => []]);
             }
 
-            $logs = ImportLog::with('user')->latest()->take(15)->get();
+            $logs = ImportLog::with('user')->latest()->take(20)->get();
 
             return response()->json([
                 'total' => ImportLog::count(),
@@ -217,12 +180,22 @@ class ImportController extends Controller
                 ]),
             ]);
         } catch (\Throwable $e) {
-            Log::warning('historyJson failed: ' . $e->getMessage());
-            return response()->json(['total' => 0, 'rows' => []]);
+            Log::warning('historyJson error: ' . $e->getMessage());
+            return response()->json(['total' => 0, 'rows' => [], 'error' => $e->getMessage()]);
         }
     }
 
-    // ── Private helpers ──────────────────────────────────────────────
+    private function generateUniquePermitNumber(int $year): string
+    {
+        for ($i = 0; $i < 100; $i++) {
+            $count  = BurialPermit::count() + $i + 1;
+            $number = 'BP-' . $year . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
+            if (!BurialPermit::where('permit_number', $number)->exists()) {
+                return $number;
+            }
+        }
+        return 'BP-' . $year . '-' . substr((string) now()->valueOf(), -7);
+    }
 
     private function getLogs()
     {
@@ -239,12 +212,10 @@ class ImportController extends Controller
     private function saveLog(string $name, int $total, int $imported, int $skipped, array $reasons): void
     {
         try {
-            // Ensure table exists before trying to write
             if (!Schema::hasTable('import_logs')) {
-                Log::warning('import_logs table does not exist. Run: php artisan migrate');
+                Log::warning('import_logs table missing — run: php artisan migrate');
                 return;
             }
-
             ImportLog::create([
                 'file_name'    => $name,
                 'uploaded_by'  => Auth::id(),
@@ -254,8 +225,7 @@ class ImportController extends Controller
                 'skip_reasons' => $reasons,
             ]);
         } catch (\Throwable $e) {
-            // Log the real error so it's visible in laravel.log
-            Log::error('ImportLog::create failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error('saveLog failed: ' . $e->getMessage());
         }
     }
 
@@ -275,9 +245,7 @@ class ImportController extends Controller
     {
         $rows = [];
         if (($h = fopen($path, 'r')) !== false) {
-            while (($d = fgetcsv($h)) !== false) {
-                $rows[] = array_values($d);
-            }
+            while (($d = fgetcsv($h)) !== false) $rows[] = array_values($d);
             fclose($h);
         }
         return $rows;
@@ -301,27 +269,19 @@ class ImportController extends Controller
     private function parseDate(mixed $val): ?string
     {
         if ($val === null || trim((string) $val) === '') return null;
-
-        if (is_numeric($val) && (float) $val > 1000) {
+        if (is_numeric($val) && (float)$val > 1000) {
             try {
                 if (class_exists(\PhpOffice\PhpSpreadsheet\Shared\Date::class)) {
-                    return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $val)
-                        ->format('Y-m-d');
+                    return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float)$val)->format('Y-m-d');
                 }
-                return date('Y-m-d', (int) (((float) $val - 25569) * 86400));
+                return date('Y-m-d', (int)(((float)$val - 25569) * 86400));
             } catch (\Throwable) {}
         }
-
         $s = trim((string) $val);
-        foreach ([
-            'Y-m-d', 'Y/m/d', 'd/m/Y', 'm/d/Y', 'd-m-Y', 'm-d-Y',
-            'd.m.Y', 'Y-m-d H:i:s', 'n/j/Y', 'j/n/Y',
-            'M d, Y', 'F d, Y', 'd M Y',
-        ] as $fmt) {
+        foreach (['Y-m-d','Y/m/d','d/m/Y','m/d/Y','d-m-Y','m-d-Y','d.m.Y','Y-m-d H:i:s','n/j/Y','j/n/Y','M d, Y','F d, Y','d M Y'] as $fmt) {
             $dt = \DateTime::createFromFormat($fmt, $s);
             if ($dt) return $dt->format('Y-m-d');
         }
-
         $ts = strtotime($s);
         return $ts !== false ? date('Y-m-d', $ts) : null;
     }

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Import Excel — LGU Carmen</title>
+    <script>if(localStorage.getItem('lgu_dark')==='1')document.documentElement.classList.add('dark');</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,10 +16,15 @@
         .role-tag { background: #1a2744; color: #fff; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: .04em; text-transform: uppercase; }
         .content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
 
-        /* Upload card */
+        .guide-card { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 1rem 1.25rem; }
+        .guide-card h3 { font-size: 13px; font-weight: 700; color: #1e40af; margin-bottom: .5rem; }
+        .guide-cols { display: flex; flex-wrap: wrap; gap: .3rem .6rem; }
+        .col-tag { font-size: 11px; font-family: monospace; background: #dbeafe; color: #1e3a8a; padding: 2px 8px; border-radius: 4px; border: 1px solid #bfdbfe; }
+        .col-tag.required { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .guide-note { font-size: 11px; color: #3b82f6; margin-top: .5rem; }
+
         .upload-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.25rem 1.5rem; }
         .upload-card h3 { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 1rem; }
-
         .dropzone { border: 2px dashed #d1d5db; border-radius: 8px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; position: relative; }
         .dropzone:hover, .dropzone.drag-over { border-color: #1a2744; background: #f8faff; }
         .dropzone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
@@ -26,45 +32,40 @@
         .dropzone-title { font-size: 14px; font-weight: 500; color: #111827; }
         .dropzone-sub   { font-size: 12px; color: #9ca3af; margin-top: 4px; }
         .dropzone-file  { font-size: 13px; font-weight: 600; color: #1a2744; margin-top: .5rem; display: none; }
-
         .upload-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; flex-wrap: wrap; gap: .5rem; }
         .upload-note   { font-size: 12px; color: #9ca3af; }
         .btn-upload { display: inline-flex; align-items: center; gap: 6px; padding: .55rem 1.1rem; background: #1a2744; color: #fff; border: none; border-radius: 7px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s; }
         .btn-upload:hover { background: #243459; }
         .btn-upload:disabled { opacity: .5; cursor: not-allowed; }
 
-        /* Panel */
         .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
         .panel-head { padding: .85rem 1.25rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
         .panel-head h3 { font-size: 13px; font-weight: 600; color: #111827; }
         .panel-head-sub { font-size: 12px; color: #9ca3af; }
-
         table { width: 100%; border-collapse: collapse; }
         th { font-size: 11px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; padding: .5rem .75rem; text-align: left; background: #fafafa; }
         td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; vertical-align: top; }
-
-        .badge-green  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 4px; background: #d1fae5; color: #065f46; }
-        .badge-yellow { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 4px; background: #fef3c7; color: #92400e; }
-        .badge-red    { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 4px; background: #fee2e2; color: #991b1b; }
-
+        .badge-green  { display: inline-flex; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 4px; background: #d1fae5; color: #065f46; }
+        .badge-yellow { display: inline-flex; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 4px; background: #fef3c7; color: #92400e; }
+        .badge-red    { display: inline-flex; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 4px; background: #fee2e2; color: #991b1b; }
         .reasons-toggle { font-size: 11px; color: #1a2744; cursor: pointer; text-decoration: underline; display: block; margin-top: 3px; }
         .reasons-list { font-size: 11px; color: #6b7280; margin-top: 4px; display: none; list-style: none; }
         .reasons-list li { padding: 1px 0; }
         .reasons-list.open { display: block; }
-        .empty-row td { text-align: center; color: #9ca3af; padding: 2rem; }
+        .empty-row td { text-align: center; color: #9ca3af; padding: 2rem; font-size: 13px; }
 
         /* Pagination */
-        .pager { display: flex; align-items: center; justify-content: center; padding: .75rem 1.25rem; border-top: 1px solid #f3f4f6; flex-wrap: wrap; gap: 1.5rem; }
+        .pager { display: flex; align-items: center; justify-content: center; padding: .75rem 1.25rem; border-top: 1px solid #f3f4f6; gap: 1.5rem; flex-wrap: wrap; }
         .pager-info { font-size: 12px; color: #6b7280; }
-        .pager-btns { display: flex; align-items: center; gap: 3px; }
-        .pager-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 9px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; text-decoration: none; background: #fff; transition: border-color .15s, color .15s; line-height: 1; }
+        .pager-btns { display: flex; gap: 3px; }
+        .pager-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 9px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; text-decoration: none; background: #fff; transition: border-color .15s; }
         .pager-btn:hover { border-color: #1a2744; color: #1a2744; }
         .pager-btn.active { background: #1a2744; color: #fff; border-color: #1a2744; font-weight: 600; }
-        .pager-btn.disabled { color: #d1d5db; cursor: not-allowed; pointer-events: none; }
+        .pager-btn.disabled { color: #d1d5db; pointer-events: none; }
 
-        /* Toast stack */
+        /* Toast */
         .toast-stack { position: fixed; top: 1rem; right: 1.25rem; z-index: 9999; display: flex; flex-direction: column; gap: .6rem; pointer-events: none; }
-        .toast { display: flex; align-items: flex-start; gap: .65rem; padding: .75rem 1rem; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.12); min-width: 280px; max-width: 420px; pointer-events: auto; transform: translateX(120%); transition: transform .35s cubic-bezier(.34,1.56,.64,1); position: relative; overflow: hidden; }
+        .toast { display: flex; align-items: flex-start; gap: .65rem; padding: .85rem 1rem; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,.13); min-width: 300px; max-width: 440px; pointer-events: auto; transform: translateX(120%); transition: transform .35s cubic-bezier(.34,1.56,.64,1); position: relative; overflow: hidden; }
         .toast.show { transform: translateX(0); }
         .toast-green  { background: #f0fdf4; border: 1px solid #bbf7d0; }
         .toast-yellow { background: #fffbeb; border: 1px solid #fde68a; }
@@ -73,24 +74,22 @@
         .toast-green  .toast-icon { background: #dcfce7; }
         .toast-yellow .toast-icon { background: #fef9c3; }
         .toast-red    .toast-icon { background: #fee2e2; }
-        .toast-content { flex: 1; }
+        .toast-body { flex: 1; }
         .toast-title { font-size: 13px; font-weight: 600; }
         .toast-green  .toast-title { color: #15803d; }
         .toast-yellow .toast-title { color: #92400e; }
         .toast-red    .toast-title { color: #991b1b; }
         .toast-msg { font-size: 12px; margin-top: 2px; color: #374151; }
-        .toast-close { background: none; border: none; cursor: pointer; font-size: 16px; line-height: 1; color: #9ca3af; padding: 0; flex-shrink: 0; transition: color .15s; }
-        .toast-close:hover { color: #374151; }
+        .toast-close { background: none; border: none; cursor: pointer; font-size: 18px; color: #9ca3af; padding: 0; flex-shrink: 0; }
         .toast-bar { position: absolute; bottom: 0; left: 0; height: 3px; width: 100%; transform-origin: left; animation: drainBar 7s linear forwards; }
         .toast-green  .toast-bar { background: #22c55e; }
         .toast-yellow .toast-bar { background: #f59e0b; }
         .toast-red    .toast-bar { background: #ef4444; }
-        @keyframes drainBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+        @keyframes drainBar { from{transform:scaleX(1)} to{transform:scaleX(0)} }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
 @include('partials.sidebar')
 
 <div class="main">
@@ -104,7 +103,32 @@
 
     <div class="content">
 
-        {{-- Upload Card --}}
+        {{-- Column Guide --}}
+        <div class="guide-card">
+            <h3>📋 Required Column Headers in your Excel / CSV</h3>
+            <div class="guide-cols">
+                <span class="col-tag required">first_name ✱</span>
+                <span class="col-tag required">last_name ✱</span>
+                <span class="col-tag required">date_of_death ✱</span>
+                <span class="col-tag">permit_type</span>
+                <span class="col-tag">applicant_name</span>
+                <span class="col-tag">status</span>
+                <span class="col-tag">nationality</span>
+                <span class="col-tag">age</span>
+                <span class="col-tag">sex</span>
+                <span class="col-tag">kind_of_burial</span>
+                <span class="col-tag">permit_number</span>
+                <span class="col-tag">applicant_contact</span>
+                <span class="col-tag">expiry_date</span>
+            </div>
+            <div class="guide-note">
+                ✱ Required &nbsp;·&nbsp;
+                <strong>permit_type</strong>: cemented, niche_1st, niche_2nd, niche_3rd, niche_4th, bone_niches &nbsp;·&nbsp;
+                <strong>status</strong>: pending, approved, released, expired
+            </div>
+        </div>
+
+        {{-- Upload --}}
         <div class="upload-card">
             <h3>Import Permits from Excel / CSV</h3>
             <form method="POST" action="{{ route('import.excel') }}" enctype="multipart/form-data" id="importForm">
@@ -126,10 +150,7 @@
                     <div class="dropzone-file" id="fileName"></div>
                 </div>
                 <div class="upload-footer">
-                    <span class="upload-note">
-                        Required columns: <strong>first_name</strong>, <strong>last_name</strong>, <strong>date_of_death</strong>.
-                        Rows missing these will be skipped.
-                    </span>
+                    <span class="upload-note">Rows missing first_name, last_name, or date_of_death will be skipped.</span>
                     <button type="submit" class="btn-upload" id="submitBtn" disabled>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
@@ -142,24 +163,24 @@
             </form>
         </div>
 
-        {{-- Upload History --}}
+        {{-- History — 100% server-rendered, no JS dependency --}}
         <div class="panel">
             <div class="panel-head">
                 <h3>Upload History</h3>
-                <span class="panel-head-sub" id="historyCount">{{ $logs->total() }} total upload{{ $logs->total() !== 1 ? 's' : '' }}</span>
+                <span class="panel-head-sub">{{ $logs->total() }} total upload{{ $logs->total() !== 1 ? 's' : '' }}</span>
             </div>
             <table>
                 <thead>
                     <tr>
                         <th>File</th>
                         <th>Uploaded By</th>
-                        <th>Date</th>
+                        <th>Date &amp; Time</th>
                         <th style="text-align:center">Total Rows</th>
                         <th style="text-align:center">Imported</th>
                         <th>Skipped</th>
                     </tr>
                 </thead>
-                <tbody id="historyTbody">
+                <tbody>
                     @forelse($logs as $log)
                     <tr>
                         <td style="font-weight:500;color:#1a2744;max-width:220px;word-break:break-all">{{ $log->file_name }}</td>
@@ -176,7 +197,11 @@
                         <td>
                             @if($log->skipped > 0)
                                 <span class="badge-yellow">{{ $log->skipped }} skipped</span>
-                                @php $reasons = is_array($log->skip_reasons) ? $log->skip_reasons : json_decode($log->skip_reasons ?? '[]', true); @endphp
+                                @php
+                                    $reasons = is_array($log->skip_reasons)
+                                        ? $log->skip_reasons
+                                        : json_decode($log->skip_reasons ?? '[]', true);
+                                @endphp
                                 @if(!empty($reasons))
                                     <span class="reasons-toggle" onclick="toggleReasons(this)">show reasons</span>
                                     <ul class="reasons-list">
@@ -194,7 +219,6 @@
                 </tbody>
             </table>
 
-            {{-- Pagination --}}
             @if($logs->hasPages())
             <div class="pager">
                 <span class="pager-info">Showing {{ $logs->firstItem() }}–{{ $logs->lastItem() }} of {{ $logs->total() }}</span>
@@ -205,11 +229,7 @@
                         <a href="{{ $logs->previousPageUrl() }}" class="pager-btn">‹ Prev</a>
                     @endif
                     @foreach($logs->getUrlRange(1, $logs->lastPage()) as $page => $url)
-                        @if($page == $logs->currentPage())
-                            <span class="pager-btn active">{{ $page }}</span>
-                        @else
-                            <a href="{{ $url }}" class="pager-btn">{{ $page }}</a>
-                        @endif
+                        <a href="{{ $url }}" class="pager-btn {{ $page == $logs->currentPage() ? 'active' : '' }}">{{ $page }}</a>
                     @endforeach
                     @if($logs->hasMorePages())
                         <a href="{{ $logs->nextPageUrl() }}" class="pager-btn">Next ›</a>
@@ -224,155 +244,72 @@
     </div>
 </div>
 
-{{-- Toast stack --}}
 <div class="toast-stack" id="toastStack"></div>
 
 <script>
-// ── File picker ──
 function handleFile(input) {
     const file = input.files[0];
     if (!file) return;
     document.getElementById('fileName').style.display = 'block';
-    document.getElementById('fileName').textContent   = '📎 ' + file.name;
-    document.getElementById('submitBtn').disabled     = false;
+    document.getElementById('fileName').textContent = '📎 ' + file.name;
+    document.getElementById('submitBtn').disabled = false;
 }
 function handleDrop(e) {
     e.preventDefault();
     document.getElementById('dropzone').classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
     if (!file) return;
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    const input = document.getElementById('fileInput');
-    input.files = dt.files;
-    handleFile(input);
+    const dt = new DataTransfer(); dt.items.add(file);
+    document.getElementById('fileInput').files = dt.files;
+    handleFile(document.getElementById('fileInput'));
 }
 function toggleReasons(el) {
     const list = el.nextElementSibling;
     list.classList.toggle('open');
     el.textContent = list.classList.contains('open') ? 'hide reasons' : 'show reasons';
 }
-
-// Disable button + show spinner while submitting
 document.getElementById('importForm').addEventListener('submit', function () {
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0"/></svg> Importing…`;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0"/></svg> Importing…';
 });
 
-// ── Toast system ──
-function showToast(type, title, msg, duration = 7000) {
-    const icons = {
-        green:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
-        yellow: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
-        red:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#991b1b" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
-    };
-    const t = document.createElement('div');
-    t.className = `toast toast-${type}`;
-    t.innerHTML = `
-        <div class="toast-icon">${icons[type]}</div>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
-        </div>
-        <button class="toast-close" onclick="dismissToast(this.closest('.toast'))">×</button>
-        <div class="toast-bar"></div>`;
+function showToast(type, title, msg, dur) {
+    dur = dur || 7000;
+    const ic = { green:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>', yellow:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', red:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#991b1b" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' };
+    var t = document.createElement('div');
+    t.className = 'toast toast-' + type;
+    t.innerHTML = '<div class="toast-icon">' + ic[type] + '</div><div class="toast-body"><div class="toast-title">' + title + '</div>' + (msg ? '<div class="toast-msg">' + msg + '</div>' : '') + '</div><button class="toast-close" onclick="(function(el){el.closest(\'.toast\').remove()})(this)">×</button><div class="toast-bar"></div>';
     document.getElementById('toastStack').appendChild(t);
-    requestAnimationFrame(() => setTimeout(() => t.classList.add('show'), 30));
-    t._tmr = setTimeout(() => dismissToast(t), duration);
-}
-function dismissToast(t) {
-    if (!t) return;
-    clearTimeout(t._tmr);
-    t.classList.remove('show');
-    t.addEventListener('transitionend', () => t.remove(), { once: true });
+    requestAnimationFrame(function(){ setTimeout(function(){ t.classList.add('show'); }, 30); });
+    setTimeout(function(){ t.classList.remove('show'); }, dur);
 }
 
-// ── Fire session toasts ──
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', function() {
     @if(session('import_success'))
         @php
             $imp  = (int) session('_import_imported', 0);
-            $skip = (int) session('_import_skipped',  0);
+            $skip = (int) session('_import_skipped', 0);
             $rsns = session('skip_reasons', []);
-            $prev = collect($rsns)->take(3)->map(fn($r) => htmlspecialchars($r, ENT_QUOTES))->implode(' | ');
-            $xtra = count($rsns) > 3 ? ' … +' . (count($rsns) - 3) . ' more' : '';
+            $prev = collect($rsns)->take(3)->map(fn($r) => e($r))->implode(' | ');
+            $xtra = count($rsns) > 3 ? ' +' . (count($rsns) - 3) . ' more' : '';
         @endphp
         @if($imp > 0 && $skip === 0)
-            showToast('green', '{{ $imp }} Permit(s) Imported Successfully', 'All rows were valid and saved to the database.');
+            showToast('green', '{{ $imp }} Permit(s) Imported Successfully', 'All rows saved to the database.');
         @elseif($imp > 0 && $skip > 0)
-            showToast('yellow', '{{ $imp }} Imported, {{ $skip }} Skipped', '{{ addslashes($prev . $xtra) }}', 10000);
+            showToast('yellow', '{{ $imp }} Imported, {{ $skip }} Skipped', '{{ addslashes($prev.$xtra) }}', 10000);
         @elseif($imp === 0 && $skip > 0)
-            showToast('yellow', 'Nothing Imported — {{ $skip }} Row(s) Skipped', '{{ addslashes($prev . $xtra) }}', 10000);
+            showToast('yellow', 'Nothing Imported — {{ $skip }} Skipped', '{{ addslashes($prev.$xtra) }}', 10000);
         @else
-            showToast('red', 'Nothing Imported', 'No valid rows found. Check column headers.');
+            showToast('red', 'Nothing Imported', 'No valid rows found.');
         @endif
     @endif
-
     @if(session('import_error'))
         showToast('red', 'Import Failed', '{{ addslashes(session("import_error")) }}');
     @elseif($errors->has('file'))
         showToast('red', 'Invalid File', '{{ addslashes($errors->first("file")) }}');
     @endif
 });
-
-// ── Live-refresh history every 5 s after an import ──
-function buildRow(log) {
-    const imp = log.imported > 0
-        ? `<span class="badge-green">${log.imported} imported</span>`
-        : `<span class="badge-red">0 imported</span>`;
-
-    let skip = `<span style="color:#d1d5db;font-size:12px">—</span>`;
-    if (log.skipped > 0) {
-        const reasons = (log.skip_reasons || []);
-        const list = reasons.length
-            ? `<span class="reasons-toggle" onclick="toggleReasons(this)">show reasons</span>
-               <ul class="reasons-list">${reasons.map(r => `<li>· ${r}</li>`).join('')}</ul>`
-            : '';
-        skip = `<span class="badge-yellow">${log.skipped} skipped</span>${list}`;
-    }
-
-    return `<tr>
-        <td style="font-weight:500;color:#1a2744;max-width:220px;word-break:break-all">${log.file_name}</td>
-        <td style="color:#6b7280">${log.uploaded_by}</td>
-        <td style="color:#6b7280;white-space:nowrap">${log.date}</td>
-        <td style="text-align:center">${log.total_rows}</td>
-        <td style="text-align:center">${imp}</td>
-        <td>${skip}</td>
-    </tr>`;
-}
-
-function refreshHistory() {
-    fetch('{{ route("import.history-json") }}', {
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-    })
-    .then(r => r.ok ? r.json() : null)
-    .then(data => {
-        if (!data) return;
-
-        // Update count label
-        const countEl = document.getElementById('historyCount');
-        if (countEl) countEl.textContent = data.total + ' total upload' + (data.total !== 1 ? 's' : '');
-
-        // Rebuild table body
-        const tbody = document.getElementById('historyTbody');
-        if (!tbody) return;
-
-        if (!data.rows || data.rows.length === 0) {
-            tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No uploads yet.</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = data.rows.map(buildRow).join('');
-    })
-    .catch(() => {});
-}
-
-// Refresh immediately on load, then every 5 seconds
-refreshHistory();
-setInterval(refreshHistory, 5000);
 </script>
-
 </body>
 </html>

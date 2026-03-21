@@ -39,6 +39,9 @@ class DeceasedPersonController extends Controller
             'place_of_death' => 'nullable|string|max:255',
             'cause_of_death' => 'nullable|string|max:255',
             'kind_of_burial' => 'nullable|in:Ground,Niche,Cremation',
+            'name_extension' => 'nullable|string|max:10',
+            'name_number'    => 'nullable|string|max:20',
+            'phone_number'   => 'nullable|string|max:20',
         ]);
 
         $deceased->update($request->only([
@@ -46,6 +49,7 @@ class DeceasedPersonController extends Controller
             'civil_status', 'nationality', 'religion', 'address',
             'date_of_birth', 'date_of_death', 'place_of_death',
             'cause_of_death', 'kind_of_burial',
+            'name_extension', 'name_number', 'phone_number',
         ]));
 
         return redirect()->route('deceased.show', $deceased)

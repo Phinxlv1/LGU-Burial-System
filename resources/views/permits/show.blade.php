@@ -228,6 +228,7 @@
 
 @include('partials.sidebar')
 
+
 <div class="main">
     <div class="topbar">
         <div class="topbar-left">
@@ -415,6 +416,8 @@
                 </div>
             </div>
         </div>
+
+        @include('partials.sms-panel')
 
         {{-- ══════════ DOCUMENTS ══════════ --}}
         <div class="docs-card">

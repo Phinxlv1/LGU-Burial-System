@@ -14,8 +14,8 @@ return [
     |
     */
     'google_maps' => [
-    'key' => env('GOOGLE_MAPS_KEY', ''),
-],
+        'key' => env('GOOGLE_MAPS_KEY', ''),
+    ],
 
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
@@ -23,6 +23,12 @@ return [
 
     'resend' => [
         'key' => env('RESEND_API_KEY'),
+    ],
+
+    'vonage' => [
+    'api_key'    => env('4eb7b9c4'),
+    'api_secret' => env('jKrrFqua1qr2RbAPUcCwFuw5MOenFiMl1lJP3e2N09QQHfWWFj'),
+    'from'       => env('VONAGE_FROM', 'LGUCarmen'),
     ],
 
     'ses' => [
@@ -37,5 +43,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+
+    
 
 ];

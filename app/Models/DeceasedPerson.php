@@ -15,6 +15,9 @@ class DeceasedPerson extends Model
     'first_name',
     'middle_name',
     'last_name',
+    'name_extension',  // ← make sure this is here
+    'name_number',     // ← make sure this is here
+    'phone_number',    // ← make sure this is here
     'date_of_death',
     'nationality',
     'age',
