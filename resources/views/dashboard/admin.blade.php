@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @livewireStyles
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — LGU Carmen</title>
@@ -520,10 +521,10 @@
         </div>
         <div class="topbar-right">
             <span class="role-pill">Admin</span>
-            <button class="btn-new" onclick="document.getElementById('permitModal').classList.add('open')">
+            <a href="{{ route('permits.index') }}#new" class="btn-new">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 New Permit
-            </button>
+            </a>
         </div>
     </div>
 
@@ -791,122 +792,14 @@
 @endif
 
 
-<!-- NEW PERMIT MODAL -->
-<div class="modal-overlay" id="permitModal" onclick="if(event.target===this)closeModal()">
-    <div class="modal">
-        <div class="modal-header">
-            <h3>New Burial Permit</h3>
-            <button class="modal-close" onclick="closeModal()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-        <form method="POST" action="{{ route('permits.store') }}">
-            @csrf
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Requestor's Name <span style="color:var(--red)">*</span></label>
-                    <input type="text" name="requestor_name" class="form-control" placeholder="Full name of requestor" required>
-                </div>
-                <div class="form-divider">Deceased Information</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
-                    <div class="form-group">
-                        <label class="form-label">First Name <span style="color:var(--red)">*</span></label>
-                        <input type="text" name="first_name" class="form-control" placeholder="First name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Last Name <span style="color:var(--red)">*</span></label>
-                        <input type="text" name="last_name" class="form-control" placeholder="Last name" required>
-                    </div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem">
-                    <div class="form-group">
-                        <label class="form-label">Nationality</label>
-                        <input type="text" name="nationality" class="form-control" placeholder="Filipino">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Age</label>
-                        <input type="number" name="age" class="form-control" placeholder="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Sex</label>
-                        <select name="sex" class="form-control">
-                            <option value="">Select…</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
-                    <div class="form-group">
-                        <label class="form-label">Date of Death <span style="color:var(--red)">*</span></label>
-                        <input type="date" name="date_of_death" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Kind of Burial</label>
-                        <select name="kind_of_burial" class="form-control">
-                            <option value="">Select…</option>
-                            <option value="Ground">Ground</option>
-                            <option value="Niche">Niche</option>
-                            <option value="Cremation">Cremation</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-divider">Burial Permit Fees</div>
-                <div class="fee-grid">
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="cemented" id="fee_cemented">
-                        <label for="fee_cemented">Cemented</label>
-                        <span class="fee-amount">₱1,000.00</span>
-                    </div>
-                    <div class="fee-section-label">Niches (New)</div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="niche_1st" id="fee_1st">
-                        <label for="fee_1st">1st Floor</label>
-                        <span class="fee-amount">₱8,000.00</span>
-                    </div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="niche_2nd" id="fee_2nd">
-                        <label for="fee_2nd">2nd Floor</label>
-                        <span class="fee-amount">₱6,600.00</span>
-                    </div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="niche_3rd" id="fee_3rd">
-                        <label for="fee_3rd">3rd Floor</label>
-                        <span class="fee-amount">₱5,700.00</span>
-                    </div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="niche_4th" id="fee_4th">
-                        <label for="fee_4th">4th Floor</label>
-                        <span class="fee-amount">₱5,300.00</span>
-                    </div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="bone_niches" id="fee_bone">
-                        <label for="fee_bone">Bone Niches</label>
-                        <span class="fee-amount">₱5,000.00</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="btn-submit">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Create Permit
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+@include('partials.permit-modal')
 
 
 <script>
-function closeModal() { document.getElementById('permitModal').classList.remove('open'); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
 
 // Open modal from hash
-if (window.location.hash === '#new') {
-    document.getElementById('permitModal').classList.add('open');
-    history.replaceState(null, '', window.location.pathname);
-}
+
 
 // Toast
 (function(){
@@ -965,6 +858,7 @@ new Chart(document.getElementById('monthlyChart').getContext('2d'), {
     }
 });
 </script>
-
+@include('partials.permit-modal')
+@livewireScripts
 </body>
 </html>

@@ -26,11 +26,10 @@ return [
     ],
 
     'vonage' => [
-    'api_key'    => env('4eb7b9c4'),
-    'api_secret' => env('jKrrFqua1qr2RbAPUcCwFuw5MOenFiMl1lJP3e2N09QQHfWWFj'),
+    'api_key'    => env('VONAGE_API_KEY'),
+    'api_secret' => env('VONAGE_API_SECRET'),
     'from'       => env('VONAGE_FROM', 'LGUCarmen'),
-    ],
-
+],
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),

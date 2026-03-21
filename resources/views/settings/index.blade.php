@@ -797,12 +797,23 @@ function renderRec(issue,rec){
 
 function toggleDQ(id){document.getElementById('dqi-'+id)?.classList.toggle('open');}
 function filterDQ(type,btn){DQ.filter=type;document.querySelectorAll('.dq-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderDQ();}
-function deletePerm(permitId,label,issueId,recId){
-    if(!confirm(`Delete permit "${label}"? This cannot be undone.`)) return;
-    fetch(`/permits/${permitId}`,{method:'DELETE',headers:{'X-CSRF-TOKEN':CSRF,'Accept':'application/json'}})
-        .then(r=>r.ok?r.json():Promise.reject())
-        .then(()=>{DQ.ignored.add(recId);checkResolved(issueId);renderDQ();toast('Deleted',label+' was removed.');})
-        .catch(()=>toast('Error','Could not delete — try again.',false));
+function deletePerm(permitId, label, issueId, recId) {
+    // Two-step warning
+    const step1 = confirm(`⚠️ Delete permit "${label}"?\n\nThis will also permanently delete the linked deceased person record.\n\nThis cannot be undone.`);
+    if (!step1) return;
+
+    const step2 = confirm(`🚨 FINAL WARNING\n\nYou are about to delete:\n• Permit: ${label}\n• The deceased person linked to this permit\n\nAre you absolutely sure?`);
+    if (!step2) return;
+
+    fetch(`/permits/${permitId}`, { method:'DELETE', headers:{ 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json' } })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(() => {
+            DQ.ignored.add(recId);
+            checkResolved(issueId);
+            renderDQ();
+            toast('Deleted', `Permit "${label}" and its deceased record were permanently removed.`);
+        })
+        .catch(() => toast('Error', 'Could not delete — try again.', false));
 }
 function ignoreDQ(issueId,recId){DQ.ignored.add(recId);checkResolved(issueId);renderDQ();toast('Ignored','This record will not be flagged again.');}
 function checkResolved(issueId){const issue=DQ.issues.find(i=>i.id===issueId);if(issue&&issue.records.every(r=>DQ.ignored.has(r.id)))DQ.resolved.add(issueId);}

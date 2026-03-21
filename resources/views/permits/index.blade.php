@@ -101,7 +101,7 @@
         @keyframes toastDrain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
         /* MODAL */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,30,61,.45); z-index: 100; align-items: center; justify-content: center; padding: 2rem 1rem; overflow-y: auto; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         .modal-overlay.open { display: flex; }
         .modal { background: #fff; border-radius: 10px; width: 100%; max-width: 580px; box-shadow: 0 20px 60px rgba(0,0,0,.2); overflow: hidden; animation: modalIn .15s ease; margin: auto; }
         @keyframes modalIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -297,7 +297,8 @@
         </div>
         <div style="display:flex;align-items:center;gap:10px">
             <span class="role-tag">Admin</span>
-            <button class="btn-primary" onclick="document.getElementById('permitModal').classList.add('open')">
+            <button class="btn-primary" onclick="openPM()">
+
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 New Permit
             </button>
@@ -320,7 +321,11 @@
                         <th><a href="{{ $sortUrl('last_name') }}"     class="sort-link {{ request('sort')==='last_name'?'active':'' }}">Deceased {!! $sortIcon('last_name') !!}</a></th>
                         <th><a href="{{ $sortUrl('permit_type') }}"   class="sort-link {{ request('sort')==='permit_type'?'active':'' }}">Type {!! $sortIcon('permit_type') !!}</a></th>
                         <th><a href="{{ $sortUrl('date_of_death') }}" class="sort-link {{ request('sort')==='date_of_death'?'active':'' }}">Date of Death {!! $sortIcon('date_of_death') !!}</a></th>
-                        <th><a href="{{ $sortUrl('created_at') }}"    class="sort-link {{ request('sort')==='created_at'?'active':'' }}">Issued {!! $sortIcon('created_at') !!}</a></th>
+                        <th style="text-align:center">
+    <a href="{{ $sortUrl('renewal_count') }}" class="sort-link {{ request('sort')==='renewal_count'?'active':'' }}" style="justify-content:center">
+        Renewals {!! $sortIcon('renewal_count') !!}
+    </a>
+</th>
                         <th><a href="{{ $sortUrl('status') }}"        class="sort-link {{ request('sort')==='status'?'active':'' }}">Status {!! $sortIcon('status') !!}</a></th>
                         <th></th>
                     </tr>
@@ -353,7 +358,13 @@
                         <td style="font-size:12px;color:#6b7280">{{ optional(optional($permit->deceased)->date_of_death)->format('M d, Y') ?? '—' }}</td>
 
                         {{-- ISSUED --}}
-                        <td style="font-size:12px;color:#6b7280">{{ $permit->created_at->format('M d, Y') }}</td>
+                        <td style="text-align:center">
+    @if(($permit->renewal_count ?? 0) > 0)
+        <span style="font-size:12px;font-weight:700;color:#f59e0b;background:#fef3c7;padding:2px 8px;border-radius:4px">{{ $permit->renewal_count }}×</span>
+    @else
+        <span style="font-size:12px;color:#d1d5db">—</span>
+    @endif
+</td>
 
                         {{-- STATUS --}}
                         <td>
@@ -492,141 +503,7 @@
     <div class="toast-progress"><div class="toast-progress-bar blue" id="printToastBar"></div></div>
 </div>
 
-{{-- NEW PERMIT MODAL --}}
-<div class="modal-overlay" id="permitModal" onclick="if(event.target===this)closeModal()">
-    <div class="modal">
-        <div class="modal-header">
-            <h3>🪦 Burial Permit (New)</h3>
-            <button class="modal-close" onclick="closeModal()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-        <form method="POST" action="{{ route('permits.store') }}">
-            @csrf
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Requestor's Name <span style="color:#ef4444">*</span></label>
-                    <input type="text" name="requestor_name" class="form-control" placeholder="Full name of requestor" required>
-                </div>
-                <div class="section-divider">Deceased Information</div>
-
-                {{-- Row 1: First / Middle / Last --}}
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem">
-                    <div class="form-group">
-                        <label class="form-label">First Name <span style="color:#ef4444">*</span></label>
-                        <input type="text" name="first_name" class="form-control" placeholder="e.g. Juan" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Middle Name <span style="font-size:9px;color:#9ca3af;font-weight:400;text-transform:none;letter-spacing:0;font-style:italic">optional</span></label>
-                        <input type="text" name="middle_name" class="form-control" placeholder="e.g. Santos">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Last Name <span style="color:#ef4444">*</span></label>
-                        <input type="text" name="last_name" class="form-control" placeholder="e.g. Dela Cruz" required>
-                    </div>
-                </div>
-
-                {{-- Row 2: Extension (narrow) --}}
-                <div style="display:grid;grid-template-columns:150px 1fr;gap:.6rem;align-items:end">
-                    <div class="form-group">
-                        <label class="form-label">Extension <span style="font-size:9px;color:#9ca3af;font-weight:400;text-transform:none;letter-spacing:0;font-style:italic">optional</span></label>
-                        <select name="extension" class="form-control">
-                            <option value="">None</option>
-                            <option value="Jr.">Jr.</option>
-                            <option value="Sr.">Sr.</option>
-                            <option value="II">II</option>
-                            <option value="III">III</option>
-                            <option value="IV">IV</option>
-                            <option value="V">V</option>
-                        </select>
-                    </div>
-                    <div style="font-size:11px;color:#9ca3af;padding-bottom:.55rem;line-height:1.5">
-                        Use for Jr., Sr., II, III, etc.<br>Appended to the last name.
-                    </div>
-                </div>
-
-                {{-- Nationality / Age / Sex --}}
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem">
-                    <div class="form-group">
-                        <label class="form-label">Nationality</label>
-                        <input type="text" name="nationality" class="form-control" placeholder="e.g. Filipino">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Age</label>
-                        <input type="number" name="age" class="form-control" placeholder="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Sex</label>
-                        <select name="sex" class="form-control">
-                            <option value="">Select…</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                </div>
-
-                {{-- Date of Death / Kind of Burial --}}
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
-                    <div class="form-group">
-                        <label class="form-label">Date of Death <span style="color:#ef4444">*</span></label>
-                        <input type="date" name="date_of_death" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Kind of Burial</label>
-                        <select name="kind_of_burial" class="form-control">
-                            <option value="">Select…</option>
-                            <option value="Ground">Ground</option>
-                            <option value="Niche">Niche</option>
-                            <option value="Cremation">Cremation</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="section-divider">Burial Permit Fees</div>
-                <div class="fee-grid">
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="cemented" id="fee_cemented">
-                        <label for="fee_cemented">Cemented</label>
-                        <span class="fee-amount">₱1,000.00</span>
-                    </div>
-                    <div style="font-size:11px;font-weight:600;color:#6b7280;padding:.4rem .25rem 0;text-transform:uppercase;letter-spacing:.05em">Niches (New)</div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="niche_1st" id="fee_1st">
-                        <label for="fee_1st">1st Floor</label>
-                        <span class="fee-amount">₱8,000.00</span>
-                    </div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="niche_2nd" id="fee_2nd">
-                        <label for="fee_2nd">2nd Floor</label>
-                        <span class="fee-amount">₱6,600.00</span>
-                    </div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="niche_3rd" id="fee_3rd">
-                        <label for="fee_3rd">3rd Floor</label>
-                        <span class="fee-amount">₱5,700.00</span>
-                    </div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="niche_4th" id="fee_4th">
-                        <label for="fee_4th">4th Floor</label>
-                        <span class="fee-amount">₱5,300.00</span>
-                    </div>
-                    <div class="fee-row" onclick="this.querySelector('input').checked=true">
-                        <input type="radio" name="burial_fee_type" value="bone_niches" id="fee_bone">
-                        <label for="fee_bone">Bone Niches</label>
-                        <span class="fee-amount">₱5,000.00</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="btn-primary">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Create Permit
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+@include('partials.permit-modal')
 
 <script>
 function closeModal() { document.getElementById('permitModal').classList.remove('open'); }

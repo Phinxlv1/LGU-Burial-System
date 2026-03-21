@@ -95,7 +95,7 @@
             <span class="sms-head-title">SMS Notifications</span>
             <span class="sms-head-sub">— {{ $permit->smsNotifications()->count() }} sent</span>
         </div>
-        <span style="font-size:11px;color:#9ca3af">Via Semaphore · PH SMS</span>
+        <span style="font-size:11px;color:#9ca3af">Via Vonage · PH SMS</span>
     </div>
 
     <div class="sms-body">

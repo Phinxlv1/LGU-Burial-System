@@ -20,7 +20,7 @@ class BurialPermitController extends Controller
             $query->orderByRaw("(SELECT last_name FROM deceased_persons WHERE deceased_persons.id = burial_permits.deceased_id) {$direction}");
         } elseif ($sort === 'date_of_death') {
             $query->orderByRaw("(SELECT date_of_death FROM deceased_persons WHERE deceased_persons.id = burial_permits.deceased_id) {$direction}");
-        } elseif (in_array($sort, ['permit_number', 'permit_type', 'created_at', 'status'])) {
+        } elseif (in_array($sort, ['permit_number', 'permit_type', 'created_at', 'status', 'renewal_count'])) {
             $query->orderBy($sort, $direction);
         } else {
             $query->orderBy('created_at', 'desc');
@@ -42,72 +42,62 @@ class BurialPermitController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'requestor_name'   => 'required|string|max:255',
-            'first_name'       => 'required|string|max:255',
-            'middle_name'      => 'nullable|string|max:255',
-            'last_name'        => 'required|string|max:255',
-            'extension'        => 'nullable|string|max:10',
-            'date_of_death'    => 'required|date',
-            'burial_fee_type'  => 'required|string',
-            'nationality'      => 'nullable|string|max:100',
-            'age'              => 'nullable|integer|min:0',
-            'sex'              => 'nullable|in:Male,Female',
-            'kind_of_burial'   => 'nullable|string|max:100',
-        ]);
-
-        // Build last name with extension if provided (e.g. "Santos Jr.")
-        $lastName = trim($request->last_name);
-        if ($request->filled('extension')) {
-            $lastName = $lastName . ' ' . trim($request->extension);
-        }
-
-        $deceased = DeceasedPerson::create([
-            'first_name'     => $request->first_name,
-            'middle_name'    => $request->middle_name ?: null,
-            'last_name'      => $lastName,
-            'date_of_death'  => $request->date_of_death,
-            'nationality'    => $request->nationality ?? 'Filipino',
-            'age'            => $request->age,
-            'sex'            => $request->sex,
-            'kind_of_burial' => $request->kind_of_burial,
-        ]);
-
-        // ── Generate unique permit number ──
-        // Find the highest existing permit number for this year and increment from there
-        $lastPermit = BurialPermit::whereYear('created_at', now()->year)
-            ->orderByRaw('CAST(SUBSTRING_INDEX(permit_number, "-", -1) AS UNSIGNED) DESC')
-            ->first();
-
-        if ($lastPermit) {
-            $lastNumber = (int) explode('-', $lastPermit->permit_number)[2];
-            $nextNumber = $lastNumber + 1;
-        } else {
-            $nextNumber = 1;
-        }
-
-        // Keep incrementing until we find a number that doesn't exist
-        do {
-            $permitNumber = 'BP-' . now()->year . '-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
-            $nextNumber++;
-        } while (BurialPermit::where('permit_number', $permitNumber)->exists());
-
-        BurialPermit::create([
-            'permit_number'          => $permitNumber,
-            'deceased_id'            => $deceased->id,
-            'permit_type'            => $request->burial_fee_type,
-            'kind_of_burial'         => $request->kind_of_burial,
-            'applicant_name'         => $request->requestor_name,
-            'applicant_relationship' => $request->applicant_relationship ?? '',
-            'applicant_contact'      => $request->applicant_contact ?? '',
-            'status'                 => 'pending',
-            'processed_by'           => Auth::id(),
-        ]);
-
-        return redirect()->route('permits.index')
-            ->with('success', 'Burial permit created successfully.');
-    }
+{
+    $request->validate([
+        'requestor_name'   => 'required|string|max:255',
+        'applicant_contact'=> 'nullable|string|max:50',
+        'first_name'       => 'required|string|max:255',
+        'middle_name'      => 'nullable|string|max:255',
+        'last_name'        => 'required|string|max:255',
+        'name_extension'   => 'nullable|string|max:20',
+        'date_of_death'    => 'required|date',
+        'burial_fee_type'  => 'required|string',
+        'nationality'      => 'nullable|string|max:100',
+        'age'              => 'nullable|integer|min:0',
+        'sex'              => 'nullable|in:Male,Female',
+        'kind_of_burial'   => 'nullable|string|max:100',
+    ]);
+ 
+    $deceased = DeceasedPerson::create([
+        'first_name'     => $request->first_name,
+        'middle_name'    => $request->middle_name,
+        'last_name'      => $request->last_name,
+        'name_extension' => $request->name_extension,
+        'date_of_death'  => $request->date_of_death,
+        'nationality'    => $request->nationality ?? 'Filipino',
+        'age'            => $request->age,
+        'sex'            => $request->sex,
+        'kind_of_burial' => $request->kind_of_burial,
+    ]);
+ 
+    // ── Duplicate-safe permit number ──
+    $year      = now()->year;
+    $lastPermit = BurialPermit::whereYear('created_at', $year)
+        ->orderByRaw('CAST(SUBSTRING_INDEX(permit_number, "-", -1) AS UNSIGNED) DESC')
+        ->first();
+    $nextNumber = $lastPermit
+        ? (int) explode('-', $lastPermit->permit_number)[2] + 1
+        : 1;
+    do {
+        $permitNumber = 'BP-' . $year . '-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        $nextNumber++;
+    } while (BurialPermit::where('permit_number', $permitNumber)->exists());
+ 
+    BurialPermit::create([
+        'permit_number'          => $permitNumber,
+        'deceased_id'            => $deceased->id,
+        'permit_type'            => $request->burial_fee_type,
+        'kind_of_burial'         => $request->kind_of_burial,
+        'applicant_name'         => $request->requestor_name,
+        'applicant_relationship' => $request->applicant_relationship ?? '',
+        'applicant_contact'      => $request->applicant_contact ?? '',
+        'status'                 => 'pending',
+        'processed_by'           => Auth::id(),
+    ]);
+ 
+    return redirect()->route('permits.index')
+        ->with('success', 'Burial permit created successfully.');
+}
 
     public function show(BurialPermit $permit)
     {

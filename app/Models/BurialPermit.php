@@ -21,6 +21,7 @@ class BurialPermit extends Model
         'remarks',
         'processed_by',
         'issued_by',
+        'renewal_count',
     ];
 
     protected $casts = [
