@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script>/* dark-mode anti-flash */
+    (function(){try{var k='lgu_dark_{{ auth()->id() }}';if(localStorage.getItem(k)==='1')document.documentElement.classList.add('dark');}catch(e){}})();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Burial Permits — LGU Carmen</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -121,6 +124,165 @@
         .modal-footer { padding: .9rem 1.25rem; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; gap: .6rem; }
         .btn-cancel { padding: .5rem 1rem; border-radius: 6px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 13px; color: #374151; background: #fff; cursor: pointer; }
         .btn-cancel:hover { background: #f9fafb; }
+    
+    /* ══════════════════════════════
+       DARK MODE OVERRIDES
+    ══════════════════════════════ */
+    html.dark body { background: #0f1117 !important; color: #e2e8f0 !important; }
+    html.dark .topbar { background: #1a1d27 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .topbar-title, html.dark .topbar-sub, html.dark .topbar-date { color: #e2e8f0 !important; }
+    html.dark .topbar-date { color: #64748b !important; }
+    html.dark .role-tag { background: #6366f1 !important; }
+    html.dark .panel, html.dark .card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .panel-head, html.dark .panel-header { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .panel-head h3, html.dark .panel-header h3 { color: #e2e8f0 !important; }
+    html.dark .panel-head a { color: #818cf8 !important; }
+    html.dark table th { background: #181b29 !important; color: #64748b !important; }
+    html.dark table td { color: #cbd5e1 !important; border-top-color: #2d3148 !important; }
+    html.dark tr.row-expired td { background: #2a1a1a !important; border-top-color: #7f1d1d !important; }
+    html.dark .permit-no { color: #818cf8 !important; }
+    html.dark .badge-yellow { background: #422006 !important; color: #fde68a !important; }
+    html.dark .badge-green  { background: #052e16 !important; color: #86efac !important; }
+    html.dark .badge-blue   { background: #1e3a5f !important; color: #93c5fd !important; }
+    html.dark .badge-red    { background: #450a0a !important; color: #fca5a5 !important; }
+    html.dark .btn-view, html.dark .btn-action { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+    html.dark .btn-view:hover, html.dark .btn-action:hover { background: #2d3148 !important; border-color: #6366f1 !important; color: #e2e8f0 !important; }
+    html.dark .welcome { background: #111827 !important; }
+    html.dark .name-main { color: #e2e8f0 !important; }
+    html.dark .name-sub { color: #64748b !important; }
+    html.dark .search-input { background: #252840 !important; border-color: #374151 !important; color: #e2e8f0 !important; }
+    html.dark .search-input:focus { border-color: #6366f1 !important; }
+    html.dark .pager { border-top-color: #2d3148 !important; }
+    html.dark .pager-info { color: #64748b !important; }
+    html.dark .pager-btn { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+    html.dark .pager-btn:hover { border-color: #6366f1 !important; color: #e2e8f0 !important; }
+    html.dark .pager-btn.active { background: #6366f1 !important; border-color: #6366f1 !important; color: #fff !important; }
+    html.dark .pager-btn.disabled { color: #374151 !important; }
+    html.dark .sort-link { color: #64748b !important; }
+    html.dark .sort-link.active, html.dark .sort-link:hover { color: #818cf8 !important; }
+    html.dark .hero { background: #111827 !important; }
+    html.dark .card-head { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .card-head-title { color: #94a3b8 !important; }
+    html.dark .card-body { background: #1e2130 !important; }
+    html.dark .fl { color: #64748b !important; }
+    html.dark .fv, html.dark .fv-lg { color: #e2e8f0 !important; }
+    html.dark .fee-box { background: #111827 !important; }
+    html.dark .section-divider { color: #818cf8 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .form-control, html.dark select.form-control { background: #252840 !important; border-color: #374151 !important; color: #e2e8f0 !important; }
+    html.dark .form-control:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,.15) !important; }
+    html.dark .form-label { color: #94a3b8 !important; }
+    html.dark .modal { background: #1e2130 !important; }
+    html.dark .modal-header { background: #111827 !important; }
+    html.dark .modal-body { background: #1e2130 !important; }
+    html.dark .modal-footer { background: #181b29 !important; border-top-color: #2d3148 !important; }
+    html.dark .btn-cancel { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+    html.dark .fee-row { border-color: #2d3148 !important; }
+    html.dark .fee-row:hover { background: #252840 !important; border-color: #6366f1 !important; }
+    html.dark .fee-row label { color: #e2e8f0 !important; }
+    html.dark .fee-amount { color: #818cf8 !important; }
+    html.dark .upload-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .dropzone { border-color: #374151 !important; }
+    html.dark .dropzone:hover, html.dark .dropzone.drag-over { border-color: #6366f1 !important; background: #1e2d6b !important; }
+    html.dark .dropzone-icon { background: #252840 !important; }
+    html.dark .dropzone-title { color: #cbd5e1 !important; }
+    html.dark .dropzone-sub { color: #64748b !important; }
+    html.dark .docs-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .docs-head { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .docs-head-title { color: #e2e8f0 !important; }
+    html.dark .docs-head-sub { color: #64748b !important; }
+    html.dark .docs-col-files { border-right-color: #2d3148 !important; }
+    html.dark .docs-col-upload { background: #181b29 !important; }
+    html.dark .doc-item { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .doc-item:hover { background: #252840 !important; border-color: #6366f1 !important; }
+    html.dark .doc-name { color: #e2e8f0 !important; }
+    html.dark .doc-meta { color: #64748b !important; }
+    html.dark .btn-doc { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+    html.dark .btn-doc:hover { background: #2d3148 !important; border-color: #6366f1 !important; color: #e2e8f0 !important; }
+    html.dark .info-item { border-color: #2d3148 !important; }
+    html.dark .info-label { color: #64748b !important; }
+    html.dark .info-value { color: #e2e8f0 !important; }
+    html.dark .info-value.empty { color: #374151 !important; }
+    html.dark .panel-head { background: #181b29 !important; }
+    html.dark .danger-panel { background: #1e2130 !important; border-color: #7f1d1d !important; }
+    html.dark .danger-head { background: #2a1a1a !important; border-bottom-color: #7f1d1d !important; }
+    html.dark .danger-desc { color: #e2e8f0 !important; }
+    html.dark .danger-sub { color: #94a3b8 !important; }
+    html.dark .topbar-back { color: #94a3b8 !important; }
+    html.dark .topbar-back:hover { color: #e2e8f0 !important; }
+    html.dark .topbar-sep { color: #334155 !important; }
+    html.dark .btn-print { background: rgba(255,255,255,.08) !important; }
+    html.dark .toggle-row { border-color: #2d3148 !important; }
+    html.dark .toggle-row:hover { background: #252840 !important; }
+    html.dark .toggle-label { color: #e2e8f0 !important; }
+    html.dark .toggle-sub { color: #64748b !important; }
+    html.dark .snav-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .snav-item { color: #94a3b8 !important; }
+    html.dark .snav-item:hover { background: #252840 !important; color: #e2e8f0 !important; }
+    html.dark .snav-item.active { background: #1e2d6b !important; color: #818cf8 !important; border-left-color: #6366f1 !important; }
+    html.dark .snav-divider { background: #2d3148 !important; }
+    html.dark .section-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .section-head { border-bottom-color: #2d3148 !important; }
+    html.dark .section-head h2 { color: #e2e8f0 !important; }
+    html.dark .section-head p { color: #64748b !important; }
+    html.dark .section-footer { background: #181b29 !important; border-top-color: #2d3148 !important; }
+    html.dark .fee-table { border-color: #2d3148 !important; }
+    html.dark .fee-table th { background: #181b29 !important; color: #64748b !important; }
+    html.dark .fee-table td { border-top-color: #2d3148 !important; color: #cbd5e1 !important; }
+    html.dark .fee-table input { background: #252840 !important; border-color: #374151 !important; color: #e2e8f0 !important; }
+    html.dark .fee-type-badge { background: #1e2d6b !important; color: #818cf8 !important; }
+    html.dark .user-table th { background: #181b29 !important; color: #64748b !important; }
+    html.dark .user-table td { color: #cbd5e1 !important; border-top-color: #2d3148 !important; }
+    html.dark .appearance-preview { border-color: #2d3148 !important; }
+    html.dark .ap-light { background: #252840 !important; }
+    html.dark .ap-light:hover { background: #2d3148 !important; }
+    html.dark .ap-light .ap-name { color: #e2e8f0 !important; }
+    html.dark .ap-light .ap-sub { color: #64748b !important; }
+    html.dark .ap-divider { background: #2d3148 !important; }
+    html.dark .danger-item { background: #2a1a1a !important; border-color: #7f1d1d !important; }
+    html.dark .danger-title { color: #fca5a5 !important; }
+    html.dark .danger-sub { color: #f87171 !important; }
+    html.dark .badge-male   { background: #1e3a5f !important; color: #93c5fd !important; }
+    html.dark .badge-female { background: #3b0764 !important; color: #e9d5ff !important; }
+    html.dark .toast { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .toast-title { color: #e2e8f0 !important; }
+    html.dark .toast-sub { color: #94a3b8 !important; }
+    html.dark .upload-note { color: #64748b !important; }
+    html.dark .btn-upload { background: #6366f1 !important; }
+    html.dark .btn-upload:hover { background: #4f46e5 !important; }
+    html.dark .btn-primary { background: #6366f1 !important; }
+    html.dark .btn-primary:hover { background: #4f46e5 !important; }
+    html.dark .dq-stat { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .dq-issue { border-color: #2d3148 !important; }
+    html.dark .dq-issue-head { background: #181b29 !important; }
+    html.dark .dq-issue-head:hover, html.dark .dq-issue.open .dq-issue-head { background: #252840 !important; }
+    html.dark .dq-issue-title { color: #e2e8f0 !important; }
+    html.dark .dq-issue-count { color: #64748b !important; }
+    html.dark .dq-issue-body { border-top-color: #2d3148 !important; }
+    html.dark .dq-desc { background: #181b29 !important; color: #94a3b8 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .dq-record { border-bottom-color: #2d3148 !important; }
+    html.dark .dq-record-title { color: #e2e8f0 !important; }
+    html.dark .dq-record-sub { color: #64748b !important; }
+    html.dark hr { border-color: #2d3148 !important; }
+    html.dark .docs-empty { color: #374151 !important; }
+    html.dark .lightbox { background: rgba(0,0,0,.92) !important; }
+
+    
+        /* Permits list specific */
+        html.dark .section-divider { color: #818cf8 !important; border-bottom-color: #2d3148 !important; }
+        html.dark .btn-print { background: rgba(255,255,255,.08) !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,.15) !important; }
+        html.dark .btn-print:hover { background: rgba(255,255,255,.14) !important; }
+        html.dark .modal-overlay { background: rgba(0,0,0,.75) !important; }
+        html.dark .fee-grid > div:not(.fee-row) { color: #64748b !important; }
+        html.dark .btn-cancel { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+        html.dark .btn-cancel:hover { background: #2d3148 !important; }
+        html.dark .btn-renew { background: #450a0a !important; border-color: #991b1b !important; color: #fca5a5 !important; }
+        html.dark .btn-renew:hover { background: #7f1d1d !important; }
+        html.dark .loading { opacity: .5 !important; }
+        html.dark .permit-row td { background: #1e2130 !important; }
+        html.dark tr.row-expired td { background: #2a1a1a !important; }
+        html.dark .pager { border-top-color: #2d3148 !important; }
+        html.dark .pager-info { color: #64748b !important; }
+
     </style>
 </head>
 <body>
@@ -347,13 +509,43 @@
                     <input type="text" name="requestor_name" class="form-control" placeholder="Full name of requestor" required>
                 </div>
                 <div class="section-divider">Deceased Information</div>
-                <div class="form-group">
-                    <label class="form-label">Deceased Name <span style="color:#ef4444">*</span></label>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
-                        <input type="text" name="first_name" class="form-control" placeholder="First name" required>
-                        <input type="text" name="last_name"  class="form-control" placeholder="Last name"  required>
+
+                {{-- Row 1: First / Middle / Last --}}
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem">
+                    <div class="form-group">
+                        <label class="form-label">First Name <span style="color:#ef4444">*</span></label>
+                        <input type="text" name="first_name" class="form-control" placeholder="e.g. Juan" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Middle Name <span style="font-size:9px;color:#9ca3af;font-weight:400;text-transform:none;letter-spacing:0;font-style:italic">optional</span></label>
+                        <input type="text" name="middle_name" class="form-control" placeholder="e.g. Santos">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name <span style="color:#ef4444">*</span></label>
+                        <input type="text" name="last_name" class="form-control" placeholder="e.g. Dela Cruz" required>
                     </div>
                 </div>
+
+                {{-- Row 2: Extension (narrow) --}}
+                <div style="display:grid;grid-template-columns:150px 1fr;gap:.6rem;align-items:end">
+                    <div class="form-group">
+                        <label class="form-label">Extension <span style="font-size:9px;color:#9ca3af;font-weight:400;text-transform:none;letter-spacing:0;font-style:italic">optional</span></label>
+                        <select name="extension" class="form-control">
+                            <option value="">None</option>
+                            <option value="Jr.">Jr.</option>
+                            <option value="Sr.">Sr.</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                            <option value="V">V</option>
+                        </select>
+                    </div>
+                    <div style="font-size:11px;color:#9ca3af;padding-bottom:.55rem;line-height:1.5">
+                        Use for Jr., Sr., II, III, etc.<br>Appended to the last name.
+                    </div>
+                </div>
+
+                {{-- Nationality / Age / Sex --}}
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem">
                     <div class="form-group">
                         <label class="form-label">Nationality</label>
@@ -372,6 +564,8 @@
                         </select>
                     </div>
                 </div>
+
+                {{-- Date of Death / Kind of Burial --}}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
                     <div class="form-group">
                         <label class="form-label">Date of Death <span style="color:#ef4444">*</span></label>
@@ -387,6 +581,7 @@
                         </select>
                     </div>
                 </div>
+
                 <div class="section-divider">Burial Permit Fees</div>
                 <div class="fee-grid">
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">

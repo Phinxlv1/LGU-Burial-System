@@ -8,28 +8,6 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
-
-        .sidebar { width: 220px; min-height: 100vh; background: #1a2744; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 50; }
-        .sidebar-brand { padding: 1.25rem 1rem 1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
-        .sidebar-brand-top { display: flex; align-items: center; gap: 8px; margin-bottom: .3rem; }
-        .sidebar-seal { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.2); }
-        .sidebar-brand h1 { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.3; }
-        .sidebar-brand p { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 2px; padding-left: 42px; }
-        .sidebar-nav { flex: 1; padding: .75rem 0; }
-        .nav-section { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); padding: .75rem 1rem .3rem; }
-        .nav-item { display: flex; align-items: center; gap: 9px; padding: .55rem 1rem; font-size: 13px; color: rgba(255,255,255,.65); text-decoration: none; border-radius: 6px; margin: 1px .5rem; transition: background .15s, color .15s; }
-        .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
-        .nav-item.active { background: rgba(255,255,255,.12); color: #fff; font-weight: 500; }
-        .nav-item svg { flex-shrink: 0; opacity: .7; }
-        .nav-item.active svg { opacity: 1; }
-        .sidebar-footer { padding: .75rem; border-top: 1px solid rgba(255,255,255,.08); }
-        .user-info { display: flex; align-items: center; gap: 8px; padding: .5rem .75rem; background: rgba(255,255,255,.06); border-radius: 6px; margin-bottom: .5rem; }
-        .user-avatar { width: 28px; height: 28px; background: rgba(255,255,255,.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
-        .user-name { font-size: 12px; color: #fff; font-weight: 500; }
-        .user-role { font-size: 10px; color: rgba(255,255,255,.4); }
-        .btn-logout { width: 100%; background: none; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; padding: .45rem; font-family: 'Inter', sans-serif; font-size: 12px; color: rgba(255,255,255,.5); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
-
         .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
         .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
         .topbar-title { font-size: 15px; font-weight: 600; color: #111827; }
@@ -55,7 +33,7 @@
         .btn-upload:hover { background: #243459; }
         .btn-upload:disabled { opacity: .5; cursor: not-allowed; }
 
-        /* History table */
+        /* Panel */
         .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
         .panel-head { padding: .85rem 1.25rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
         .panel-head h3 { font-size: 13px; font-weight: 600; color: #111827; }
@@ -75,71 +53,40 @@
         .reasons-list.open { display: block; }
         .empty-row td { text-align: center; color: #9ca3af; padding: 2rem; }
 
-        /* ── TOAST NOTIFICATIONS (top-left) ── */
-        .toast-stack {
-            position: fixed;
-            top: 1rem;
-            left: calc(220px + 1rem); /* sidebar width + gap */
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: .6rem;
-            pointer-events: none;
-        }
-        .toast {
-            display: flex;
-            align-items: flex-start;
-            gap: .65rem;
-            padding: .75rem 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0,0,0,.12);
-            min-width: 280px;
-            max-width: 420px;
-            pointer-events: auto;
-            transform: translateX(-120%);
-            transition: transform .35s cubic-bezier(.34,1.56,.64,1);
-            position: relative;
-            overflow: hidden;
-        }
-        .toast.show { transform: translateX(0); }
+        /* Pagination */
+        .pager { display: flex; align-items: center; justify-content: center; padding: .75rem 1.25rem; border-top: 1px solid #f3f4f6; flex-wrap: wrap; gap: 1.5rem; }
+        .pager-info { font-size: 12px; color: #6b7280; }
+        .pager-btns { display: flex; align-items: center; gap: 3px; }
+        .pager-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 9px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; text-decoration: none; background: #fff; transition: border-color .15s, color .15s; line-height: 1; }
+        .pager-btn:hover { border-color: #1a2744; color: #1a2744; }
+        .pager-btn.active { background: #1a2744; color: #fff; border-color: #1a2744; font-weight: 600; }
+        .pager-btn.disabled { color: #d1d5db; cursor: not-allowed; pointer-events: none; }
 
+        /* Toast stack */
+        .toast-stack { position: fixed; top: 1rem; right: 1.25rem; z-index: 9999; display: flex; flex-direction: column; gap: .6rem; pointer-events: none; }
+        .toast { display: flex; align-items: flex-start; gap: .65rem; padding: .75rem 1rem; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.12); min-width: 280px; max-width: 420px; pointer-events: auto; transform: translateX(120%); transition: transform .35s cubic-bezier(.34,1.56,.64,1); position: relative; overflow: hidden; }
+        .toast.show { transform: translateX(0); }
         .toast-green  { background: #f0fdf4; border: 1px solid #bbf7d0; }
         .toast-yellow { background: #fffbeb; border: 1px solid #fde68a; }
         .toast-red    { background: #fef2f2; border: 1px solid #fecaca; }
-
-        .toast-icon {
-            width: 30px; height: 30px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
+        .toast-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .toast-green  .toast-icon { background: #dcfce7; }
         .toast-yellow .toast-icon { background: #fef9c3; }
         .toast-red    .toast-icon { background: #fee2e2; }
-
         .toast-content { flex: 1; }
         .toast-title { font-size: 13px; font-weight: 600; }
         .toast-green  .toast-title { color: #15803d; }
         .toast-yellow .toast-title { color: #92400e; }
         .toast-red    .toast-title { color: #991b1b; }
-        .toast-msg  { font-size: 12px; margin-top: 2px; color: #374151; }
-
-        .toast-close {
-            background: none; border: none; cursor: pointer;
-            font-size: 16px; line-height: 1; color: #9ca3af;
-            padding: 0; flex-shrink: 0; transition: color .15s;
-        }
+        .toast-msg { font-size: 12px; margin-top: 2px; color: #374151; }
+        .toast-close { background: none; border: none; cursor: pointer; font-size: 16px; line-height: 1; color: #9ca3af; padding: 0; flex-shrink: 0; transition: color .15s; }
         .toast-close:hover { color: #374151; }
-
-        .toast-bar {
-            position: absolute; bottom: 0; left: 0;
-            height: 3px; width: 100%;
-            transform-origin: left;
-            animation: drainBar 6s linear forwards;
-        }
+        .toast-bar { position: absolute; bottom: 0; left: 0; height: 3px; width: 100%; transform-origin: left; animation: drainBar 7s linear forwards; }
         .toast-green  .toast-bar { background: #22c55e; }
         .toast-yellow .toast-bar { background: #f59e0b; }
         .toast-red    .toast-bar { background: #ef4444; }
         @keyframes drainBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -159,7 +106,7 @@
 
         {{-- Upload Card --}}
         <div class="upload-card">
-            <h3>Import Permits from Excel</h3>
+            <h3>Import Permits from Excel / CSV</h3>
             <form method="POST" action="{{ route('import.excel') }}" enctype="multipart/form-data" id="importForm">
                 @csrf
                 <div class="dropzone" id="dropzone"
@@ -175,11 +122,14 @@
                         </svg>
                     </div>
                     <div class="dropzone-title">Click to upload or drag &amp; drop</div>
-                    <div class="dropzone-sub">.xlsx, .xls, or .csv — max 10MB</div>
+                    <div class="dropzone-sub">.xlsx, .xls, or .csv &nbsp;·&nbsp; Max 10 MB</div>
                     <div class="dropzone-file" id="fileName"></div>
                 </div>
                 <div class="upload-footer">
-                    <span class="upload-note">Rows missing first_name, last_name, or date_of_death will be skipped automatically.</span>
+                    <span class="upload-note">
+                        Required columns: <strong>first_name</strong>, <strong>last_name</strong>, <strong>date_of_death</strong>.
+                        Rows missing these will be skipped.
+                    </span>
                     <button type="submit" class="btn-upload" id="submitBtn" disabled>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
@@ -192,11 +142,11 @@
             </form>
         </div>
 
-        {{-- Upload History — last 5 only --}}
+        {{-- Upload History --}}
         <div class="panel">
             <div class="panel-head">
                 <h3>Upload History</h3>
-                <span class="panel-head-sub" id="historyCount">{{ $logs->total() }} total uploads</span>
+                <span class="panel-head-sub" id="historyCount">{{ $logs->total() }} total upload{{ $logs->total() !== 1 ? 's' : '' }}</span>
             </div>
             <table>
                 <thead>
@@ -204,17 +154,15 @@
                         <th>File</th>
                         <th>Uploaded By</th>
                         <th>Date</th>
-                        <th>Total Rows</th>
-                        <th>Imported</th>
+                        <th style="text-align:center">Total Rows</th>
+                        <th style="text-align:center">Imported</th>
                         <th>Skipped</th>
                     </tr>
                 </thead>
                 <tbody id="historyTbody">
                     @forelse($logs as $log)
                     <tr>
-                        <td style="font-weight:500;color:#1a2744;max-width:200px;word-break:break-all">
-                            {{ $log->file_name }}
-                        </td>
+                        <td style="font-weight:500;color:#1a2744;max-width:220px;word-break:break-all">{{ $log->file_name }}</td>
                         <td style="color:#6b7280">{{ optional($log->user)->name ?? 'Admin' }}</td>
                         <td style="color:#6b7280;white-space:nowrap">{{ $log->created_at->format('M d, Y · g:i A') }}</td>
                         <td style="text-align:center">{{ $log->total_rows }}</td>
@@ -228,17 +176,11 @@
                         <td>
                             @if($log->skipped > 0)
                                 <span class="badge-yellow">{{ $log->skipped }} skipped</span>
-                                @php
-                                    $reasons = is_array($log->skip_reasons)
-                                        ? $log->skip_reasons
-                                        : json_decode($log->skip_reasons ?? '[]', true);
-                                @endphp
+                                @php $reasons = is_array($log->skip_reasons) ? $log->skip_reasons : json_decode($log->skip_reasons ?? '[]', true); @endphp
                                 @if(!empty($reasons))
                                     <span class="reasons-toggle" onclick="toggleReasons(this)">show reasons</span>
                                     <ul class="reasons-list">
-                                        @foreach($reasons as $r)
-                                            <li>· {{ $r }}</li>
-                                        @endforeach
+                                        @foreach($reasons as $r)<li>· {{ $r }}</li>@endforeach
                                     </ul>
                                 @endif
                             @else
@@ -251,16 +193,42 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- Pagination --}}
+            @if($logs->hasPages())
+            <div class="pager">
+                <span class="pager-info">Showing {{ $logs->firstItem() }}–{{ $logs->lastItem() }} of {{ $logs->total() }}</span>
+                <div class="pager-btns">
+                    @if($logs->onFirstPage())
+                        <span class="pager-btn disabled">‹ Prev</span>
+                    @else
+                        <a href="{{ $logs->previousPageUrl() }}" class="pager-btn">‹ Prev</a>
+                    @endif
+                    @foreach($logs->getUrlRange(1, $logs->lastPage()) as $page => $url)
+                        @if($page == $logs->currentPage())
+                            <span class="pager-btn active">{{ $page }}</span>
+                        @else
+                            <a href="{{ $url }}" class="pager-btn">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                    @if($logs->hasMorePages())
+                        <a href="{{ $logs->nextPageUrl() }}" class="pager-btn">Next ›</a>
+                    @else
+                        <span class="pager-btn disabled">Next ›</span>
+                    @endif
+                </div>
+            </div>
+            @endif
         </div>
 
     </div>
 </div>
 
-{{-- ── TOAST STACK (top-left, after sidebar) ── --}}
+{{-- Toast stack --}}
 <div class="toast-stack" id="toastStack"></div>
 
 <script>
-// ── File picker helpers ──
+// ── File picker ──
 function handleFile(input) {
     const file = input.files[0];
     if (!file) return;
@@ -273,9 +241,9 @@ function handleDrop(e) {
     document.getElementById('dropzone').classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
     if (!file) return;
-    const input = document.getElementById('fileInput');
     const dt = new DataTransfer();
     dt.items.add(file);
+    const input = document.getElementById('fileInput');
     input.files = dt.files;
     handleFile(input);
 }
@@ -284,88 +252,64 @@ function toggleReasons(el) {
     list.classList.toggle('open');
     el.textContent = list.classList.contains('open') ? 'hide reasons' : 'show reasons';
 }
-document.getElementById('importForm').addEventListener('submit', function() {
-    document.getElementById('submitBtn').disabled    = true;
-    document.getElementById('submitBtn').textContent = 'Importing…';
+
+// Disable button + show spinner while submitting
+document.getElementById('importForm').addEventListener('submit', function () {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0"/></svg> Importing…`;
 });
 
 // ── Toast system ──
-function showToast(type, title, message, duration = 6000) {
-    // type: 'green' | 'yellow' | 'red'
+function showToast(type, title, msg, duration = 7000) {
     const icons = {
         green:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
         yellow: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
         red:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#991b1b" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
     };
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `
         <div class="toast-icon">${icons[type]}</div>
         <div class="toast-content">
             <div class="toast-title">${title}</div>
-            ${message ? `<div class="toast-msg">${message}</div>` : ''}
+            ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
         </div>
         <button class="toast-close" onclick="dismissToast(this.closest('.toast'))">×</button>
-        <div class="toast-bar"></div>
-    `;
-
-    document.getElementById('toastStack').appendChild(toast);
-    requestAnimationFrame(() => setTimeout(() => toast.classList.add('show'), 30));
-
-    const timer = setTimeout(() => dismissToast(toast), duration);
-    toast._timer = timer;
+        <div class="toast-bar"></div>`;
+    document.getElementById('toastStack').appendChild(t);
+    requestAnimationFrame(() => setTimeout(() => t.classList.add('show'), 30));
+    t._tmr = setTimeout(() => dismissToast(t), duration);
+}
+function dismissToast(t) {
+    if (!t) return;
+    clearTimeout(t._tmr);
+    t.classList.remove('show');
+    t.addEventListener('transitionend', () => t.remove(), { once: true });
 }
 
-function dismissToast(toast) {
-    if (!toast) return;
-    clearTimeout(toast._timer);
-    toast.classList.remove('show');
-    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
-}
-
-// ── Fire toasts from server session data ──
+// ── Fire session toasts ──
 window.addEventListener('DOMContentLoaded', () => {
-
     @if(session('import_success'))
         @php
-            $imported = (int) session('_import_imported', 0);
-            $skipped  = (int) session('_import_skipped', 0);
-            $reasons  = session('skip_reasons', []);
-            $preview  = collect($reasons)->take(3)->implode(' | ');
-            $extra    = count($reasons) > 3 ? ' …+' . (count($reasons) - 3) . ' more' : '';
+            $imp  = (int) session('_import_imported', 0);
+            $skip = (int) session('_import_skipped',  0);
+            $rsns = session('skip_reasons', []);
+            $prev = collect($rsns)->take(3)->map(fn($r) => htmlspecialchars($r, ENT_QUOTES))->implode(' | ');
+            $xtra = count($rsns) > 3 ? ' … +' . (count($rsns) - 3) . ' more' : '';
         @endphp
-
-        @if($skipped > 0)
-            {{-- YELLOW: any rows were skipped — partial or total failure --}}
-            @if($imported > 0)
-                {{-- Some got in, some didn't --}}
-                showToast('yellow',
-                    '{{ $imported }} Imported, {{ $skipped }} Skipped',
-                    '{{ addslashes($preview . $extra) }}',
-                    9000);
-            @else
-                {{-- Nothing imported, everything skipped --}}
-                showToast('yellow',
-                    '{{ $skipped }} Row(s) Skipped — Nothing Imported',
-                    '{{ addslashes($preview . $extra) }}',
-                    9000);
-            @endif
-
-        @elseif($imported > 0)
-            {{-- GREEN: all rows imported, zero skips --}}
-            showToast('green',
-                '{{ $imported }} Permit(s) Imported Successfully',
-                'All rows were valid and saved to the database.');
-
+        @if($imp > 0 && $skip === 0)
+            showToast('green', '{{ $imp }} Permit(s) Imported Successfully', 'All rows were valid and saved to the database.');
+        @elseif($imp > 0 && $skip > 0)
+            showToast('yellow', '{{ $imp }} Imported, {{ $skip }} Skipped', '{{ addslashes($prev . $xtra) }}', 10000);
+        @elseif($imp === 0 && $skip > 0)
+            showToast('yellow', 'Nothing Imported — {{ $skip }} Row(s) Skipped', '{{ addslashes($prev . $xtra) }}', 10000);
         @else
-            {{-- RED: no rows at all (empty file after header) --}}
-            showToast('red', 'Nothing Imported', 'No valid rows found. Check file format.');
+            showToast('red', 'Nothing Imported', 'No valid rows found. Check column headers.');
         @endif
-
     @endif
 
-    {{-- Red: only ONE toast (import_error takes priority) --}}
     @if(session('import_error'))
         showToast('red', 'Import Failed', '{{ addslashes(session("import_error")) }}');
     @elseif($errors->has('file'))
@@ -373,60 +317,61 @@ window.addEventListener('DOMContentLoaded', () => {
     @endif
 });
 
-// ── Live-refresh history table every 4 seconds ──
-function refreshHistory() {
-    fetch('/import/history-json', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-            if (!data) return;
+// ── Live-refresh history every 5 s after an import ──
+function buildRow(log) {
+    const imp = log.imported > 0
+        ? `<span class="badge-green">${log.imported} imported</span>`
+        : `<span class="badge-red">0 imported</span>`;
 
-            // Update count badge
-            const countEl = document.getElementById('historyCount');
-            if (countEl) countEl.textContent = data.total + ' total uploads';
+    let skip = `<span style="color:#d1d5db;font-size:12px">—</span>`;
+    if (log.skipped > 0) {
+        const reasons = (log.skip_reasons || []);
+        const list = reasons.length
+            ? `<span class="reasons-toggle" onclick="toggleReasons(this)">show reasons</span>
+               <ul class="reasons-list">${reasons.map(r => `<li>· ${r}</li>`).join('')}</ul>`
+            : '';
+        skip = `<span class="badge-yellow">${log.skipped} skipped</span>${list}`;
+    }
 
-            // Rebuild tbody
-            const tbody = document.getElementById('historyTbody');
-            if (!tbody) return;
-
-            if (data.rows.length === 0) {
-                tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No uploads yet.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = data.rows.map(log => {
-                const importedBadge = log.imported > 0
-                    ? `<span class="badge-green">${log.imported} imported</span>`
-                    : `<span class="badge-red">0 imported</span>`;
-
-                let skippedCell = '<span style="color:#d1d5db;font-size:12px">—</span>';
-                if (log.skipped > 0) {
-                    const rid = 'r_' + log.id;
-                    const reasons = log.skip_reasons || [];
-                    const reasonsHtml = reasons.length
-                        ? `<span class="reasons-toggle" onclick="toggleReasons(this)">show reasons</span>
-                           <ul class="reasons-list" id="${rid}">
-                             ${reasons.map(r => `<li>· ${r}</li>`).join('')}
-                           </ul>`
-                        : '';
-                    skippedCell = `<span class="badge-yellow">${log.skipped} skipped</span>${reasonsHtml}`;
-                }
-
-                return `<tr>
-                    <td style="font-weight:500;color:#1a2744;max-width:200px;word-break:break-all">${log.file_name}</td>
-                    <td style="color:#6b7280">${log.uploaded_by}</td>
-                    <td style="color:#6b7280;white-space:nowrap">${log.date}</td>
-                    <td style="text-align:center">${log.total_rows}</td>
-                    <td style="text-align:center">${importedBadge}</td>
-                    <td>${skippedCell}</td>
-                </tr>`;
-            }).join('');
-        })
-        .catch(() => {});
+    return `<tr>
+        <td style="font-weight:500;color:#1a2744;max-width:220px;word-break:break-all">${log.file_name}</td>
+        <td style="color:#6b7280">${log.uploaded_by}</td>
+        <td style="color:#6b7280;white-space:nowrap">${log.date}</td>
+        <td style="text-align:center">${log.total_rows}</td>
+        <td style="text-align:center">${imp}</td>
+        <td>${skip}</td>
+    </tr>`;
 }
 
-// Poll every 4 seconds
-setInterval(refreshHistory, 4000);
+function refreshHistory() {
+    fetch('{{ route("import.history-json") }}', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    })
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+        if (!data) return;
 
+        // Update count label
+        const countEl = document.getElementById('historyCount');
+        if (countEl) countEl.textContent = data.total + ' total upload' + (data.total !== 1 ? 's' : '');
+
+        // Rebuild table body
+        const tbody = document.getElementById('historyTbody');
+        if (!tbody) return;
+
+        if (!data.rows || data.rows.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No uploads yet.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.rows.map(buildRow).join('');
+    })
+    .catch(() => {});
+}
+
+// Refresh immediately on load, then every 5 seconds
+refreshHistory();
+setInterval(refreshHistory, 5000);
 </script>
 
 </body>

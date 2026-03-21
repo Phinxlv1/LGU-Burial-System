@@ -47,7 +47,9 @@ class BurialPermitController extends Controller
         $request->validate([
             'requestor_name'   => 'required|string|max:255',
             'first_name'       => 'required|string|max:255',
+            'middle_name'      => 'nullable|string|max:255',
             'last_name'        => 'required|string|max:255',
+            'extension'        => 'nullable|string|max:10',
             'date_of_death'    => 'required|date',
             'burial_fee_type'  => 'required|string',
             'nationality'      => 'nullable|string|max:100',
@@ -56,9 +58,16 @@ class BurialPermitController extends Controller
             'kind_of_burial'   => 'nullable|string|max:100',
         ]);
 
-        $deceased = DeceasedPerson::create([
+        // Build last name with extension if provided (e.g. "Santos Jr.")
+        $lastName = trim($request->last_name);
+        if ($request->filled('extension')) {
+            $lastName = $lastName . ' ' . trim($request->extension);
+        }
+
+        $deceased = \App\Models\DeceasedPerson::create([
             'first_name'     => $request->first_name,
-            'last_name'      => $request->last_name,
+            'middle_name'    => $request->middle_name ?: null,
+            'last_name'      => $lastName,
             'date_of_death'  => $request->date_of_death,
             'nationality'    => $request->nationality ?? 'Filipino',
             'age'            => $request->age,
@@ -66,10 +75,10 @@ class BurialPermitController extends Controller
             'kind_of_burial' => $request->kind_of_burial,
         ]);
 
-        $latest       = BurialPermit::whereYear('created_at', now()->year)->count() + 1;
+        $latest       = \App\Models\BurialPermit::whereYear('created_at', now()->year)->count() + 1;
         $permitNumber = 'BP-' . now()->year . '-' . str_pad($latest, 5, '0', STR_PAD_LEFT);
 
-        BurialPermit::create([
+        \App\Models\BurialPermit::create([
             'permit_number'          => $permitNumber,
             'deceased_id'            => $deceased->id,
             'permit_type'            => $request->burial_fee_type,
@@ -78,7 +87,7 @@ class BurialPermitController extends Controller
             'applicant_relationship' => $request->applicant_relationship ?? '',
             'applicant_contact'      => $request->applicant_contact ?? '',
             'status'                 => 'pending',
-            'processed_by'           => Auth::id(),
+            'processed_by'           => \Illuminate\Support\Facades\Auth::id(),
         ]);
 
         return redirect()->route('permits.index')
@@ -263,16 +272,25 @@ class BurialPermitController extends Controller
 
     public function renew(BurialPermit $permit)
 {
-    abort_if($permit->status !== 'expired', 403);
+    // Allow renewal for expired or expiring-soon permits
+    $isExpired  = $permit->status === 'expired';
+    $isExpiring = $permit->status === 'released'
+                  && $permit->expiry_date
+                  && $permit->expiry_date->diffInDays(now()) <= 30
+                  && $permit->expiry_date->isFuture();
+ 
+    abort_if(!$isExpired && !$isExpiring, 403, 'This permit is not eligible for renewal.');
  
     $permit->update([
-        'status'      => 'approved',
-        'expiry_date' => now()->addYear(),
-        'processed_by' => Auth::id(),
+        'status'      => 'released',
+        'expiry_date' => now()->addYears(5),
+        'processed_by'=> \Illuminate\Support\Facades\Auth::id(),
+        'remarks'     => ($permit->remarks ? $permit->remarks . ' | ' : '')
+                         . 'Renewed on ' . now()->format('F d, Y') . ' by ' . auth()->user()->name,
     ]);
  
-    return redirect()->route('permits.show', $permit)
-                     ->with('success', 'Permit renewed successfully. Status reset to Approved.');
+    return redirect()->route('dashboard')
+        ->with('success', "Permit {$permit->permit_number} has been renewed successfully. New expiry: " . $permit->fresh()->expiry_date->format('F d, Y') . '.');
 }
 
 

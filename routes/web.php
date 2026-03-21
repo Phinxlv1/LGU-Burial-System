@@ -34,6 +34,9 @@ Route::middleware(['auth'])->group(function () {
     // ── Admin + Super Admin ──
     Route::middleware(['role:admin|super_admin'])->group(function () {
 
+        Route::patch('permits/{permit}/renew', [BurialPermitController::class, 'renew'])->name('permits.renew');
+        Route::patch('permits/{permit}/renew', [BurialPermitController::class, 'renew'])->name('permits.renew');
+
 
         Route::post('permits/{permit}/documents',      [DocumentController::class, 'upload'])->name('documents.upload');
         Route::get('documents/{document}/download',    [DocumentController::class, 'download'])->name('documents.download');
@@ -68,7 +71,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cemetery/map', [CemeteryMapController::class, 'index'])->name('cemetery.map');
 
         Route::post('permits/{permit}/documents', [DocumentController::class, 'upload'])->name('documents.upload');
+        Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+        Route::delete('documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+
         Route::post('permits/{permit}/sms',       [SmsController::class, 'send'])->name('sms.send');
+        
+        Route::get('/cemetery/grid', function() {
+            return view('cemetery.grid');
+        })->name('cemetery.grid');
 
         Route::get('/import/excel',  [ImportController::class, 'showImport'])->name('import.show');
         Route::post('/import/excel', [ImportController::class, 'importExcel'])->name('import.excel');

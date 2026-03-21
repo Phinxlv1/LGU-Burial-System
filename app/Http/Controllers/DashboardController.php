@@ -10,40 +10,40 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Super Admin → dedicated analytics dashboard
         if ($user->hasRole('super_admin')) {
             return redirect()->route('superadmin.dashboard');
         }
 
-        // Admin → full permit processing dashboard
-        $recentPermits = BurialPermit::with('deceased')->latest()->take(10)->get();
+        // ── Sorting (same logic as BurialPermitController) ──
+        $sort      = request()->get('sort', 'created_at');
+        $direction = request()->get('direction', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        $query = BurialPermit::with('deceased');
+
+        if ($sort === 'last_name') {
+            $query->orderByRaw("(SELECT last_name FROM deceased_persons WHERE deceased_persons.id = burial_permits.deceased_id) {$direction}");
+        } elseif ($sort === 'date_of_death') {
+            $query->orderByRaw("(SELECT date_of_death FROM deceased_persons WHERE deceased_persons.id = burial_permits.deceased_id) {$direction}");
+        } elseif (in_array($sort, ['permit_number', 'permit_type', 'created_at', 'status'])) {
+            $query->orderBy($sort, $direction);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $recentPermits = $query->paginate(10)->withQueryString();
 
         $stats = [
-            'total'      => BurialPermit::count(),
-            'this_month' => BurialPermit::whereMonth('created_at', now()->month)
-                                        ->whereYear('created_at', now()->year)->count(),
-            'pending'    => BurialPermit::where('status', 'pending')->count(),
-            'approved'   => BurialPermit::where('status', 'approved')->count(),
-            'released'   => BurialPermit::where('status', 'released')->count(),
-            'expiring'   => BurialPermit::where('status', 'released')
-                                        ->whereNotNull('expiry_date')
-                                        ->whereDate('expiry_date', '<=', now()->addDays(30))
-                                        ->whereDate('expiry_date', '>=', now())
-                                        ->count(),
-            'monthly'    => $this->getMonthlyData(),
+            'total'    => BurialPermit::count(),
+            'pending'  => BurialPermit::where('status', 'pending')->count(),
+            'approved' => BurialPermit::where('status', 'approved')->count(),
+            'released' => BurialPermit::where('status', 'released')->count(),
+            'expiring' => BurialPermit::where('status', 'released')
+                            ->whereNotNull('expiry_date')
+                            ->whereDate('expiry_date', '<=', now()->addDays(30))
+                            ->whereDate('expiry_date', '>=', now())
+                            ->count(),
         ];
 
         return view('dashboard.admin', compact('stats', 'recentPermits'));
-    }
-
-    private function getMonthlyData(): array
-    {
-        $data = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $data[] = BurialPermit::whereMonth('created_at', now()->subMonths($i)->month)
-                                   ->whereYear('created_at', now()->subMonths($i)->year)
-                                   ->count();
-        }
-        return $data;
     }
 }

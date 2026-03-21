@@ -2,32 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script>/* dark-mode anti-flash */
+    (function(){try{var k='lgu_dark_{{ auth()->id() }}';if(localStorage.getItem(k)==='1')document.documentElement.classList.add('dark');}catch(e){}})();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $deceased->last_name }}, {{ $deceased->first_name }} — LGU Carmen</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
-        .sidebar { width: 220px; min-height: 100vh; background: #1a2744; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 50; }
-        .sidebar-brand { padding: 1.25rem 1rem 1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
-        .sidebar-brand-top { display: flex; align-items: center; gap: 8px; margin-bottom: .3rem; }
-        .sidebar-seal { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.2); }
-        .sidebar-brand h1 { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.3; }
-        .sidebar-brand p { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 2px; padding-left: 42px; }
-        .sidebar-nav { flex: 1; padding: .75rem 0; }
-        .nav-section { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); padding: .75rem 1rem .3rem; }
-        .nav-item { display: flex; align-items: center; gap: 9px; padding: .55rem 1rem; font-size: 13px; color: rgba(255,255,255,.65); text-decoration: none; border-radius: 6px; margin: 1px .5rem; transition: background .15s, color .15s; }
-        .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
-        .nav-item.active { background: rgba(255,255,255,.12); color: #fff; font-weight: 500; }
-        .nav-item svg { flex-shrink: 0; opacity: .7; }
-        .nav-item.active svg { opacity: 1; }
-        .sidebar-footer { padding: .75rem; border-top: 1px solid rgba(255,255,255,.08); }
-        .user-info { display: flex; align-items: center; gap: 8px; padding: .5rem .75rem; background: rgba(255,255,255,.06); border-radius: 6px; margin-bottom: .5rem; }
-        .user-avatar { width: 28px; height: 28px; background: rgba(255,255,255,.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
-        .user-name { font-size: 12px; color: #fff; font-weight: 500; }
-        .user-role { font-size: 10px; color: rgba(255,255,255,.4); }
-        .btn-logout { width: 100%; background: none; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; padding: .45rem; font-family: 'Inter', sans-serif; font-size: 12px; color: rgba(255,255,255,.5); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
         .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-width: 0; }
         .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
         .topbar-title { font-size: 15px; font-weight: 700; color: #111827; }
@@ -35,34 +18,92 @@
         .content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
         .btn-back { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: #6b7280; text-decoration: none; }
         .btn-back:hover { color: #1a2744; }
+
+        /* Panel */
         .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
         .panel-head { padding: .85rem 1.25rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
         .panel-head h3 { font-size: 13px; font-weight: 700; color: #111827; }
         .panel-head span { font-size: 12px; color: #9ca3af; }
+
+        /* Info grid — 3 equal columns, each field stacked */
         .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-        .info-item { padding: .9rem 1.25rem; border-bottom: 1px solid #f3f4f6; border-right: 1px solid #f3f4f6; }
+        .info-item {
+            padding: .9rem 1.25rem;
+            border-bottom: 1px solid #f3f4f6;
+            border-right: 1px solid #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        /* Remove right border on last column of each row */
         .info-item:nth-child(3n) { border-right: none; }
-        .info-label { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+        /* Remove bottom border on last row */
+        .info-item:nth-last-child(-n+3):nth-child(3n+1),
+        .info-item:nth-last-child(-n+3):nth-child(3n+2),
+        .info-item:nth-last-child(-n+3):nth-child(3n)  { border-bottom: none; }
+        /* Fallback for when last row has fewer items */
+        .info-item:last-child { border-bottom: none; }
+
+        .info-label { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; }
         .info-value { font-size: 13px; color: #111827; font-weight: 500; }
         .info-value.empty { color: #d1d5db; font-style: italic; font-weight: 400; }
+
+        /* Permit table */
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .07em; padding: .5rem .75rem; text-align: left; background: #fafafa; white-space: nowrap; }
         td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; vertical-align: middle; }
+
         .permit-no { font-weight: 700; color: #1a2744; }
-        .badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+
+        /* Status badges — matching permits/index */
+        .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 4px; white-space: nowrap; }
         .badge-yellow { background: #fef3c7; color: #92400e; }
         .badge-green  { background: #d1fae5; color: #065f46; }
         .badge-blue   { background: #dbeafe; color: #1e40af; }
         .badge-red    { background: #fee2e2; color: #991b1b; }
-        .btn-action { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; white-space: nowrap; }
+
+        /* Renewal count chip */
+        .renew-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #374151;
+        }
+        .renew-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            border-radius: 11px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .renew-count.zero   { background: #f3f4f6; color: #9ca3af; }
+        .renew-count.active { background: #dbeafe; color: #1e40af; }
+
+        /* Action button */
+        .btn-action { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 12px; color: #374151; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; }
         .btn-action:hover { background: #f9fafb; border-color: #1a2744; color: #1a2744; }
-        .btn-delete { color: #ef4444; border-color: #fca5a5; }
-        .btn-delete:hover { background: #fee2e2; border-color: #ef4444; }
+
         .btn-primary { display: inline-flex; align-items: center; gap: 5px; padding: .5rem 1rem; border-radius: 6px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #fff; background: #1a2744; cursor: pointer; text-decoration: none; transition: background .15s; }
         .btn-primary:hover { background: #243459; }
 
-        /* ── EDIT MODAL ── */
+        /* Danger zone */
+        .danger-panel { background: #fff; border: 1px solid #fee2e2; border-radius: 10px; overflow: hidden; }
+        .danger-head { padding: .85rem 1.25rem; border-bottom: 1px solid #fee2e2; background: #fff5f5; }
+        .danger-head h3 { font-size: 13px; font-weight: 700; color: #991b1b; }
+        .danger-body { padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
+        .danger-desc { font-size: 13px; font-weight: 600; color: #111827; }
+        .danger-sub  { font-size: 12px; color: #6b7280; margin-top: 2px; }
+        .btn-danger { display: inline-flex; align-items: center; gap: 5px; padding: .45rem .9rem; border-radius: 6px; border: 1.5px solid #fca5a5; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #991b1b; background: #fff; cursor: pointer; transition: all .15s; }
+        .btn-danger:hover { background: #fee2e2; border-color: #ef4444; }
+
+        /* Edit modal */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
         .modal-overlay.open { display: flex; }
         .modal { background: #fff; border-radius: 10px; width: 100%; max-width: 620px; box-shadow: 0 20px 60px rgba(0,0,0,.2); overflow: hidden; animation: modalIn .15s ease; margin: auto; }
@@ -84,140 +125,188 @@
         .btn-cancel { padding: .5rem 1rem; border-radius: 6px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 13px; color: #374151; background: #fff; cursor: pointer; }
         .btn-cancel:hover { background: #f9fafb; }
 
-        /* ── DELETE MODAL OVERLAY ── */
-        .del-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,.55);
-            z-index: 200; align-items: center; justify-content: center; padding: 1rem;
-        }
-        .del-overlay.open { display: flex; }
+        /* Toast */
+        .toast { position: fixed; top: 1.1rem; right: 1.25rem; z-index: 9999; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,.12); width: 300px; overflow: hidden; transform: translateX(calc(100% + 1.5rem)); transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+        .toast.show { transform: translateX(0); }
+        .toast-body { display: flex; align-items: center; gap: .75rem; padding: .85rem 1rem; }
+        .toast-icon { width: 30px; height: 30px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .toast-title { font-size: 13px; font-weight: 600; color: #111827; }
+        .toast-sub   { font-size: 11px; color: #6b7280; }
+        .toast-bar { height: 3px; background: #e5e7eb; }
+        .toast-fill { height: 100%; width: 100%; background: #10b981; transform-origin: left; animation: drain 4s linear forwards; }
+        @keyframes drain { from{transform:scaleX(1)} to{transform:scaleX(0)} }
+    
+    /* ══════════════════════════════
+       DARK MODE OVERRIDES
+    ══════════════════════════════ */
+    html.dark body { background: #0f1117 !important; color: #e2e8f0 !important; }
+    html.dark .topbar { background: #1a1d27 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .topbar-title, html.dark .topbar-sub, html.dark .topbar-date { color: #e2e8f0 !important; }
+    html.dark .topbar-date { color: #64748b !important; }
+    html.dark .role-tag { background: #6366f1 !important; }
+    html.dark .panel, html.dark .card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .panel-head, html.dark .panel-header { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .panel-head h3, html.dark .panel-header h3 { color: #e2e8f0 !important; }
+    html.dark .panel-head a { color: #818cf8 !important; }
+    html.dark table th { background: #181b29 !important; color: #64748b !important; }
+    html.dark table td { color: #cbd5e1 !important; border-top-color: #2d3148 !important; }
+    html.dark tr.row-expired td { background: #2a1a1a !important; border-top-color: #7f1d1d !important; }
+    html.dark .permit-no { color: #818cf8 !important; }
+    html.dark .badge-yellow { background: #422006 !important; color: #fde68a !important; }
+    html.dark .badge-green  { background: #052e16 !important; color: #86efac !important; }
+    html.dark .badge-blue   { background: #1e3a5f !important; color: #93c5fd !important; }
+    html.dark .badge-red    { background: #450a0a !important; color: #fca5a5 !important; }
+    html.dark .btn-view, html.dark .btn-action { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+    html.dark .btn-view:hover, html.dark .btn-action:hover { background: #2d3148 !important; border-color: #6366f1 !important; color: #e2e8f0 !important; }
+    html.dark .welcome { background: #111827 !important; }
+    html.dark .name-main { color: #e2e8f0 !important; }
+    html.dark .name-sub { color: #64748b !important; }
+    html.dark .search-input { background: #252840 !important; border-color: #374151 !important; color: #e2e8f0 !important; }
+    html.dark .search-input:focus { border-color: #6366f1 !important; }
+    html.dark .pager { border-top-color: #2d3148 !important; }
+    html.dark .pager-info { color: #64748b !important; }
+    html.dark .pager-btn { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+    html.dark .pager-btn:hover { border-color: #6366f1 !important; color: #e2e8f0 !important; }
+    html.dark .pager-btn.active { background: #6366f1 !important; border-color: #6366f1 !important; color: #fff !important; }
+    html.dark .pager-btn.disabled { color: #374151 !important; }
+    html.dark .sort-link { color: #64748b !important; }
+    html.dark .sort-link.active, html.dark .sort-link:hover { color: #818cf8 !important; }
+    html.dark .hero { background: #111827 !important; }
+    html.dark .card-head { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .card-head-title { color: #94a3b8 !important; }
+    html.dark .card-body { background: #1e2130 !important; }
+    html.dark .fl { color: #64748b !important; }
+    html.dark .fv, html.dark .fv-lg { color: #e2e8f0 !important; }
+    html.dark .fee-box { background: #111827 !important; }
+    html.dark .section-divider { color: #818cf8 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .form-control, html.dark select.form-control { background: #252840 !important; border-color: #374151 !important; color: #e2e8f0 !important; }
+    html.dark .form-control:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,.15) !important; }
+    html.dark .form-label { color: #94a3b8 !important; }
+    html.dark .modal { background: #1e2130 !important; }
+    html.dark .modal-header { background: #111827 !important; }
+    html.dark .modal-body { background: #1e2130 !important; }
+    html.dark .modal-footer { background: #181b29 !important; border-top-color: #2d3148 !important; }
+    html.dark .btn-cancel { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+    html.dark .fee-row { border-color: #2d3148 !important; }
+    html.dark .fee-row:hover { background: #252840 !important; border-color: #6366f1 !important; }
+    html.dark .fee-row label { color: #e2e8f0 !important; }
+    html.dark .fee-amount { color: #818cf8 !important; }
+    html.dark .upload-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .dropzone { border-color: #374151 !important; }
+    html.dark .dropzone:hover, html.dark .dropzone.drag-over { border-color: #6366f1 !important; background: #1e2d6b !important; }
+    html.dark .dropzone-icon { background: #252840 !important; }
+    html.dark .dropzone-title { color: #cbd5e1 !important; }
+    html.dark .dropzone-sub { color: #64748b !important; }
+    html.dark .docs-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .docs-head { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .docs-head-title { color: #e2e8f0 !important; }
+    html.dark .docs-head-sub { color: #64748b !important; }
+    html.dark .docs-col-files { border-right-color: #2d3148 !important; }
+    html.dark .docs-col-upload { background: #181b29 !important; }
+    html.dark .doc-item { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .doc-item:hover { background: #252840 !important; border-color: #6366f1 !important; }
+    html.dark .doc-name { color: #e2e8f0 !important; }
+    html.dark .doc-meta { color: #64748b !important; }
+    html.dark .btn-doc { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+    html.dark .btn-doc:hover { background: #2d3148 !important; border-color: #6366f1 !important; color: #e2e8f0 !important; }
+    html.dark .info-item { border-color: #2d3148 !important; }
+    html.dark .info-label { color: #64748b !important; }
+    html.dark .info-value { color: #e2e8f0 !important; }
+    html.dark .info-value.empty { color: #374151 !important; }
+    html.dark .panel-head { background: #181b29 !important; }
+    html.dark .danger-panel { background: #1e2130 !important; border-color: #7f1d1d !important; }
+    html.dark .danger-head { background: #2a1a1a !important; border-bottom-color: #7f1d1d !important; }
+    html.dark .danger-desc { color: #e2e8f0 !important; }
+    html.dark .danger-sub { color: #94a3b8 !important; }
+    html.dark .topbar-back { color: #94a3b8 !important; }
+    html.dark .topbar-back:hover { color: #e2e8f0 !important; }
+    html.dark .topbar-sep { color: #334155 !important; }
+    html.dark .btn-print { background: rgba(255,255,255,.08) !important; }
+    html.dark .toggle-row { border-color: #2d3148 !important; }
+    html.dark .toggle-row:hover { background: #252840 !important; }
+    html.dark .toggle-label { color: #e2e8f0 !important; }
+    html.dark .toggle-sub { color: #64748b !important; }
+    html.dark .snav-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .snav-item { color: #94a3b8 !important; }
+    html.dark .snav-item:hover { background: #252840 !important; color: #e2e8f0 !important; }
+    html.dark .snav-item.active { background: #1e2d6b !important; color: #818cf8 !important; border-left-color: #6366f1 !important; }
+    html.dark .snav-divider { background: #2d3148 !important; }
+    html.dark .section-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .section-head { border-bottom-color: #2d3148 !important; }
+    html.dark .section-head h2 { color: #e2e8f0 !important; }
+    html.dark .section-head p { color: #64748b !important; }
+    html.dark .section-footer { background: #181b29 !important; border-top-color: #2d3148 !important; }
+    html.dark .fee-table { border-color: #2d3148 !important; }
+    html.dark .fee-table th { background: #181b29 !important; color: #64748b !important; }
+    html.dark .fee-table td { border-top-color: #2d3148 !important; color: #cbd5e1 !important; }
+    html.dark .fee-table input { background: #252840 !important; border-color: #374151 !important; color: #e2e8f0 !important; }
+    html.dark .fee-type-badge { background: #1e2d6b !important; color: #818cf8 !important; }
+    html.dark .user-table th { background: #181b29 !important; color: #64748b !important; }
+    html.dark .user-table td { color: #cbd5e1 !important; border-top-color: #2d3148 !important; }
+    html.dark .appearance-preview { border-color: #2d3148 !important; }
+    html.dark .ap-light { background: #252840 !important; }
+    html.dark .ap-light:hover { background: #2d3148 !important; }
+    html.dark .ap-light .ap-name { color: #e2e8f0 !important; }
+    html.dark .ap-light .ap-sub { color: #64748b !important; }
+    html.dark .ap-divider { background: #2d3148 !important; }
+    html.dark .danger-item { background: #2a1a1a !important; border-color: #7f1d1d !important; }
+    html.dark .danger-title { color: #fca5a5 !important; }
+    html.dark .danger-sub { color: #f87171 !important; }
+    html.dark .badge-male   { background: #1e3a5f !important; color: #93c5fd !important; }
+    html.dark .badge-female { background: #3b0764 !important; color: #e9d5ff !important; }
+    html.dark .toast { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .toast-title { color: #e2e8f0 !important; }
+    html.dark .toast-sub { color: #94a3b8 !important; }
+    html.dark .upload-note { color: #64748b !important; }
+    html.dark .btn-upload { background: #6366f1 !important; }
+    html.dark .btn-upload:hover { background: #4f46e5 !important; }
+    html.dark .btn-primary { background: #6366f1 !important; }
+    html.dark .btn-primary:hover { background: #4f46e5 !important; }
+    html.dark .dq-stat { background: #1e2130 !important; border-color: #2d3148 !important; }
+    html.dark .dq-issue { border-color: #2d3148 !important; }
+    html.dark .dq-issue-head { background: #181b29 !important; }
+    html.dark .dq-issue-head:hover, html.dark .dq-issue.open .dq-issue-head { background: #252840 !important; }
+    html.dark .dq-issue-title { color: #e2e8f0 !important; }
+    html.dark .dq-issue-count { color: #64748b !important; }
+    html.dark .dq-issue-body { border-top-color: #2d3148 !important; }
+    html.dark .dq-desc { background: #181b29 !important; color: #94a3b8 !important; border-bottom-color: #2d3148 !important; }
+    html.dark .dq-record { border-bottom-color: #2d3148 !important; }
+    html.dark .dq-record-title { color: #e2e8f0 !important; }
+    html.dark .dq-record-sub { color: #64748b !important; }
+    html.dark hr { border-color: #2d3148 !important; }
+    html.dark .docs-empty { color: #374151 !important; }
+    html.dark .lightbox { background: rgba(0,0,0,.92) !important; }
 
-        .del-modal {
-            background: #fff; border-radius: 14px; width: 100%; max-width: 400px;
-            box-shadow: 0 24px 64px rgba(0,0,0,.28);
-            overflow: hidden; animation: modalIn .2s ease; margin: auto;
-        }
+    
+        /* Deceased show specific */
+        html.dark .info-item { border-bottom-color: #2d3148 !important; border-right-color: #2d3148 !important; }
+        html.dark .info-label { color: #64748b !important; }
+        html.dark .info-value { color: #e2e8f0 !important; }
+        html.dark .info-value.empty { color: #374151 !important; }
+        html.dark .badge-male   { background: #1e3a5f !important; color: #93c5fd !important; }
+        html.dark .badge-female { background: #4a044e !important; color: #f5d0fe !important; }
+        html.dark .renew-chip { color: #cbd5e1 !important; }
+        html.dark .renew-count.zero   { background: #252840 !important; color: #64748b !important; }
+        html.dark .renew-count.active { background: #1e3a5f !important; color: #93c5fd !important; }
+        html.dark .btn-back { color: #94a3b8 !important; }
+        html.dark .btn-back:hover { color: #e2e8f0 !important; }
+        html.dark .danger-panel { border-color: #7f1d1d !important; }
+        html.dark .danger-head  { background: #2a1a1a !important; border-color: #7f1d1d !important; }
+        html.dark .danger-head h3 { color: #fca5a5 !important; }
+        html.dark .danger-body { background: #1e2130 !important; }
+        html.dark .danger-desc { color: #e2e8f0 !important; }
+        html.dark .danger-sub  { color: #94a3b8 !important; }
+        html.dark .btn-danger { background: #1e2130 !important; border-color: #7f1d1d !important; color: #fca5a5 !important; }
+        html.dark .btn-danger:hover { background: #450a0a !important; border-color: #ef4444 !important; }
+        html.dark .modal-overlay { background: rgba(0,0,0,.75) !important; }
+        html.dark .modal { background: #1e2130 !important; border-color: #2d3148 !important; }
+        html.dark .modal-body { background: #1e2130 !important; }
+        html.dark .modal-footer { background: #181b29 !important; border-top-color: #2d3148 !important; }
+        html.dark .section-divider { color: #818cf8 !important; border-bottom-color: #2d3148 !important; }
+        html.dark .btn-cancel { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+        html.dark .permit-no { color: #818cf8 !important; }
+        html.dark .table-wrap { background: #1e2130 !important; }
 
-        /* Step wrappers */
-        .del-step { display: none; }
-        .del-step.active { display: block; }
-
-        /* Shared step layout */
-        .del-top {
-            padding: 1.75rem 1.5rem 1rem;
-            display: flex; flex-direction: column; align-items: center;
-            gap: .7rem; text-align: center;
-        }
-        .del-icon-wrap {
-            width: 56px; height: 56px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .del-icon-wrap.red    { background: #fee2e2; }
-        .del-icon-wrap.amber  { background: #fef3c7; }
-        .del-top h2 { font-size: 18px; font-weight: 800; color: #111827; line-height: 1.2; }
-        .del-top p  { font-size: 13px; color: #6b7280; line-height: 1.6; max-width: 300px; }
-
-        .del-chip {
-            background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 7px;
-            padding: .35rem .9rem; font-size: 13px; font-weight: 700; color: #1a2744;
-            display: inline-block;
-        }
-
-        .del-warn {
-            margin: 0 1.5rem .25rem;
-            background: #fff7ed; border: 1px solid #fed7aa;
-            border-radius: 8px; padding: .7rem .9rem;
-            font-size: 12px; color: #9a3412; line-height: 1.55;
-        }
-        .del-warn strong { font-weight: 700; }
-
-        .del-actions {
-            padding: .85rem 1.5rem 1.5rem;
-            display: flex; flex-direction: column; gap: .5rem;
-        }
-
-        .btn-del-yes {
-            width: 100%; padding: .7rem; border: none; border-radius: 8px;
-            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
-            background: #ef4444; color: #fff; cursor: pointer; transition: background .15s;
-        }
-        .btn-del-yes:hover { background: #dc2626; }
-
-        .btn-del-no {
-            width: 100%; padding: .7rem; border: 1.5px solid #e5e7eb; border-radius: 8px;
-            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
-            color: #374151; background: #fff; cursor: pointer; transition: all .15s;
-        }
-        .btn-del-no:hover { background: #f9fafb; border-color: #d1d5db; }
-
-        /* Step 2 type-to-confirm */
-        .del-input-wrap { padding: 0 1.5rem .25rem; }
-        .del-input-wrap label {
-            display: block; font-size: 11px; font-weight: 700;
-            color: #374151; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px;
-        }
-        .del-input-wrap input {
-            width: 100%; padding: .55rem .8rem;
-            border: 1.5px solid #e5e7eb; border-radius: 7px;
-            font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
-            color: #111827; outline: none; letter-spacing: .08em;
-            transition: border-color .15s, box-shadow .15s;
-        }
-        .del-input-wrap input:focus { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
-        .del-input-wrap .hint { font-size: 11px; color: #9ca3af; margin-top: 5px; }
-
-        .btn-del-final {
-            width: 100%; padding: .7rem; border: none; border-radius: 8px;
-            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
-            background: #b91c1c; color: #fff; cursor: pointer; transition: all .15s;
-            opacity: .35; pointer-events: none;
-        }
-        .btn-del-final.unlocked { opacity: 1; pointer-events: auto; }
-        .btn-del-final.unlocked:hover { background: #991b1b; }
-
-        /* ── TOAST ── */
-        .toast {
-            position: fixed;
-            top: 1.1rem;
-            left: 220px;       /* right edge of the sidebar */
-            margin-left: 1.1rem;
-            z-index: 9999;
-            min-width: 240px;
-            max-width: 320px;
-            background: #1e293b;
-            border-radius: 9px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,.28);
-            /* start off-screen to the left (behind sidebar) */
-            transform: translateX(calc(-100% - 1.1rem - 220px));
-            opacity: 0;
-            transition: transform .42s cubic-bezier(.22,.68,0,1.15), opacity .3s ease;
-        }
-        .toast.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        .toast-body {
-            display: flex; align-items: center; gap: .75rem;
-            padding: .9rem 1rem;
-        }
-        .toast-dot {
-            width: 32px; height: 32px; flex-shrink: 0;
-            background: rgba(239,68,68,.18); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .toast-text .toast-title { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.3; }
-        .toast-text .toast-sub   { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
-        /* Progress bar */
-        .toast-track { height: 3px; background: rgba(255,255,255,.1); }
-        .toast-bar {
-            height: 100%; width: 100%;
-            background: #ef4444;
-            transform-origin: left center;
-            transform: scaleX(1);
-            transition: transform 5s linear;
-        }
-        .toast-bar.drain { transform: scaleX(0); }
     </style>
 </head>
 <body>
@@ -243,21 +332,23 @@
             Back to Deceased Records
         </a>
 
-        <!-- Personal Info -->
+        {{-- PERSONAL INFO --}}
         <div class="panel">
             <div class="panel-head"><h3>Personal Information</h3></div>
             <div class="info-grid">
                 <div class="info-item">
                     <div class="info-label">Last Name</div>
-                    <div class="info-value">{{ $deceased->last_name ?? '—' }}</div>
+                    <div class="info-value">{{ $deceased->last_name }}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">First Name</div>
-                    <div class="info-value">{{ $deceased->first_name ?? '—' }}</div>
+                    <div class="info-value">{{ $deceased->first_name }}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Middle Name</div>
-                    <div class="info-value {{ !$deceased->middle_name ? 'empty' : '' }}">{{ $deceased->middle_name ?? '—' }}</div>
+                    <div class="info-value {{ !$deceased->middle_name ? 'empty' : '' }}">
+                        {{ $deceased->middle_name ?? '—' }}
+                    </div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Sex</div>
@@ -273,7 +364,9 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Date of Death</div>
-                    <div class="info-value">{{ $deceased->date_of_death ? \Carbon\Carbon::parse($deceased->date_of_death)->format('M d, Y') : '—' }}</div>
+                    <div class="info-value">
+                        {{ $deceased->date_of_death ? \Carbon\Carbon::parse($deceased->date_of_death)->format('M d, Y') : '—' }}
+                    </div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Kind of Burial</div>
@@ -286,7 +379,7 @@
             </div>
         </div>
 
-        <!-- Linked Permits -->
+        {{-- BURIAL PERMITS --}}
         <div class="panel">
             <div class="panel-head">
                 <h3>Burial Permits</h3>
@@ -296,21 +389,69 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Permit No.</th><th>Type</th><th>Requestor</th><th>Issued</th><th>Status</th><th>Actions</th>
+                            <th>Permit No.</th>
+                            <th>Type</th>
+                            <th>Requestor</th>
+                            <th>Issued</th>
+                            <th>Status</th>
+                            <th>Renewals</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($deceased->permits as $permit)
+                        @php
+                            $expiring = $permit->status === 'released'
+                                && $permit->expiry_date
+                                && $permit->expiry_date->isFuture()
+                                && $permit->expiry_date->diffInDays(now()) <= 30;
+
+                            // Renewal count — safely query; defaults to 0 if table missing
+                            try {
+                                $renewalCount = \Illuminate\Support\Facades\DB::table('transactions')
+                                    ->where('permit_id', $permit->id)
+                                    ->where('action', 'like', '%renew%')
+                                    ->count();
+                            } catch (\Throwable) {
+                                $renewalCount = 0;
+                            }
+                        @endphp
                         <tr>
                             <td><span class="permit-no">{{ $permit->permit_number }}</span></td>
                             <td style="font-size:12px;color:#6b7280">{{ ucfirst(str_replace('_',' ',$permit->permit_type)) }}</td>
                             <td style="font-size:12px">{{ $permit->applicant_name ?? '—' }}</td>
                             <td style="font-size:12px;color:#6b7280">{{ $permit->created_at->format('M d, Y') }}</td>
+
+                            {{-- Status badge matching permits/index --}}
                             <td>
-                                @php $colors=['pending'=>'badge-yellow','approved'=>'badge-green','released'=>'badge-blue','expired'=>'badge-red']; @endphp
-                                <span class="badge {{ $colors[$permit->status] ?? 'badge-yellow' }}">{{ ucfirst($permit->status) }}</span>
+                                @if($permit->status === 'expired')
+                                    <span class="badge badge-red" style="font-weight:700">⚠ Expired</span>
+                                @elseif($expiring)
+                                    <span class="badge badge-yellow">⏳ Expiring Soon</span>
+                                @elseif($permit->status === 'released')
+                                    <span class="badge badge-blue">Released</span>
+                                @elseif($permit->status === 'approved')
+                                    <span class="badge badge-green">Approved</span>
+                                @else
+                                    <span class="badge badge-yellow">{{ ucfirst($permit->status) }}</span>
+                                @endif
                             </td>
-                            <td><a href="{{ route('permits.show', $permit) }}" class="btn-action">View</a></td>
+
+                            {{-- Renewals count instead of View button --}}
+                            <td>
+                                <div class="renew-chip">
+                                    <span class="renew-count {{ $renewalCount > 0 ? 'active' : 'zero' }}">
+                                        {{ $renewalCount }}
+                                    </span>
+                                    <span style="font-size:11px;color:#9ca3af">
+                                        {{ $renewalCount === 1 ? 'renewal' : 'renewals' }}
+                                    </span>
+                                    <a href="{{ route('permits.show', $permit) }}"
+                                       style="margin-left:.35rem;font-size:11px;color:#1a2744;text-decoration:none;opacity:.6"
+                                       title="View permit">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
                         @empty
                         <tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:2rem">No permits linked to this record.</td></tr>
@@ -320,117 +461,29 @@
             </div>
         </div>
 
-        <!-- Danger Zone -->
-        <div class="panel" style="border-color:#fee2e2">
-            <div class="panel-head" style="background:#fff5f5">
-                <h3 style="color:#991b1b">Danger Zone</h3>
-            </div>
-            <div style="padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem">
+        {{-- DANGER ZONE --}}
+        <div class="danger-panel">
+            <div class="danger-head"><h3>Danger Zone</h3></div>
+            <div class="danger-body">
                 <div>
-                    <div style="font-size:13px;font-weight:600;color:#111827">Delete this record</div>
-                    <div style="font-size:12px;color:#6b7280;margin-top:2px">This will also delete all linked burial permits. This cannot be undone.</div>
+                    <div class="danger-desc">Delete this record</div>
+                    <div class="danger-sub">This will also delete all linked burial permits. This cannot be undone.</div>
                 </div>
-                <button type="button" class="btn-action btn-delete" onclick="openDel()">
-                    Delete Record
-                </button>
-            </div>
-        </div>
-
-    </div><!-- /content -->
-</div><!-- /main -->
-
-
-{{-- ══════════════════════════════════
-     DELETE — STEP 1
-══════════════════════════════════ --}}
-<div class="del-overlay" id="delOverlay">
-    <div class="del-modal">
-
-        {{-- STEP 1 --}}
-        <div class="del-step active" id="delStep1">
-            <div class="del-top">
-                <div class="del-icon-wrap red">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6l-1 14H6L5 6"/>
-                        <path d="M10 11v6M14 11v6"/>
-                        <path d="M9 6V4h6v2"/>
-                    </svg>
-                </div>
-                <h2>Delete this record?</h2>
-                <p>You're about to permanently delete the record for:</p>
-                <span class="del-chip">{{ $deceased->last_name }}, {{ $deceased->first_name }}</span>
-            </div>
-            <div class="del-warn">
-                ⚠️ <strong>{{ $deceased->permits->count() }} linked burial permit(s)</strong> will also be deleted.
-                This action <strong>cannot be undone</strong>.
-            </div>
-            <div class="del-actions">
-                <button class="btn-del-yes" onclick="goStep2()">Yes, I want to delete this record</button>
-                <button class="btn-del-no"  onclick="closeDel()">No, keep this record safe</button>
-            </div>
-        </div>
-
-        {{-- STEP 2 --}}
-        <div class="del-step" id="delStep2">
-            <div class="del-top">
-                <div class="del-icon-wrap amber">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                </div>
-                <h2>Are you absolutely sure?</h2>
-                <p>Type <strong style="color:#1a2744;letter-spacing:.05em">DELETE</strong> in the box below to confirm permanent deletion.</p>
-            </div>
-            <div class="del-input-wrap">
-                <label>Confirm deletion</label>
-                <input type="text" id="delInput" placeholder="DELETE" autocomplete="off" oninput="checkDel(this)">
-                <div class="hint">Once deleted, this data is gone forever — no recovery possible.</div>
-            </div>
-            <div class="del-actions">
-                <form id="delForm" method="POST" action="{{ route('deceased.destroy', $deceased) }}">
+                <form method="POST" action="{{ route('deceased.destroy', $deceased) }}"
+                      onsubmit="return confirm('Delete this record and all linked permits?')">
                     @csrf @method('DELETE')
-                    <button type="button" class="btn-del-final" id="btnFinal" onclick="doDelete()">
-                        Permanently Delete Record
+                    <button type="submit" class="btn-danger">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                        Delete Record
                     </button>
                 </form>
-                <button class="btn-del-no" onclick="closeDel()">Cancel</button>
             </div>
         </div>
 
-    </div>
-</div>
+    </div>{{-- /content --}}
+</div>{{-- /main --}}
 
-
-{{-- ══════════════════════════════════
-     TOAST
-══════════════════════════════════ --}}
-<div class="toast" id="toast">
-    <div class="toast-body">
-        <div class="toast-dot">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14H6L5 6"/>
-                <path d="M10 11v6M14 11v6"/>
-                <path d="M9 6V4h6v2"/>
-            </svg>
-        </div>
-        <div class="toast-text">
-            <div class="toast-title">Record deleted</div>
-            <div class="toast-sub">{{ $deceased->last_name }}, {{ $deceased->first_name }} was permanently removed.</div>
-        </div>
-    </div>
-    <div class="toast-track">
-        <div class="toast-bar" id="toastBar"></div>
-    </div>
-</div>
-
-
-{{-- ══════════════════════════════════
-     EDIT MODAL
-══════════════════════════════════ --}}
+{{-- EDIT MODAL --}}
 <div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeEdit()">
     <div class="modal">
         <div class="modal-header">
@@ -463,20 +516,20 @@
                         <label class="form-label">Sex</label>
                         <select name="sex" class="form-control">
                             <option value="">Select…</option>
-                            <option value="Male"   {{ old('sex', $deceased->sex) === 'Male'   ? 'selected' : '' }}>Male</option>
-                            <option value="Female" {{ old('sex', $deceased->sex) === 'Female' ? 'selected' : '' }}>Female</option>
+                            <option value="Male"   {{ old('sex',$deceased->sex)==='Male'   ?'selected':'' }}>Male</option>
+                            <option value="Female" {{ old('sex',$deceased->sex)==='Female' ?'selected':'' }}>Female</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Age</label>
-                        <input type="number" name="age" class="form-control" min="0" value="{{ old('age', $deceased->age) }}">
+                        <input type="number" name="age" class="form-control" min="0" value="{{ old('age',$deceased->age) }}">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Civil Status</label>
                         <select name="civil_status" class="form-control">
                             <option value="">Select…</option>
                             @foreach(['Single','Married','Widowed','Separated'] as $cs)
-                                <option value="{{ $cs }}" {{ old('civil_status', $deceased->civil_status) === $cs ? 'selected' : '' }}>{{ $cs }}</option>
+                                <option value="{{ $cs }}" {{ old('civil_status',$deceased->civil_status)===$cs?'selected':'' }}>{{ $cs }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -484,16 +537,16 @@
                 <div class="form-row cols-2">
                     <div class="form-group">
                         <label class="form-label">Nationality</label>
-                        <input type="text" name="nationality" class="form-control" value="{{ old('nationality', $deceased->nationality) }}">
+                        <input type="text" name="nationality" class="form-control" value="{{ old('nationality',$deceased->nationality) }}">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Religion</label>
-                        <input type="text" name="religion" class="form-control" value="{{ old('religion', $deceased->religion) }}">
+                        <input type="text" name="religion" class="form-control" value="{{ old('religion',$deceased->religion) }}">
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Address</label>
-                    <input type="text" name="address" class="form-control" value="{{ old('address', $deceased->address) }}">
+                    <input type="text" name="address" class="form-control" value="{{ old('address',$deceased->address) }}">
                 </div>
                 <div class="section-divider">Death Information</div>
                 <div class="form-row cols-2">
@@ -509,11 +562,11 @@
                 <div class="form-row cols-2">
                     <div class="form-group">
                         <label class="form-label">Place of Death</label>
-                        <input type="text" name="place_of_death" class="form-control" value="{{ old('place_of_death', $deceased->place_of_death) }}">
+                        <input type="text" name="place_of_death" class="form-control" value="{{ old('place_of_death',$deceased->place_of_death) }}">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Cause of Death</label>
-                        <input type="text" name="cause_of_death" class="form-control" value="{{ old('cause_of_death', $deceased->cause_of_death) }}">
+                        <input type="text" name="cause_of_death" class="form-control" value="{{ old('cause_of_death',$deceased->cause_of_death) }}">
                     </div>
                 </div>
                 <div class="form-group">
@@ -521,7 +574,7 @@
                     <select name="kind_of_burial" class="form-control">
                         <option value="">Select…</option>
                         @foreach(['Ground','Niche','Cremation'] as $kb)
-                            <option value="{{ $kb }}" {{ old('kind_of_burial', $deceased->kind_of_burial) === $kb ? 'selected' : '' }}>{{ $kb }}</option>
+                            <option value="{{ $kb }}" {{ old('kind_of_burial',$deceased->kind_of_burial)===$kb?'selected':'' }}>{{ $kb }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -537,73 +590,22 @@
     </div>
 </div>
 
-
-<script>
-/* ── EDIT ── */
-function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
-@if($errors->any())
-    document.getElementById('editModal').classList.add('open');
+{{-- TOAST --}}
+@if(session('success'))
+<div class="toast show" id="sToast">
+    <div class="toast-body">
+        <div class="toast-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div><div class="toast-title">Saved</div><div class="toast-sub">{{ session('success') }}</div></div>
+    </div>
+    <div class="toast-bar"><div class="toast-fill"></div></div>
+</div>
 @endif
 
-/* ── DELETE FLOW ── */
-function openDel() {
-    // reset to step 1 every open
-    showStep('delStep1');
-    document.getElementById('delInput').value = '';
-    document.getElementById('btnFinal').classList.remove('unlocked');
-    document.getElementById('delOverlay').classList.add('open');
-}
-
-function closeDel() {
-    document.getElementById('delOverlay').classList.remove('open');
-}
-
-function goStep2() {
-    showStep('delStep2');
-    setTimeout(() => document.getElementById('delInput').focus(), 80);
-}
-
-function showStep(id) {
-    document.querySelectorAll('.del-step').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
-
-function checkDel(input) {
-    const btn = document.getElementById('btnFinal');
-    input.value.trim().toUpperCase() === 'DELETE'
-        ? btn.classList.add('unlocked')
-        : btn.classList.remove('unlocked');
-}
-
-function doDelete() {
-    closeDel();
-    fireToast();
-    // Allow the toast to appear before form submission navigates away
-    setTimeout(() => document.getElementById('delForm').submit(), 700);
-}
-
-/* ── TOAST ── */
-function fireToast() {
-    const toast = document.getElementById('toast');
-    const bar   = document.getElementById('toastBar');
-
-    // Slide in
-    toast.classList.add('show');
-
-    // Start draining the bar after next paint
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-        bar.classList.add('drain');
-    }));
-
-    // Since the page navigates in ~700ms the toast is purely visual feedback before redirect
-}
-
-/* ESC closes whichever modal is open */
-document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape') return;
-    closeEdit();
-    closeDel();
-});
+<script>
+function closeEdit() { document.getElementById('editModal').classList.remove('open'); }
+@if($errors->any()) document.getElementById('editModal').classList.add('open'); @endif
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeEdit(); });
+(function(){ const t=document.getElementById('sToast'); if(!t) return; setTimeout(()=>t.classList.remove('show'),4500); })();
 </script>
 
 </body>

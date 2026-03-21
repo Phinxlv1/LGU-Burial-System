@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script>/* dark-mode anti-flash */
+    (function(){try{var k='lgu_dark_{{ auth()->id() }}';if(localStorage.getItem(k)==='1')document.documentElement.classList.add('dark');}catch(e){}})();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $permit->permit_number }} — LGU Carmen</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -131,6 +134,94 @@
         .toast-fill.green { background: #10b981; }
         .toast-fill.red   { background: #ef4444; }
         @keyframes drain { from{transform:scaleX(1)} to{transform:scaleX(0)} }
+    
+        /* ═══════════════ DARK MODE — permits/show ═══════════════ */
+        html.dark body { background: #0f1117 !important; color: #e2e8f0 !important; }
+        html.dark .main { background: #0f1117 !important; }
+        html.dark .content { background: #0f1117 !important; }
+
+        /* Topbar */
+        html.dark .topbar { background: #1a1d27 !important; border-bottom-color: #2d3148 !important; }
+        html.dark .topbar-title { color: #e2e8f0 !important; }
+        html.dark .topbar-back  { color: #94a3b8 !important; }
+        html.dark .topbar-back:hover { color: #e2e8f0 !important; }
+        html.dark .topbar-sep   { color: #334155 !important; }
+        html.dark .role-tag     { background: #6366f1 !important; }
+
+        /* Hero */
+        html.dark .hero { background: #111827 !important; }
+        html.dark .hero-eyebrow { color: rgba(255,255,255,.3) !important; }
+        html.dark .hero-no   { color: #fff !important; }
+        html.dark .hero-meta { color: rgba(255,255,255,.35) !important; }
+
+        /* Buttons in hero */
+        html.dark .btn-print  { background: rgba(255,255,255,.08) !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,.15) !important; }
+        html.dark .btn-print:hover { background: rgba(255,255,255,.14) !important; }
+        html.dark .btn-delete { background: #450a0a !important; color: #fca5a5 !important; border-color: #7f1d1d !important; }
+        html.dark .btn-delete:hover { background: #7f1d1d !important; }
+        html.dark .btn-renew  { background: #450a0a !important; color: #fca5a5 !important; border-color: #7f1d1d !important; }
+        html.dark .btn-renew:hover { background: #7f1d1d !important; }
+
+        /* Badges */
+        html.dark .badge-yellow { background: #422006 !important; color: #fde68a !important; }
+        html.dark .badge-green  { background: #052e16 !important; color: #86efac !important; }
+        html.dark .badge-blue   { background: #1e3a5f !important; color: #93c5fd !important; }
+        html.dark .badge-red    { background: #450a0a !important; color: #fca5a5 !important; }
+
+        /* Info cards */
+        html.dark .card { background: #1e2130 !important; border-color: #2d3148 !important; }
+        html.dark .card-head { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+        html.dark .card-head-title { color: #94a3b8 !important; }
+        html.dark .card-body { background: #1e2130 !important; }
+        html.dark .fl  { color: #64748b !important; }
+        html.dark .fv  { color: #e2e8f0 !important; }
+        html.dark .fv-lg { color: #f1f5f9 !important; font-weight: 700 !important; }
+
+        /* Fee box */
+        html.dark .fee-box { background: #111827 !important; }
+        html.dark .fee-box-eyebrow { color: rgba(255,255,255,.3) !important; }
+        html.dark .fee-box-type    { color: rgba(255,255,255,.85) !important; }
+        html.dark .fee-box-amount  { color: #fff !important; }
+        html.dark .fee-box-na      { color: rgba(255,255,255,.25) !important; }
+        html.dark .fee-box-divider { background: rgba(255,255,255,.1) !important; }
+
+        /* Documents card */
+        html.dark .docs-card  { background: #1e2130 !important; border-color: #2d3148 !important; }
+        html.dark .docs-head  { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+        html.dark .docs-head-title { color: #e2e8f0 !important; }
+        html.dark .docs-head-sub   { color: #64748b !important; }
+        html.dark .docs-col-files  { border-right-color: #2d3148 !important; background: #1e2130 !important; }
+        html.dark .docs-col-upload { background: #181b29 !important; }
+        html.dark .docs-col-label  { color: #64748b !important; }
+        html.dark .docs-empty      { color: #374151 !important; }
+
+        /* Doc items */
+        html.dark .doc-item  { background: #1e2130 !important; border-color: #2d3148 !important; }
+        html.dark .doc-item:hover { background: #252840 !important; border-color: #6366f1 !important; }
+        html.dark .doc-name  { color: #e2e8f0 !important; }
+        html.dark .doc-meta  { color: #64748b !important; }
+        html.dark .btn-doc   { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
+        html.dark .btn-doc:hover { background: #2d3148 !important; border-color: #6366f1 !important; color: #e2e8f0 !important; }
+        html.dark .btn-doc-delete { border-color: #7f1d1d !important; color: #fca5a5 !important; }
+        html.dark .btn-doc-delete:hover { background: #450a0a !important; border-color: #ef4444 !important; }
+
+        /* Dropzone */
+        html.dark .dropzone { border-color: #374151 !important; }
+        html.dark .dropzone:hover, html.dark .dropzone.drag-over { border-color: #6366f1 !important; background: #1e2d6b !important; }
+        html.dark .dropzone-icon  { background: #252840 !important; }
+        html.dark .dropzone-title { color: #cbd5e1 !important; }
+        html.dark .dropzone-sub   { color: #64748b !important; }
+        html.dark .dropzone-file  { color: #818cf8 !important; }
+        html.dark .btn-upload  { background: #6366f1 !important; border-color: #6366f1 !important; }
+        html.dark .btn-upload:hover { background: #4f46e5 !important; }
+        html.dark .upload-note { color: #64748b !important; }
+
+        /* Toast */
+        html.dark .toast { background: #1e2130 !important; border-color: #2d3148 !important; }
+        html.dark .toast-title { color: #e2e8f0 !important; }
+        html.dark .toast-sub   { color: #94a3b8 !important; }
+        html.dark .toast-bar   { background: #2d3148 !important; }
+
     </style>
 </head>
 <body>
