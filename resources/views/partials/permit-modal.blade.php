@@ -23,7 +23,7 @@
 
                 {{-- REQUESTOR --}}
                 <div class="form-group">
-                    <label class="form-label">Requestor's Name <span style="color:var(--red)">*</span></label>
+                    <label class="form-label">Requestor's Name <span style="color:#ef4444">*</span></label>
                     <input type="text" name="requestor_name" class="form-control"
                            placeholder="Full name of requestor" required
                            value="{{ old('requestor_name') }}">
@@ -37,22 +37,22 @@
                 </div>
 
                 {{-- DECEASED INFO --}}
-                <div class="form-divider">Deceased Information</div>
+                <div class="section-divider" style="margin-top:.5rem">Deceased Information</div>
 
                 {{-- Name row: First · Middle · Last --}}
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem">
                     <div class="form-group">
-                        <label class="form-label">First Name <span style="color:var(--red)">*</span></label>
+                        <label class="form-label">First Name <span style="color:#ef4444">*</span></label>
                         <input type="text" name="first_name" class="form-control"
                                placeholder="e.g. Juan" required value="{{ old('first_name') }}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Middle Name <span style="font-weight:400;text-transform:none;font-family:sans-serif;font-size:10px;color:var(--text-3)">optional</span></label>
+                        <label class="form-label">Middle Name <span style="font-weight:400;text-transform:none;font-size:10px;color:#9ca3af">optional</span></label>
                         <input type="text" name="middle_name" class="form-control"
                                placeholder="e.g. Santos" value="{{ old('middle_name') }}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Last Name <span style="color:var(--red)">*</span></label>
+                        <label class="form-label">Last Name <span style="color:#ef4444">*</span></label>
                         <input type="text" name="last_name" class="form-control"
                                placeholder="e.g. Dela Cruz" required value="{{ old('last_name') }}">
                     </div>
@@ -61,7 +61,7 @@
                 {{-- Extension --}}
                 <div style="display:grid;grid-template-columns:180px 1fr;gap:.6rem;align-items:start">
                     <div class="form-group">
-                        <label class="form-label">Extension <span style="font-weight:400;text-transform:none;font-family:sans-serif;font-size:10px;color:var(--text-3)">optional</span></label>
+                        <label class="form-label">Extension <span style="font-weight:400;text-transform:none;font-size:10px;color:#9ca3af">optional</span></label>
                         <select name="name_extension" class="form-control">
                             <option value="">None</option>
                             <option value="Jr."  {{ old('name_extension')==='Jr.'  ?'selected':'' }}>Jr.</option>
@@ -72,7 +72,7 @@
                             <option value="V"    {{ old('name_extension')==='V'    ?'selected':'' }}>V</option>
                         </select>
                     </div>
-                    <div style="padding-top:1.4rem;font-size:11px;color:var(--text-3);font-family:var(--mono);line-height:1.5">
+                    <div style="padding-top:1.55rem;font-size:11px;color:#9ca3af;line-height:1.6">
                         Use for Jr., Sr., II, III, etc.<br>Appended to the last name.
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                 {{-- Date of Death · Kind of Burial --}}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
                     <div class="form-group">
-                        <label class="form-label">Date of Death <span style="color:var(--red)">*</span></label>
+                        <label class="form-label">Date of Death <span style="color:#ef4444">*</span></label>
                         <input type="date" name="date_of_death" class="form-control"
                                required value="{{ old('date_of_death') }}">
                     </div>
@@ -118,7 +118,7 @@
                 </div>
 
                 {{-- FEES --}}
-                <div class="form-divider">Burial Permit Fees</div>
+                <div class="section-divider" style="margin-top:.5rem">Burial Permit Fees</div>
 
                 <div class="fee-grid">
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">
@@ -127,7 +127,7 @@
                         <span class="fee-amount">₱1,000.00</span>
                     </div>
 
-                    <div class="fee-section-label">Niches (New)</div>
+                    <p style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin:.4rem 0 .1rem .25rem">Niches (New)</p>
 
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">
                         <input type="radio" name="burial_fee_type" value="niche_1st" id="pm_fee_1st" {{ old('burial_fee_type')==='niche_1st'?'checked':'' }}>
@@ -150,7 +150,7 @@
                         <span class="fee-amount">₱5,300.00</span>
                     </div>
 
-                    <div class="fee-section-label">Bone Niches</div>
+                    <p style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin:.4rem 0 .1rem .25rem">Bone Niches</p>
 
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">
                         <input type="radio" name="burial_fee_type" value="bone_niches" id="pm_fee_bone" {{ old('burial_fee_type')==='bone_niches'?'checked':'' }}>
@@ -163,7 +163,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn-cancel" onclick="closePM()">Cancel</button>
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-primary">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
@@ -178,27 +178,44 @@
 function openPM()  { document.getElementById('permitModal').classList.add('open'); }
 function closePM() { document.getElementById('permitModal').classList.remove('open'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePM(); });
-// Support ?modal=new in URL (e.g. from FAB on dashboard)
 if (new URLSearchParams(location.search).get('modal') === 'new' ||
     location.hash === '#new') {
     openPM();
     history.replaceState(null, '', location.pathname);
 }
 </script>
+
 <style>
+/* Modal scroll containment */
 #permitModal .modal {
     max-height: 90vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+}
+#permitModal .modal form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 #permitModal .modal-body {
-    max-height: calc(90vh - 120px); /* subtract header + footer height */
+    flex: 1;
     overflow-y: auto;
     overscroll-behavior: contain;
+    padding: 1.25rem;
 }
+#permitModal .modal-footer {
+    flex-shrink: 0;
+}
+
 /* Thin scrollbar */
 #permitModal .modal-body::-webkit-scrollbar { width: 4px; }
 #permitModal .modal-body::-webkit-scrollbar-track { background: transparent; }
 #permitModal .modal-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 #permitModal .modal-body::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* Dark mode */
+html.dark #permitModal .modal-body::-webkit-scrollbar-thumb { background: #374151; }
+html.dark #permitModal .modal-body::-webkit-scrollbar-thumb:hover { background: #4b5563; }
 </style>

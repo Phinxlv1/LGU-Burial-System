@@ -45,27 +45,13 @@ html.dark .topbar-date { color: #64748b !important; }
 html.dark .role-tag { background: #4f46e5 !important; }
 
 /* Panels / Cards */
-html.dark .panel,
-html.dark .upload-card,
-html.dark .stat-card,
-html.dark .card,
-html.dark .docs-card,
-html.dark .guide-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+html.dark .panel, html.dark .upload-card, html.dark .stat-card, html.dark .card, html.dark .docs-card, html.dark .guide-card { background: #1e2130 !important; border-color: #2d3148 !important; }
 
-html.dark .panel-head,
-html.dark .panel-header,
-html.dark .card-head,
-html.dark .docs-head { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+html.dark .panel-head, html.dark .panel-header, html.dark .card-head, html.dark .docs-head { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
 
-html.dark .panel-head h3,
-html.dark .panel-header h3,
-html.dark .card-head-title,
-html.dark .upload-card h3,
-html.dark .docs-head-title { color: #e2e8f0 !important; }
+html.dark .panel-head h3, html.dark .panel-header h3, html.dark .card-head-title, html.dark .upload-card h3, html.dark .docs-head-title { color: #e2e8f0 !important; }
 
-html.dark .panel-head-sub,
-html.dark .panel-head a,
-html.dark .docs-head-sub { color: #64748b !important; }
+html.dark .panel-head-sub, html.dark .panel-head a, html.dark .docs-head-sub { color: #64748b !important; }
 
 html.dark .view-all { color: #818cf8 !important; }
 
@@ -201,10 +187,6 @@ html.dark .info-value.empty { color: #374151 !important; }
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Burial Permits
             </a>
-            <a href="{{ route('deceased.index') }}" class="nav-item {{ request()->routeIs('deceased.*') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                Deceased Records
-            </a>
             <div class="nav-section">Cemetery</div>
             <a href="{{ route('cemetery.map') }}" class="nav-item {{ request()->routeIs('cemetery.*') ? 'active' : '' }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -254,7 +236,6 @@ html.dark .info-value.empty { color: #374151 !important; }
 <script>
 // ── Dark mode: persisted in localStorage ──
 (function() {
-    // Apply immediately to avoid flash
     if (localStorage.getItem('lgu_dark') === '1') {
         document.documentElement.classList.add('dark');
     }
@@ -271,7 +252,6 @@ function updateDarkLabel(isDark) {
     if (label) label.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
 }
 
-// Set correct label on load
 document.addEventListener('DOMContentLoaded', function() {
     updateDarkLabel(document.documentElement.classList.contains('dark'));
 });

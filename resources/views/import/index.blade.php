@@ -16,12 +16,7 @@
         .role-tag { background: #1a2744; color: #fff; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: .04em; text-transform: uppercase; }
         .content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
 
-        .guide-card { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 1rem 1.25rem; }
-        .guide-card h3 { font-size: 13px; font-weight: 700; color: #1e40af; margin-bottom: .5rem; }
-        .guide-cols { display: flex; flex-wrap: wrap; gap: .3rem .6rem; }
-        .col-tag { font-size: 11px; font-family: monospace; background: #dbeafe; color: #1e3a8a; padding: 2px 8px; border-radius: 4px; border: 1px solid #bfdbfe; }
-        .col-tag.required { background: #fef3c7; color: #92400e; border-color: #fde68a; }
-        .guide-note { font-size: 11px; color: #3b82f6; margin-top: .5rem; }
+
 
         .upload-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.25rem 1.5rem; }
         .upload-card h3 { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 1rem; }
@@ -103,30 +98,7 @@
 
     <div class="content">
 
-        {{-- Column Guide --}}
-        <div class="guide-card">
-            <h3>📋 Required Column Headers in your Excel / CSV</h3>
-            <div class="guide-cols">
-                <span class="col-tag required">first_name ✱</span>
-                <span class="col-tag required">last_name ✱</span>
-                <span class="col-tag required">date_of_death ✱</span>
-                <span class="col-tag">permit_type</span>
-                <span class="col-tag">applicant_name</span>
-                <span class="col-tag">status</span>
-                <span class="col-tag">nationality</span>
-                <span class="col-tag">age</span>
-                <span class="col-tag">sex</span>
-                <span class="col-tag">kind_of_burial</span>
-                <span class="col-tag">permit_number</span>
-                <span class="col-tag">applicant_contact</span>
-                <span class="col-tag">expiry_date</span>
-            </div>
-            <div class="guide-note">
-                ✱ Required &nbsp;·&nbsp;
-                <strong>permit_type</strong>: cemented, niche_1st, niche_2nd, niche_3rd, niche_4th, bone_niches &nbsp;·&nbsp;
-                <strong>status</strong>: pending, approved, released, expired
-            </div>
-        </div>
+
 
         {{-- Upload --}}
         <div class="upload-card">
