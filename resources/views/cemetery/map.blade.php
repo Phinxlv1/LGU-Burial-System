@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>/* dark-mode anti-flash */
-    (function(){try{var k='lgu_dark_{{ auth()->id() }}';if(localStorage.getItem(k)==='1')document.documentElement.classList.add('dark');}catch(e){}})();
+    (function(){try{if(localStorage.getItem('lgu_dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">

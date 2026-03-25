@@ -3,6 +3,9 @@
 <head>
     @livewireStyles
     <meta charset="UTF-8">
+    <script>/* dark-mode anti-flash */
+    (function(){try{if(localStorage.getItem('lgu_dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — LGU Carmen</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -505,6 +508,130 @@
         .d8 { animation-delay: .32s; }
 
         .empty-row td { text-align: center; color: var(--text-3); padding: 2.5rem; font-size: 13px; }
+
+        /* ── Scrollable table ── */
+        .table-scroll {
+            max-height: 420px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+        .table-scroll::-webkit-scrollbar { width: 5px; }
+        .table-scroll::-webkit-scrollbar-track { background: transparent; }
+        .table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        .table-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .table-scroll thead th { position: sticky; top: 0; z-index: 2; }
+
+        /* ══════════════════════════════
+           DARK MODE OVERRIDES
+        ══════════════════════════════ */
+        html.dark body { background: #0f1117 !important; color: #e2e8f0 !important; }
+        html.dark .main { background: #0f1117 !important; }
+
+        /* Topbar */
+        html.dark .topbar { background: #1a1d27 !important; border-bottom-color: #2d3148 !important; }
+        html.dark .topbar-title { color: #e2e8f0 !important; }
+        html.dark .topbar-date { color: #64748b !important; }
+        html.dark .role-pill { background: #1e2d6b !important; color: #818cf8 !important; border-color: #374191 !important; }
+
+        /* Hero */
+        html.dark .hero { background: #111827 !important; }
+        html.dark .hero-stats { background: rgba(255,255,255,.04) !important; border-color: rgba(255,255,255,.08) !important; }
+
+        /* Stat cards */
+        html.dark .stat-card { background: #1e2130 !important; border-color: #2d3148 !important; }
+        html.dark .stat-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.3) !important; }
+        html.dark .stat-label { color: #94a3b8 !important; }
+        html.dark .stat-sub { color: #64748b !important; }
+        html.dark .stat-icon.blue  { background: #1e2d6b !important; }
+        html.dark .stat-icon.amber { background: #422006 !important; }
+        html.dark .stat-icon.red   { background: #450a0a !important; }
+        html.dark .stat-icon.green { background: #052e16 !important; }
+        html.dark .stat-pill.neu { background: #252840 !important; color: #64748b !important; }
+        html.dark .stat-pill.ok  { background: #052e16 !important; color: #86efac !important; }
+        html.dark .stat-pill.bad { background: #450a0a !important; color: #fca5a5 !important; }
+
+        /* Panels */
+        html.dark .panel { background: #1e2130 !important; border-color: #2d3148 !important; }
+        html.dark .panel-head { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
+        html.dark .panel-title { color: #e2e8f0 !important; }
+        html.dark .panel-sub { color: #64748b !important; }
+        html.dark .link-arrow { color: #818cf8 !important; }
+
+        /* Tables */
+        html.dark th { background: #181b29 !important; color: #64748b !important; }
+        html.dark td { color: #cbd5e1 !important; border-top-color: #2d3148 !important; }
+        html.dark tbody tr:hover td { background: #252840 !important; }
+        html.dark tr.row-expired td { background: #2a1515 !important; border-top-color: #7f1d1d !important; }
+        html.dark tr.row-expired:hover td { background: #351a1a !important; }
+        html.dark .permit-mono { color: #818cf8 !important; }
+        html.dark .deceased-name { color: #e2e8f0 !important; }
+        html.dark .empty-row td { color: #4b5563 !important; }
+
+        /* Badges */
+        html.dark .badge-yellow { background: #422006 !important; color: #fde68a !important; }
+        html.dark .badge-green  { background: #052e16 !important; color: #86efac !important; }
+        html.dark .badge-blue   { background: #0c1a4a !important; color: #93c5fd !important; }
+        html.dark .badge-red    { background: #450a0a !important; color: #fca5a5 !important; }
+        html.dark .badge-orange { background: #431407 !important; color: #fdba74 !important; }
+
+        /* Buttons */
+        html.dark .btn-xs { background: #252840 !important; border-color: #2d3148 !important; color: #94a3b8 !important; }
+        html.dark .btn-xs:hover { border-color: #6366f1 !important; color: #818cf8 !important; background: #1e2d6b !important; }
+        html.dark .btn-xs.danger { background: #450a0a !important; border-color: #7f1d1d !important; color: #fca5a5 !important; }
+        html.dark .btn-xs.danger:hover { background: #7f1d1d !important; border-color: #ef4444 !important; }
+        html.dark .btn-new { background: #6366f1 !important; }
+        html.dark .btn-new:hover { background: #4f46e5 !important; }
+
+        /* Pagination */
+        html.dark .pager { border-top-color: #2d3148 !important; }
+        html.dark .pager-info { color: #64748b !important; }
+        html.dark .pager-btn { background: #252840 !important; border-color: #2d3148 !important; color: #94a3b8 !important; }
+        html.dark .pager-btn:hover { border-color: #6366f1 !important; color: #818cf8 !important; }
+        html.dark .pager-btn.active { background: #6366f1 !important; border-color: #6366f1 !important; color: #fff !important; }
+        html.dark .pager-btn.disabled { color: #374151 !important; border-color: #2d3148 !important; }
+
+        /* Alerts list */
+        html.dark .alert-row { border-top-color: #2d3148 !important; }
+        html.dark .alert-row:hover { background: #252840 !important; }
+        html.dark .alert-name { color: #e2e8f0 !important; }
+        html.dark .alert-meta { color: #64748b !important; }
+        html.dark .alert-indicator.red { box-shadow: 0 0 0 3px #450a0a !important; }
+        html.dark .alert-indicator.amber { box-shadow: 0 0 0 3px #422006 !important; }
+
+        /* Chart */
+        html.dark .chart-body canvas { filter: brightness(.9); }
+
+        /* Progress bars */
+        html.dark .prog-name { color: #94a3b8 !important; }
+        html.dark .prog-count { color: #64748b !important; }
+        html.dark .prog-track { background: #252840 !important; }
+
+        /* Scrollbar dark */
+        html.dark .table-scroll { scrollbar-color: #374151 transparent; }
+        html.dark .table-scroll::-webkit-scrollbar-thumb { background: #374151; }
+        html.dark .table-scroll::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+
+        /* Forms / Modals */
+        html.dark .modal { background: #1e2130 !important; }
+        html.dark .modal-body { background: #1e2130 !important; }
+        html.dark .modal-footer { background: #181b29 !important; border-top-color: #2d3148 !important; }
+        html.dark .form-control, html.dark select.form-control { background: #252840 !important; border-color: #2d3148 !important; color: #e2e8f0 !important; }
+        html.dark .form-control:focus { border-color: #6366f1 !important; }
+        html.dark .form-label { color: #94a3b8 !important; }
+        html.dark .form-divider { color: #818cf8 !important; border-bottom-color: #2d3148 !important; }
+        html.dark .fee-row { border-color: #2d3148 !important; background: #1e2130 !important; }
+        html.dark .fee-row:hover { background: #1e2d6b !important; border-color: #6366f1 !important; }
+        html.dark .fee-row label { color: #cbd5e1 !important; }
+        html.dark .fee-amount { color: #818cf8 !important; }
+        html.dark .btn-cancel { background: #252840 !important; border-color: #2d3148 !important; color: #94a3b8 !important; }
+        html.dark .btn-submit { background: #6366f1 !important; }
+        html.dark .btn-submit:hover { background: #4f46e5 !important; }
+
+        /* Toast */
+        html.dark .toast { background: #1e2130 !important; border-color: #2d3148 !important; }
+        html.dark .toast-title { color: #e2e8f0 !important; }
+        html.dark .toast-msg { color: #94a3b8 !important; }
     </style>
 </head>
 <body>
@@ -600,7 +727,7 @@
                 <div class="panel-head">
                     <div>
                         <div class="panel-title">Recent Permit Applications</div>
-                        <div class="panel-sub">{{ $recentPermits->total() }} total &nbsp;·&nbsp; showing latest {{ $recentPermits->count() }}</div>
+                        <div class="panel-sub">{{ $recentPermits->count() }} records</div>
                     </div>
                     <a href="{{ route('permits.index') }}" class="link-arrow">
                         View all
@@ -608,6 +735,7 @@
                     </a>
                 </div>
 
+                <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
@@ -662,27 +790,7 @@
                         @endforelse
                     </tbody>
                 </table>
-
-                @if($recentPermits->hasPages())
-                <div class="pager">
-                    <span class="pager-info">{{ $recentPermits->firstItem() }}–{{ $recentPermits->lastItem() }} of {{ $recentPermits->total() }}</span>
-                    <div class="pager-btns">
-                        @if($recentPermits->onFirstPage())
-                            <span class="pager-btn disabled">‹</span>
-                        @else
-                            <a href="{{ $recentPermits->previousPageUrl() }}" class="pager-btn">‹</a>
-                        @endif
-                        @php $cur=$recentPermits->currentPage();$last=$recentPermits->lastPage();$pages=[];for($p=1;$p<=$last;$p++)if($p==1||$p==$last||abs($p-$cur)<=1)$pages[]=$p;sort($pages); @endphp
-                        @php $prev=null; @endphp
-                        @foreach($pages as $page)
-                            @if($prev!==null&&$page-$prev>1)<span class="pager-btn disabled" style="border:none">…</span>@endif
-                            @if($page==$cur)<span class="pager-btn active">{{$page}}</span>@else<a href="{{ $recentPermits->url($page) }}" class="pager-btn">{{$page}}</a>@endif
-                            @php $prev=$page; @endphp
-                        @endforeach
-                        @if($recentPermits->hasMorePages())<a href="{{ $recentPermits->nextPageUrl() }}" class="pager-btn">›</a>@else<span class="pager-btn disabled">›</span>@endif
-                    </div>
                 </div>
-                @endif
             </div>
 
             <!-- RIGHT COLUMN -->

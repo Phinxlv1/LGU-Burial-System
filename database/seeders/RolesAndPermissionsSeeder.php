@@ -2,17 +2,18 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions
         $permissions = [
@@ -60,25 +61,25 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Create Super Admin user
         $superAdminUser = User::firstOrCreate(
-    ['email' => 'superadmin@lgucarmen.gov.ph'],
-    [
-        'name'     => 'Super Admin',
-        'password' => bcrypt('superadmin123'),
-        'role'     => 'super_admin',
-    ]
-);
-$superAdminUser->update(['role' => 'super_admin']);
+            ['email' => 'superadmin@lgucarmen.gov.ph'],
+            [
+                'name' => 'Super Admin',
+                'password' => bcrypt('superadmin123'),
+                'role' => 'super_admin',
+            ]
+        );
+        $superAdminUser->update(['role' => 'super_admin']);
 
         // Create Admin user
         $adminUser = User::firstOrCreate(
-    ['email' => 'admin@lgucarmen.gov.ph'],
-    [
-        'name'     => 'MCR Admin',
-        'password' => bcrypt('admin123'),
-        'role'     => 'admin',
-    ]
-);
-$adminUser->update(['role' => 'admin']);
+            ['email' => 'admin@lgucarmen.gov.ph'],
+            [
+                'name' => 'MCR Admin',
+                'password' => bcrypt('admin123'),
+                'role' => 'admin',
+            ]
+        );
+        $adminUser->update(['role' => 'admin']);
 
         $this->command->info('Roles and users created!');
         $this->command->info('Super Admin: superadmin@lgucarmen.gov.ph / superadmin123');

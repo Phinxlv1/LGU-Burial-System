@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class DeceasedPerson extends Model
 {
@@ -12,18 +12,18 @@ class DeceasedPerson extends Model
     protected $table = 'deceased_persons';
 
     protected $fillable = [
-    'first_name',
-    'middle_name',
-    'last_name',
-    'name_extension',  // ← make sure this is here
-    'name_number',     // ← make sure this is here
-    'phone_number',    // ← make sure this is here
-    'date_of_death',
-    'nationality',
-    'age',
-    'sex',
-    'kind_of_burial',
-];
+        'first_name',
+        'middle_name',
+        'last_name',
+        'name_extension',  // ← make sure this is here
+        'name_number',     // ← make sure this is here
+        'phone_number',    // ← make sure this is here
+        'date_of_death',
+        'nationality',
+        'age',
+        'sex',
+        'kind_of_burial',
+    ];
 
     protected $casts = [
         'date_of_death' => 'date',

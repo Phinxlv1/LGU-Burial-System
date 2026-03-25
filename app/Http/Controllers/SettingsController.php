@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BurialPermit;
+use App\Models\DeceasedPerson;
 use App\Models\ImportLog;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class SettingsController extends Controller
@@ -19,7 +22,10 @@ class SettingsController extends Controller
 
     private function load(): array
     {
-        if (!file_exists($this->path)) return [];
+        if (! file_exists($this->path)) {
+            return [];
+        }
+
         return json_decode(file_get_contents($this->path), true) ?? [];
     }
 
@@ -34,7 +40,7 @@ class SettingsController extends Controller
     public function index()
     {
         $settings = $this->load();
-        $users    = User::orderBy('created_at')->get();
+        $users = User::orderBy('created_at')->get();
 
         return view('settings.index', compact('settings', 'users'));
     }
@@ -48,30 +54,30 @@ class SettingsController extends Controller
 
         match ($section) {
             'general' => $this->updateGeneral($request, $settings),
-            'fees'    => $this->updateFees($request, $settings),
+            'fees' => $this->updateFees($request, $settings),
             'notifications' => $this->updateNotifications($request, $settings),
-            default   => abort(404),
+            default => abort(404),
         };
 
         $this->save($settings);
 
         return redirect()->route('settings.index')
-            ->with('success', ucfirst($section) . ' settings saved successfully.');
+            ->with('success', ucfirst($section).' settings saved successfully.');
     }
 
     private function updateGeneral(Request $request, array &$settings): void
     {
         $request->validate([
-            'municipality_name'   => 'required|string|max:100',
-            'province'            => 'required|string|max:100',
-            'registrar_name'      => 'nullable|string|max:100',
-            'mayor_name'          => 'nullable|string|max:100',
-            'office_address'      => 'nullable|string|max:255',
-            'permit_prefix'       => 'required|string|max:10',
+            'municipality_name' => 'required|string|max:100',
+            'province' => 'required|string|max:100',
+            'registrar_name' => 'nullable|string|max:100',
+            'mayor_name' => 'nullable|string|max:100',
+            'office_address' => 'nullable|string|max:255',
+            'permit_prefix' => 'required|string|max:10',
             'permit_expiry_years' => 'required|integer|in:1,2,3,5',
             'expiry_warning_days' => 'required|integer|min:7|max:90',
-            'date_format'         => 'required|string',
-            'per_page'            => 'required|integer|in:10,15,20,25,50',
+            'date_format' => 'required|string',
+            'per_page' => 'required|integer|in:10,15,20,25,50',
         ]);
 
         foreach ([
@@ -89,10 +95,10 @@ class SettingsController extends Controller
 
         foreach ($feeKeys as $key) {
             $settings['fees'][$key] = [
-                'tomb'   => (int) $request->input("fees.{$key}.tomb",   0),
+                'tomb' => (int) $request->input("fees.{$key}.tomb", 0),
                 'permit' => (int) $request->input("fees.{$key}.permit", 0),
-                'maint'  => (int) $request->input("fees.{$key}.maint",  0),
-                'app'    => (int) $request->input("fees.{$key}.app",    0),
+                'maint' => (int) $request->input("fees.{$key}.maint", 0),
+                'app' => (int) $request->input("fees.{$key}.app", 0),
             ];
         }
     }
@@ -142,23 +148,24 @@ class SettingsController extends Controller
     public function storeUser(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users,email',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'role'     => 'required|in:admin,super_admin',
+            'role' => 'required|in:admin,super_admin',
         ]);
 
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role'     => $request->role,
+            'role' => $request->role,
         ]);
 
         // Assign Spatie role too
         try {
             $user->assignRole($request->role);
-        } catch (\Throwable) {}
+        } catch (\Throwable) {
+        }
 
         return redirect()->route('settings.index', ['#users'])
             ->with('success', "{$request->name} added successfully.");
@@ -181,248 +188,247 @@ class SettingsController extends Controller
     public function dataQualityScan()
     {
         $issues = [];
- 
+
         // ── 1. DUPLICATE PERMITS: same deceased_id appears more than once ──
-        $dupPermits = \App\Models\BurialPermit::select('deceased_id', \Illuminate\Support\Facades\DB::raw('COUNT(*) as cnt'), \Illuminate\Support\Facades\DB::raw('GROUP_CONCAT(id) as ids'))
+        $dupPermits = BurialPermit::select('deceased_id', DB::raw('COUNT(*) as cnt'), DB::raw('GROUP_CONCAT(id) as ids'))
             ->groupBy('deceased_id')
             ->having('cnt', '>', 1)
             ->with('deceased')
             ->get();
- 
+
         if ($dupPermits->isNotEmpty()) {
             $records = [];
             foreach ($dupPermits as $dup) {
                 $permitIds = explode(',', $dup->ids);
-                $permits = \App\Models\BurialPermit::whereIn('id', $permitIds)->get();
+                $permits = BurialPermit::whereIn('id', $permitIds)->get();
                 foreach ($permits as $p) {
                     $deceased = $dup->deceased;
                     $records[] = [
-                        'id'         => 'dup-permit-' . $p->id,
-                        'permit_id'  => $p->id,
-                        'label'      => $p->permit_number,
-                        'sub'        => ($deceased ? $deceased->last_name.', '.$deceased->first_name : 'Unknown') . ' — ' . ucfirst($p->status),
+                        'id' => 'dup-permit-'.$p->id,
+                        'permit_id' => $p->id,
+                        'label' => $p->permit_number,
+                        'sub' => ($deceased ? $deceased->last_name.', '.$deceased->first_name : 'Unknown').' — '.ucfirst($p->status),
                         'field_name' => 'deceased_id',
-                        'field_value'=> (string)$p->deceased_id,
-                        'edit_url'   => route('permits.show', $p),
+                        'field_value' => (string) $p->deceased_id,
+                        'edit_url' => route('permits.show', $p),
                     ];
                 }
             }
             $issues[] = [
-                'id'          => 'dup-same-deceased',
-                'type'        => 'duplicate',
-                'severity'    => 'high',
-                'title'       => 'Multiple permits for the same deceased person',
+                'id' => 'dup-same-deceased',
+                'type' => 'duplicate',
+                'severity' => 'high',
+                'title' => 'Multiple permits for the same deceased person',
                 'description' => 'Each deceased person should have only one active permit. Review these and delete the duplicate(s) or verify they are distinct cases.',
-                'records'     => $records,
+                'records' => $records,
             ];
         }
- 
+
         // ── 2. DUPLICATE PERMIT NUMBERS ──
-        $dupNums = \App\Models\BurialPermit::select('permit_number', \Illuminate\Support\Facades\DB::raw('COUNT(*) as cnt'))
+        $dupNums = BurialPermit::select('permit_number', DB::raw('COUNT(*) as cnt'))
             ->groupBy('permit_number')
             ->having('cnt', '>', 1)
             ->pluck('permit_number');
- 
+
         if ($dupNums->isNotEmpty()) {
             $records = [];
             foreach ($dupNums as $num) {
-                $permits = \App\Models\BurialPermit::where('permit_number', $num)->with('deceased')->get();
+                $permits = BurialPermit::where('permit_number', $num)->with('deceased')->get();
                 foreach ($permits as $p) {
                     $records[] = [
-                        'id'          => 'dupnum-' . $p->id,
-                        'permit_id'   => $p->id,
-                        'label'       => $p->permit_number,
-                        'sub'         => optional($p->deceased)->last_name . ', ' . optional($p->deceased)->first_name,
-                        'field_name'  => 'permit_number',
+                        'id' => 'dupnum-'.$p->id,
+                        'permit_id' => $p->id,
+                        'label' => $p->permit_number,
+                        'sub' => optional($p->deceased)->last_name.', '.optional($p->deceased)->first_name,
+                        'field_name' => 'permit_number',
                         'field_value' => $p->permit_number,
-                        'edit_url'    => route('permits.show', $p),
+                        'edit_url' => route('permits.show', $p),
                     ];
                 }
             }
             $issues[] = [
-                'id'          => 'dup-permit-numbers',
-                'type'        => 'duplicate',
-                'severity'    => 'high',
-                'title'       => 'Duplicate permit numbers detected',
+                'id' => 'dup-permit-numbers',
+                'type' => 'duplicate',
+                'severity' => 'high',
+                'title' => 'Duplicate permit numbers detected',
                 'description' => 'Permit numbers must be unique. These permits share the same number — delete the duplicate or correct the numbering.',
-                'records'     => $records,
+                'records' => $records,
             ];
         }
- 
+
         // ── 3. MISSING: permits with no deceased linked ──
-        $noDeceased = \App\Models\BurialPermit::whereNull('deceased_id')->orWhereDoesntHave('deceased')->get();
+        $noDeceased = BurialPermit::whereNull('deceased_id')->orWhereDoesntHave('deceased')->get();
         if ($noDeceased->isNotEmpty()) {
             $issues[] = [
-                'id'          => 'missing-deceased',
-                'type'        => 'missing',
-                'severity'    => 'high',
-                'title'       => 'Permits missing a deceased person record',
+                'id' => 'missing-deceased',
+                'type' => 'missing',
+                'severity' => 'high',
+                'title' => 'Permits missing a deceased person record',
                 'description' => 'These permits have no linked deceased person. They may have been imported incorrectly. Attach the correct deceased record or delete the permit.',
-                'records'     => $noDeceased->map(fn($p) => [
-                    'id'          => 'miss-dec-' . $p->id,
-                    'permit_id'   => $p->id,
-                    'label'       => $p->permit_number,
-                    'sub'         => 'Applicant: ' . ($p->applicant_name ?? 'Unknown'),
-                    'field_name'  => 'deceased_id',
+                'records' => $noDeceased->map(fn ($p) => [
+                    'id' => 'miss-dec-'.$p->id,
+                    'permit_id' => $p->id,
+                    'label' => $p->permit_number,
+                    'sub' => 'Applicant: '.($p->applicant_name ?? 'Unknown'),
+                    'field_name' => 'deceased_id',
                     'field_value' => null,
-                    'edit_url'    => route('permits.show', $p),
+                    'edit_url' => route('permits.show', $p),
                 ])->toArray(),
             ];
         }
- 
+
         // ── 4. MISSING: deceased with no date_of_death ──
-        $noDod = \App\Models\DeceasedPerson::whereNull('date_of_death')->get();
+        $noDod = DeceasedPerson::whereNull('date_of_death')->get();
         if ($noDod->isNotEmpty()) {
             $issues[] = [
-                'id'          => 'missing-dod',
-                'type'        => 'missing',
-                'severity'    => 'medium',
-                'title'       => 'Deceased records missing date of death',
+                'id' => 'missing-dod',
+                'type' => 'missing',
+                'severity' => 'medium',
+                'title' => 'Deceased records missing date of death',
                 'description' => 'Date of death is required for official permits. Fill in the missing date on each record.',
-                'records'     => $noDod->map(fn($d) => [
-                    'id'          => 'miss-dod-' . $d->id,
-                    'permit_id'   => null,
-                    'label'       => $d->last_name . ', ' . $d->first_name,
-                    'sub'         => 'Record #' . $d->id . ' — Added ' . $d->created_at->format('M d, Y'),
-                    'field_name'  => 'date_of_death',
+                'records' => $noDod->map(fn ($d) => [
+                    'id' => 'miss-dod-'.$d->id,
+                    'permit_id' => null,
+                    'label' => $d->last_name.', '.$d->first_name,
+                    'sub' => 'Record #'.$d->id.' — Added '.$d->created_at->format('M d, Y'),
+                    'field_name' => 'date_of_death',
                     'field_value' => null,
-                    'edit_url'    => route('deceased.show', $d),
+                    'edit_url' => route('deceased.show', $d),
                 ])->toArray(),
             ];
         }
- 
+
         // ── 5. MISSING: permits with no applicant name ──
-        $noApplicant = \App\Models\BurialPermit::where(function($q) {
+        $noApplicant = BurialPermit::where(function ($q) {
             $q->whereNull('applicant_name')->orWhere('applicant_name', '')->orWhere('applicant_name', 'Unknown');
         })->with('deceased')->get();
         if ($noApplicant->isNotEmpty()) {
             $issues[] = [
-                'id'          => 'missing-applicant',
-                'type'        => 'missing',
-                'severity'    => 'medium',
-                'title'       => 'Permits with missing or placeholder applicant name',
+                'id' => 'missing-applicant',
+                'type' => 'missing',
+                'severity' => 'medium',
+                'title' => 'Permits with missing or placeholder applicant name',
                 'description' => 'The requesting party\'s name is required. Update these permits with the correct applicant information.',
-                'records'     => $noApplicant->map(fn($p) => [
-                    'id'          => 'miss-app-' . $p->id,
-                    'permit_id'   => $p->id,
-                    'label'       => $p->permit_number,
-                    'sub'         => optional($p->deceased)->last_name . ', ' . optional($p->deceased)->first_name,
-                    'field_name'  => 'applicant_name',
+                'records' => $noApplicant->map(fn ($p) => [
+                    'id' => 'miss-app-'.$p->id,
+                    'permit_id' => $p->id,
+                    'label' => $p->permit_number,
+                    'sub' => optional($p->deceased)->last_name.', '.optional($p->deceased)->first_name,
+                    'field_name' => 'applicant_name',
                     'field_value' => $p->applicant_name ?? null,
-                    'edit_url'    => route('permits.show', $p),
+                    'edit_url' => route('permits.show', $p),
                 ])->toArray(),
             ];
         }
- 
+
         // ── 6. MISSING: released permits with no expiry date ──
-        $noExpiry = \App\Models\BurialPermit::where('status', 'released')->whereNull('expiry_date')->with('deceased')->get();
+        $noExpiry = BurialPermit::where('status', 'released')->whereNull('expiry_date')->with('deceased')->get();
         if ($noExpiry->isNotEmpty()) {
             $issues[] = [
-                'id'          => 'missing-expiry',
-                'type'        => 'missing',
-                'severity'    => 'medium',
-                'title'       => 'Released permits with no expiry date set',
+                'id' => 'missing-expiry',
+                'type' => 'missing',
+                'severity' => 'medium',
+                'title' => 'Released permits with no expiry date set',
                 'description' => 'Released permits should always have an expiry date. These were likely released without the system auto-setting one. Review and set expiry dates.',
-                'records'     => $noExpiry->map(fn($p) => [
-                    'id'          => 'miss-exp-' . $p->id,
-                    'permit_id'   => $p->id,
-                    'label'       => $p->permit_number,
-                    'sub'         => optional($p->deceased)->last_name . ', ' . optional($p->deceased)->first_name . ' — Released ' . $p->updated_at->format('M d, Y'),
-                    'field_name'  => 'expiry_date',
+                'records' => $noExpiry->map(fn ($p) => [
+                    'id' => 'miss-exp-'.$p->id,
+                    'permit_id' => $p->id,
+                    'label' => $p->permit_number,
+                    'sub' => optional($p->deceased)->last_name.', '.optional($p->deceased)->first_name.' — Released '.$p->updated_at->format('M d, Y'),
+                    'field_name' => 'expiry_date',
                     'field_value' => null,
-                    'edit_url'    => route('permits.show', $p),
+                    'edit_url' => route('permits.show', $p),
                 ])->toArray(),
             ];
         }
- 
+
         // ── 7. INCONSISTENT: deceased first/last name appears to be swapped ──
         // (last_name looks like a first name — single short word in last, long compound in first)
-        $possibleSwapped = \App\Models\DeceasedPerson::whereRaw("LENGTH(last_name) < 3 AND LENGTH(first_name) > 8")->get();
+        $possibleSwapped = DeceasedPerson::whereRaw('LENGTH(last_name) < 3 AND LENGTH(first_name) > 8')->get();
         if ($possibleSwapped->isNotEmpty()) {
             $issues[] = [
-                'id'          => 'incon-name-swap',
-                'type'        => 'inconsistent',
-                'severity'    => 'low',
-                'title'       => 'Possible first/last name swap in deceased records',
+                'id' => 'incon-name-swap',
+                'type' => 'inconsistent',
+                'severity' => 'low',
+                'title' => 'Possible first/last name swap in deceased records',
                 'description' => 'These records have a very short last name and a long first name, which may indicate the names were entered in the wrong fields.',
-                'records'     => $possibleSwapped->map(fn($d) => [
-                    'id'          => 'swap-' . $d->id,
-                    'permit_id'   => null,
-                    'label'       => $d->last_name . ', ' . $d->first_name,
-                    'sub'         => 'Record #' . $d->id,
-                    'field_name'  => 'last_name',
+                'records' => $possibleSwapped->map(fn ($d) => [
+                    'id' => 'swap-'.$d->id,
+                    'permit_id' => null,
+                    'label' => $d->last_name.', '.$d->first_name,
+                    'sub' => 'Record #'.$d->id,
+                    'field_name' => 'last_name',
                     'field_value' => $d->last_name,
-                    'edit_url'    => route('deceased.show', $d),
+                    'edit_url' => route('deceased.show', $d),
                 ])->toArray(),
             ];
         }
- 
+
         // ── 8. INCONSISTENT: permit type not in known set ──
-        $knownTypes = ['cemented','niche_1st','niche_2nd','niche_3rd','niche_4th','bone_niches'];
-        $badType = \App\Models\BurialPermit::whereNotIn('permit_type', $knownTypes)->with('deceased')->get();
+        $knownTypes = ['cemented', 'niche_1st', 'niche_2nd', 'niche_3rd', 'niche_4th', 'bone_niches'];
+        $badType = BurialPermit::whereNotIn('permit_type', $knownTypes)->with('deceased')->get();
         if ($badType->isNotEmpty()) {
             $issues[] = [
-                'id'          => 'incon-permit-type',
-                'type'        => 'inconsistent',
-                'severity'    => 'low',
-                'title'       => 'Permits with unrecognised permit type values',
+                'id' => 'incon-permit-type',
+                'type' => 'inconsistent',
+                'severity' => 'low',
+                'title' => 'Permits with unrecognised permit type values',
                 'description' => 'These permits have a permit_type that does not match any known fee category. They may have been imported with old or incorrect values.',
-                'records'     => $badType->map(fn($p) => [
-                    'id'          => 'badtype-' . $p->id,
-                    'permit_id'   => $p->id,
-                    'label'       => $p->permit_number,
-                    'sub'         => optional($p->deceased)->last_name . ', ' . optional($p->deceased)->first_name,
-                    'field_name'  => 'permit_type',
+                'records' => $badType->map(fn ($p) => [
+                    'id' => 'badtype-'.$p->id,
+                    'permit_id' => $p->id,
+                    'label' => $p->permit_number,
+                    'sub' => optional($p->deceased)->last_name.', '.optional($p->deceased)->first_name,
+                    'field_name' => 'permit_type',
                     'field_value' => $p->permit_type,
-                    'edit_url'    => route('permits.show', $p),
+                    'edit_url' => route('permits.show', $p),
                 ])->toArray(),
             ];
         }
- 
+
         // ── 9. INCONSISTENT: deceased records with age <= 0 ──
-        $badAge = \App\Models\DeceasedPerson::where('age', '<=', 0)->whereNotNull('age')->get();
+        $badAge = DeceasedPerson::where('age', '<=', 0)->whereNotNull('age')->get();
         if ($badAge->isNotEmpty()) {
             $issues[] = [
-                'id'          => 'incon-age',
-                'type'        => 'inconsistent',
-                'severity'    => 'low',
-                'title'       => 'Deceased records with invalid age (0 or negative)',
+                'id' => 'incon-age',
+                'type' => 'inconsistent',
+                'severity' => 'low',
+                'title' => 'Deceased records with invalid age (0 or negative)',
                 'description' => 'Age at death should be a positive number. These records likely have a data entry error.',
-                'records'     => $badAge->map(fn($d) => [
-                    'id'          => 'badage-' . $d->id,
-                    'permit_id'   => null,
-                    'label'       => $d->last_name . ', ' . $d->first_name,
-                    'sub'         => 'Record #' . $d->id,
-                    'field_name'  => 'age',
-                    'field_value' => (string)$d->age,
-                    'edit_url'    => route('deceased.show', $d),
+                'records' => $badAge->map(fn ($d) => [
+                    'id' => 'badage-'.$d->id,
+                    'permit_id' => null,
+                    'label' => $d->last_name.', '.$d->first_name,
+                    'sub' => 'Record #'.$d->id,
+                    'field_name' => 'age',
+                    'field_value' => (string) $d->age,
+                    'edit_url' => route('deceased.show', $d),
                 ])->toArray(),
             ];
         }
- 
+
         // ── 10. INCONSISTENT: date_of_death is in the future ──
-        $futureDod = \App\Models\DeceasedPerson::whereNotNull('date_of_death')
+        $futureDod = DeceasedPerson::whereNotNull('date_of_death')
             ->where('date_of_death', '>', now()->toDateString())->get();
         if ($futureDod->isNotEmpty()) {
             $issues[] = [
-                'id'          => 'incon-future-dod',
-                'type'        => 'inconsistent',
-                'severity'    => 'medium',
-                'title'       => 'Deceased records with a future date of death',
+                'id' => 'incon-future-dod',
+                'type' => 'inconsistent',
+                'severity' => 'medium',
+                'title' => 'Deceased records with a future date of death',
                 'description' => 'Date of death cannot be in the future. These records likely have a data entry error (e.g. wrong year).',
-                'records'     => $futureDod->map(fn($d) => [
-                    'id'          => 'futdod-' . $d->id,
-                    'permit_id'   => null,
-                    'label'       => $d->last_name . ', ' . $d->first_name,
-                    'sub'         => 'Record #' . $d->id,
-                    'field_name'  => 'date_of_death',
+                'records' => $futureDod->map(fn ($d) => [
+                    'id' => 'futdod-'.$d->id,
+                    'permit_id' => null,
+                    'label' => $d->last_name.', '.$d->first_name,
+                    'sub' => 'Record #'.$d->id,
+                    'field_name' => 'date_of_death',
                     'field_value' => $d->date_of_death->format('Y-m-d'),
-                    'edit_url'    => route('deceased.show', $d),
+                    'edit_url' => route('deceased.show', $d),
                 ])->toArray(),
             ];
         }
- 
+
         return response()->json(['issues' => $issues, 'scanned_at' => now()->toISOString()]);
     }
- 
 }

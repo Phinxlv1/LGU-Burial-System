@@ -25,8 +25,8 @@ class BurialPermit extends Model
     ];
 
     protected $casts = [
-        'issued_date'  => 'date',
-        'expiry_date'  => 'date',
+        'issued_date' => 'date',
+        'expiry_date' => 'date',
     ];
 
     public function deceased()

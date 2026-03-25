@@ -25,29 +25,29 @@ class DocumentController extends Controller
             ],
         ]);
 
-        $file     = $request->file('document');
+        $file = $request->file('document');
         $origName = $file->getClientOriginalName();
-        $ext      = $file->getClientOriginalExtension();
-        $mime     = $file->getMimeType();
+        $ext = $file->getClientOriginalExtension();
+        $mime = $file->getMimeType();
 
         // Store under permits/{permit_id}/ folder, private disk
         $path = $file->storeAs(
-            'permits/' . $permit->id . '/documents',
+            'permits/'.$permit->id.'/documents',
             $origName,
             'local'
         );
 
         Document::create([
-            'permit_id'   => $permit->id,
-            'file_name'   => $origName,
-            'file_path'   => $path,
-            'file_type'   => $ext,
-            'mime_type'   => $mime,
+            'permit_id' => $permit->id,
+            'file_name' => $origName,
+            'file_path' => $path,
+            'file_type' => $ext,
+            'mime_type' => $mime,
             'uploaded_by' => Auth::id(),
         ]);
 
         return redirect()->route('permits.show', $permit)
-            ->with('success', '"' . $origName . '" attached successfully.');
+            ->with('success', '"'.$origName.'" attached successfully.');
     }
 
     /**
@@ -56,7 +56,7 @@ class DocumentController extends Controller
      */
     public function download(Document $document)
     {
-        $path = storage_path('app/private/' . $document->file_path);
+        $path = storage_path('app/private/'.$document->file_path);
 
         abort_unless(file_exists($path), 404, 'File not found.');
 
@@ -74,7 +74,7 @@ class DocumentController extends Controller
         $permit = $document->permit;
 
         // Delete file from storage
-        $path = 'private/' . $document->file_path;
+        $path = 'private/'.$document->file_path;
         if (Storage::disk('local')->exists($document->file_path)) {
             Storage::disk('local')->delete($document->file_path);
         }

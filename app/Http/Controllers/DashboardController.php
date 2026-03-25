@@ -16,35 +16,37 @@ class DashboardController extends Controller
 
         $recentPermits = BurialPermit::with('deceased')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
-          
+            ->limit(50)
+            ->get();
+
         $stats = [
-            'total'      => BurialPermit::count(),
+            'total' => BurialPermit::count(),
             'this_month' => BurialPermit::whereMonth('created_at', now()->month)
-                                        ->whereYear('created_at', now()->year)->count(),
-            'pending'    => BurialPermit::where('status', 'pending')->count(),
-            'approved'   => BurialPermit::where('status', 'approved')->count(),
-            'released'   => BurialPermit::where('status', 'released')->count(),
-            'expired'    => BurialPermit::where('status', 'expired')->count(),
-            'expiring'   => BurialPermit::where('status', 'released')
-                                        ->whereNotNull('expiry_date')
-                                        ->whereDate('expiry_date', '<=', now()->addDays(30))
-                                        ->whereDate('expiry_date', '>=', now())
-                                        ->count(),
-            'monthly'    => $this->getMonthlyData(),
+                ->whereYear('created_at', now()->year)->count(),
+            'pending' => BurialPermit::where('status', 'pending')->count(),
+            'approved' => BurialPermit::where('status', 'approved')->count(),
+            'released' => BurialPermit::where('status', 'released')->count(),
+            'expired' => BurialPermit::where('status', 'expired')->count(),
+            'expiring' => BurialPermit::where('status', 'released')
+                ->whereNotNull('expiry_date')
+                ->whereDate('expiry_date', '<=', now()->addDays(30))
+                ->whereDate('expiry_date', '>=', now())
+                ->count(),
+            'monthly' => $this->getMonthlyData(),
         ];
 
         return view('dashboard.admin', compact('stats', 'recentPermits'));
     }
 
     private function getMonthlyData(): array
-{
-    $data = [];
-    for ($m = 1; $m <= 12; $m++) {
-        $data[] = BurialPermit::whereMonth('created_at', $m)
-                               ->whereYear('created_at', now()->year)
-                               ->count();
+    {
+        $data = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $data[] = BurialPermit::whereMonth('created_at', $m)
+                ->whereYear('created_at', now()->year)
+                ->count();
+        }
+
+        return $data;
     }
-    return $data;
-}
 }

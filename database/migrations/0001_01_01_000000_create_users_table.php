@@ -1,4 +1,5 @@
 <?php
+
 // ============================================================
 // UPDATED MIGRATION
 // File: database/migrations/0001_01_01_000000_create_users_table.php
@@ -52,9 +53,9 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->foreign('employee_number')
-                  ->references('employee_number')
-                  ->on('employees')
-                  ->onDelete('cascade');
+                ->references('employee_number')
+                ->on('employees')
+                ->onDelete('cascade');
         });
 
         // ── password reset tokens ─────────────────────────────────

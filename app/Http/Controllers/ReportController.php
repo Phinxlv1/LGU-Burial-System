@@ -4,33 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Models\BurialPermit;
 use App\Models\DeceasedPerson;
-use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
     public function index()
     {
-        $year  = now()->year;
+        $year = now()->year;
         $month = now()->month;
 
-        $totalPermits    = BurialPermit::count();
-        $pendingPermits  = BurialPermit::where('status', 'pending')->count();
+        $totalPermits = BurialPermit::count();
+        $pendingPermits = BurialPermit::where('status', 'pending')->count();
         $approvedPermits = BurialPermit::where('status', 'approved')->count();
         $releasedPermits = BurialPermit::where('status', 'released')->count();
-        $expiredPermits  = BurialPermit::where('status', 'expired')->count();
+        $expiredPermits = BurialPermit::where('status', 'expired')->count();
 
-        $newPermits       = BurialPermit::whereYear('created_at', $year)->count();
+        $newPermits = BurialPermit::whereYear('created_at', $year)->count();
         $permitsThisMonth = BurialPermit::whereYear('created_at', $year)->whereMonth('created_at', $month)->count();
-        $permitsThisWeek  = BurialPermit::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
+        $permitsThisWeek = BurialPermit::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
 
-        $renewalsThisYear  = BurialPermit::whereYear('updated_at', $year)
+        $renewalsThisYear = BurialPermit::whereYear('updated_at', $year)
             ->whereYear('created_at', '<', $year)
             ->where('status', 'released')->count();
         $renewalsThisMonth = BurialPermit::whereYear('updated_at', $year)
             ->whereMonth('updated_at', $month)
             ->whereYear('created_at', '<', $year)
             ->where('status', 'released')->count();
-        $renewalsThisWeek  = BurialPermit::whereBetween('updated_at', [now()->startOfWeek(), now()->endOfWeek()])
+        $renewalsThisWeek = BurialPermit::whereBetween('updated_at', [now()->startOfWeek(), now()->endOfWeek()])
             ->whereYear('created_at', '<', $year)
             ->where('status', 'released')->count();
 
@@ -45,8 +45,8 @@ class ReportController extends Controller
             ->whereDate('expiry_date', '<=', now()->addDays(30))
             ->count();
 
-        $totalDeceased     = DeceasedPerson::count();
-        $deceasedThisYear  = DeceasedPerson::whereYear('created_at', $year)->count();
+        $totalDeceased = DeceasedPerson::count();
+        $deceasedThisYear = DeceasedPerson::whereYear('created_at', $year)->count();
         $deceasedThisMonth = DeceasedPerson::whereYear('created_at', $year)->whereMonth('created_at', $month)->count();
 
         $monthly = BurialPermit::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
@@ -56,12 +56,12 @@ class ReportController extends Controller
             ->toArray();
 
         $monthlyData = [];
-        $monthNames  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        $monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         for ($m = 1; $m <= 12; $m++) {
             $monthlyData[$m - 1] = $monthly[$m] ?? 0;
         }
-        $maxVal       = max(array_merge($monthlyData, [1]));
-        $peakIdx      = array_search($maxVal, $monthlyData);
+        $maxVal = max(array_merge($monthlyData, [1]));
+        $peakIdx = array_search($maxVal, $monthlyData);
         $busiestMonth = $monthNames[$peakIdx] ?? '—';
         $busiestCount = $maxVal;
 
@@ -71,11 +71,11 @@ class ReportController extends Controller
             ->toArray();
 
         $feeAmounts = [
-            'cemented'    => 1000,
-            'niche_1st'   => 8000,
-            'niche_2nd'   => 6600,
-            'niche_3rd'   => 5700,
-            'niche_4th'   => 5300,
+            'cemented' => 1000,
+            'niche_1st' => 8000,
+            'niche_2nd' => 6600,
+            'niche_3rd' => 5700,
+            'niche_4th' => 5300,
             'bone_niches' => 5000,
         ];
         $estimatedRevenue = 0;
@@ -101,12 +101,12 @@ class ReportController extends Controller
     {
         $year = now()->year;
 
-        $totalPermits    = BurialPermit::count();
-        $pendingPermits  = BurialPermit::where('status', 'pending')->count();
+        $totalPermits = BurialPermit::count();
+        $pendingPermits = BurialPermit::where('status', 'pending')->count();
         $approvedPermits = BurialPermit::where('status', 'approved')->count();
         $releasedPermits = BurialPermit::where('status', 'released')->count();
-        $expiredPermits  = BurialPermit::where('status', 'expired')->count();
-        $totalDeceased   = DeceasedPerson::count();
+        $expiredPermits = BurialPermit::where('status', 'expired')->count();
+        $totalDeceased = DeceasedPerson::count();
 
         $newPermits = BurialPermit::whereYear('created_at', $year)->count();
 
@@ -133,13 +133,13 @@ class ReportController extends Controller
 
         $recentPermits = BurialPermit::with('deceased')->latest()->limit(15)->get();
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('superadmin.report', compact(
+        $pdf = Pdf::loadView('superadmin.report', compact(
             'totalPermits', 'pendingPermits', 'approvedPermits',
             'releasedPermits', 'expiredPermits', 'totalDeceased',
             'newPermits', 'renewedPermits',
             'monthlyData', 'feeCounts', 'recentPermits', 'year'
         ))->setPaper('a4', 'portrait');
 
-        return $pdf->download('LGU-Carmen-Burial-Report-' . now()->format('Y-m-d') . '.pdf');
+        return $pdf->download('LGU-Carmen-Burial-Report-'.now()->format('Y-m-d').'.pdf');
     }
 }

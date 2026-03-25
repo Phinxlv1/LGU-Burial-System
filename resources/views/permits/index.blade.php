@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>/* dark-mode anti-flash */
-    (function(){try{var k='lgu_dark_{{ auth()->id() }}';if(localStorage.getItem(k)==='1')document.documentElement.classList.add('dark');}catch(e){}})();
+    (function(){try{if(localStorage.getItem('lgu_dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Burial Permits — LGU Carmen</title>
@@ -20,6 +20,16 @@
         .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
         .panel-header { padding: .85rem 1.25rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
         .panel-header h3 { font-size: 13px; font-weight: 600; color: #111827; }
+
+        .empty-row td { text-align: center; color: var(--text-3); padding: 2.5rem; font-size: 13px; }
+
+        /* ── Scrollable table ── */
+        .table-scroll { max-height: 75vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d1d5db transparent; }
+        .table-scroll::-webkit-scrollbar { width: 6px; }
+        .table-scroll::-webkit-scrollbar-track { background: transparent; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        .table-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .table-scroll thead th { position: sticky; top: 0; z-index: 2; }
 
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         table colgroup col:nth-child(1) { width: 155px; }
@@ -175,6 +185,9 @@
     html.dark .modal-header { background: #111827 !important; }
     html.dark .modal-body { background: #1e2130 !important; }
     html.dark .modal-footer { background: #181b29 !important; border-top-color: #2d3148 !important; }
+    html.dark .table-scroll { scrollbar-color: #374151 transparent; }
+    html.dark .table-scroll::-webkit-scrollbar-thumb { background: #374151; }
+    html.dark .table-scroll::-webkit-scrollbar-thumb:hover { background: #4b5563; }
     html.dark .btn-cancel { background: #252840 !important; border-color: #374151 !important; color: #cbd5e1 !important; }
     html.dark .fee-row { border-color: #2d3148 !important; }
     html.dark .fee-row:hover { background: #252840 !important; border-color: #6366f1 !important; }
@@ -309,35 +322,30 @@
         <div class="panel">
             <div class="panel-header">
                 <h3>All Burial Permits
-                    <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:.5rem">{{ $permits->total() }} total</span>
+                    <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:.5rem">{{ $permits->count() }} records</span>
                 </h3>
                 <input type="text" class="search-input" placeholder="Search by name or permit no…" oninput="filterTable(this.value)">
             </div>
+            <div class="table-scroll">
             <table>
                 <colgroup><col/><col/><col/><col/><col/><col/><col/></colgroup>
                 <thead>
                     <tr>
-                        <th><a href="{{ $sortUrl('permit_number') }}" class="sort-link {{ request('sort')==='permit_number'?'active':'' }}">Permit No. {!! $sortIcon('permit_number') !!}</a></th>
-                        <th><a href="{{ $sortUrl('last_name') }}"     class="sort-link {{ request('sort')==='last_name'?'active':'' }}">Deceased {!! $sortIcon('last_name') !!}</a></th>
-                        <th><a href="{{ $sortUrl('permit_type') }}"   class="sort-link {{ request('sort')==='permit_type'?'active':'' }}">Type {!! $sortIcon('permit_type') !!}</a></th>
-                        <th><a href="{{ $sortUrl('date_of_death') }}" class="sort-link {{ request('sort')==='date_of_death'?'active':'' }}">Date of Death {!! $sortIcon('date_of_death') !!}</a></th>
+                        <th><a href="{{ $sortUrl('permit_number') }}" class="sort-link {{ request('sort', 'status')==='permit_number'?'active':'' }}">Permit No. {!! $sortIcon('permit_number') !!}</a></th>
+                        <th><a href="{{ $sortUrl('last_name') }}"     class="sort-link {{ request('sort', 'status')==='last_name'?'active':'' }}">Deceased {!! $sortIcon('last_name') !!}</a></th>
+                        <th><a href="{{ $sortUrl('permit_type') }}"   class="sort-link {{ request('sort', 'status')==='permit_type'?'active':'' }}">Type {!! $sortIcon('permit_type') !!}</a></th>
+                        <th><a href="{{ $sortUrl('date_of_death') }}" class="sort-link {{ request('sort', 'status')==='date_of_death'?'active':'' }}">Date of Death {!! $sortIcon('date_of_death') !!}</a></th>
                         <th style="text-align:center">
-    <a href="{{ $sortUrl('renewal_count') }}" class="sort-link {{ request('sort')==='renewal_count'?'active':'' }}" style="justify-content:center">
+    <a href="{{ $sortUrl('renewal_count') }}" class="sort-link {{ request('sort', 'status')==='renewal_count'?'active':'' }}" style="justify-content:center">
         Renewals {!! $sortIcon('renewal_count') !!}
     </a>
 </th>
-                        <th><a href="{{ $sortUrl('status') }}"        class="sort-link {{ request('sort')==='status'?'active':'' }}">Status {!! $sortIcon('status') !!}</a></th>
+                        <th><a href="{{ $sortUrl('status') }}"        class="sort-link {{ request('sort', 'status')==='status'?'active':'' }}">Status {!! $sortIcon('status') !!}</a></th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($permits as $permit)
-                    @php
-                        $expiring = $permit->status === 'released'
-                            && $permit->expiry_date
-                            && $permit->expiry_date->isFuture()
-                            && $permit->expiry_date->diffInDays(now()) <= 30;
-                    @endphp
                     <tr class="permit-row {{ $permit->status === 'expired' ? 'row-expired' : '' }}">
 
                         {{-- PERMIT NO --}}
@@ -370,14 +378,8 @@
                         <td>
                             @if($permit->status === 'expired')
                                 <span class="badge badge-red" style="font-weight:700">⚠ Expired</span>
-                            @elseif($expiring)
-                                <span class="badge badge-yellow">⏳ Expiring Soon</span>
-                            @elseif($permit->status === 'released')
-                                <span class="badge badge-blue">Released</span>
-                            @elseif($permit->status === 'approved')
-                                <span class="badge badge-green">Approved</span>
                             @else
-                                <span class="badge badge-yellow">{{ ucfirst($permit->status) }}</span>
+                                <span class="badge badge-yellow">⏳ Expiring Soon</span>
                             @endif
                         </td>
 
@@ -422,50 +424,7 @@
                     @endforelse
                 </tbody>
             </table>
-
-            @if($permits->hasPages())
-            <div class="pager">
-                <span class="pager-info">
-                    Showing {{ $permits->firstItem() }}–{{ $permits->lastItem() }} of {{ $permits->total() }} results
-                </span>
-                <div class="pager-btns">
-                    @if($permits->onFirstPage())
-                        <span class="pager-btn disabled">‹ Prev</span>
-                    @else
-                        <a href="{{ $permits->previousPageUrl() }}" class="pager-btn">‹ Prev</a>
-                    @endif
-
-                    @php
-                        $current = $permits->currentPage();
-                        $last    = $permits->lastPage();
-                        $pages   = [];
-                        for ($p = 1; $p <= $last; $p++) {
-                            if ($p == 1 || $p == $last || abs($p - $current) <= 2) $pages[] = $p;
-                        }
-                        $pages = array_unique($pages); sort($pages);
-                    @endphp
-
-                    @php $prev = null; @endphp
-                    @foreach($pages as $page)
-                        @if($prev !== null && $page - $prev > 1)
-                            <span class="pager-btn disabled" style="border:none;padding:0 4px;">…</span>
-                        @endif
-                        @if($page == $current)
-                            <span class="pager-btn active">{{ $page }}</span>
-                        @else
-                            <a href="{{ $permits->url($page) }}" class="pager-btn">{{ $page }}</a>
-                        @endif
-                        @php $prev = $page; @endphp
-                    @endforeach
-
-                    @if($permits->hasMorePages())
-                        <a href="{{ $permits->nextPageUrl() }}" class="pager-btn">Next ›</a>
-                    @else
-                        <span class="pager-btn disabled">Next ›</span>
-                    @endif
-                </div>
             </div>
-            @endif
         </div>
     </div>
 </div>
