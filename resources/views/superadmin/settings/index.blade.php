@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @livewireStyles
+
     <meta charset="UTF-8">
     <script>/* dark-mode anti-flash */
     (function(){try{if(localStorage.getItem('lgu_dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();
@@ -351,7 +353,7 @@
 </head>
 <body>
 
-@include('partials.sidebar')
+@include('superadmin.partials.sidebar')
 
 <div class="main">
     <div class="topbar">
@@ -391,12 +393,7 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
                     Notifications
                 </div>
-                <div class="snav-divider"></div>
-                <div class="snav-item" id="dq-nav-item" onclick="showSection('dataquality',this);runScan()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-                    Data Quality
-                    <span class="snav-badge" id="dq-badge" style="display:none">!</span>
-                </div>
+                
                 <div class="snav-divider"></div>
                 <div class="snav-item" onclick="showSection('danger',this)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -558,34 +555,6 @@
                     </div>
                     <div class="section-footer"><button type="submit" class="btn-primary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Save Preferences</button></div>
                 </form>
-            </div>
-
-            {{-- DATA QUALITY --}}
-            <div class="section-card" id="section-dataquality">
-                <div class="section-head"><h2>Data Quality Scanner</h2><p>Detects duplicates, missing fields, and inconsistencies. Click an issue to expand it, then choose what to do.</p></div>
-                <div class="section-body">
-                    <div class="dq-summary-bar" id="dq-summary" style="display:none">
-                        <div class="dq-stat red">  <div class="dq-stat-val" id="cnt-high">—</div>  <div class="dq-stat-lbl">Critical</div></div>
-                        <div class="dq-stat amber"><div class="dq-stat-val" id="cnt-med">—</div>   <div class="dq-stat-lbl">Warnings</div></div>
-                        <div class="dq-stat blue"> <div class="dq-stat-val" id="cnt-low">—</div>   <div class="dq-stat-lbl">Info</div></div>
-                        <div class="dq-stat green"><div class="dq-stat-val" id="cnt-res">0</div>   <div class="dq-stat-lbl">Resolved</div></div>
-                    </div>
-                    <div class="dq-toolbar" id="dq-toolbar" style="display:none">
-                        <div class="dq-filters">
-                            <button class="dq-filter f-all active" onclick="filterDQ('all',this)">All</button>
-                            <button class="dq-filter f-dup"        onclick="filterDQ('duplicate',this)">🔴 Duplicates</button>
-                            <button class="dq-filter f-miss"       onclick="filterDQ('missing',this)">🟡 Missing Data</button>
-                            <button class="dq-filter f-incon"      onclick="filterDQ('inconsistent',this)">🔵 Inconsistent</button>
-                        </div>
-                        <button class="btn-sm" onclick="runScan(true)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>Re-scan</button>
-                    </div>
-                    <div class="dq-loading" id="dq-loading"><div class="spinner"></div>Scanning database for issues…</div>
-                    <div id="dq-list"></div>
-                    <div class="dq-empty" id="dq-empty" style="display:none">
-                        <div class="dq-empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
-                        <h3>All Clear!</h3><p>No data quality issues found. Your records are clean.</p>
-                    </div>
-                </div>
             </div>
 
             {{-- DANGER --}}
@@ -798,24 +767,125 @@ function renderRec(issue,rec){
 function toggleDQ(id){document.getElementById('dqi-'+id)?.classList.toggle('open');}
 function filterDQ(type,btn){DQ.filter=type;document.querySelectorAll('.dq-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderDQ();}
 function deletePerm(permitId, label, issueId, recId) {
-    // Two-step warning
-    const step1 = confirm(`⚠️ Delete permit "${label}"?\n\nThis will also permanently delete the linked deceased person record.\n\nThis cannot be undone.`);
-    if (!step1) return;
+    // Store pending delete info
+    window._pendingDelete = { permitId, label, issueId, recId };
+    document.getElementById('deleteModal-label').textContent = label;
+    document.getElementById('deleteModal').classList.add('open');
+}
 
-    const step2 = confirm(`🚨 FINAL WARNING\n\nYou are about to delete:\n• Permit: ${label}\n• The deceased person linked to this permit\n\nAre you absolutely sure?`);
-    if (!step2) return;
+function confirmDelete() {
+    const { permitId, label, issueId, recId } = window._pendingDelete;
+    document.getElementById('deleteModal').classList.remove('open');
+    
+        fetch(`/permits/${permitId}?source=data_quality`, { method:'DELETE', headers:{ 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json' } })
 
-    fetch(`/permits/${permitId}`, { method:'DELETE', headers:{ 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json' } })
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(() => {
+            // Remove the record row from DOM instantly
+            const rowEl = document.getElementById('dqr-' + recId);
+            if (rowEl) rowEl.remove();
+
             DQ.ignored.add(recId);
-            checkResolved(issueId);
-            renderDQ();
+
+            // Update count in header
+            const issue = DQ.issues.find(i => i.id === issueId);
+            if (issue) {
+                const visRecs = issue.records.filter(r => !DQ.ignored.has(r.id));
+                const countEl = document.querySelector(`#dqi-${issueId} .dq-issue-count`);
+                if (countEl) countEl.textContent = `${visRecs.length} record${visRecs.length !== 1 ? 's' : ''}`;
+                if (visRecs.length === 0) {
+                    const issueEl = document.getElementById('dqi-' + issueId);
+                    if (issueEl) issueEl.remove();
+                    DQ.resolved.add(issueId);
+                }
+            }
+
             toast('Deleted', `Permit "${label}" and its deceased record were permanently removed.`);
+
+            // Background rescan — updates DQ.issues silently, then patches open panels
+            fetch('{{ route("settings.dataquality.scan") }}', { headers:{'Accept':'application/json','X-CSRF-TOKEN':CSRF} })
+                .then(r => r.json())
+                .then(d => {
+                    DQ.issues = d.issues || [];
+
+                    // For each issue in the fresh data, update the count and records
+                    DQ.issues.forEach(issue => {
+                        const issueEl = document.getElementById('dqi-' + issue.id);
+                        if (!issueEl) return; // already removed from DOM
+
+                        const visRecs = issue.records.filter(r => !DQ.ignored.has(r.id));
+
+                        // Update count
+                        const countEl = issueEl.querySelector('.dq-issue-count');
+                        if (countEl) countEl.textContent = `${visRecs.length} record${visRecs.length !== 1 ? 's' : ''}`;
+
+                        // Replace body records only (keep open/closed state)
+                        const body = issueEl.querySelector('.dq-issue-body');
+                        if (body) {
+                            const desc = body.querySelector('.dq-desc');
+                            const descHtml = desc ? desc.outerHTML : '';
+                            body.innerHTML = descHtml + visRecs.map(r => renderRec(issue, r)).join('');
+                        }
+
+                        // Remove issue block if no records left
+                        if (visRecs.length === 0) {
+                            issueEl.remove();
+                            DQ.resolved.add(issue.id);
+                        }
+                    });
+
+                    // Update summary counters
+                    const active = DQ.issues.filter(i => !DQ.resolved.has(i.id) && !allRecordsIgnored(i));
+                    const c = { high: 0, medium: 0, low: 0 };
+                    active.forEach(i => c[i.severity]++);
+                    document.getElementById('cnt-high').textContent = c.high;
+                    document.getElementById('cnt-med').textContent  = c.medium;
+                    document.getElementById('cnt-low').textContent  = c.low;
+                    document.getElementById('cnt-res').textContent  = DQ.resolved.size + countAllIgnored();
+
+                    if (active.length === 0) show('dq-empty');
+                })
+                .catch(() => {}); // silent fail — UI already updated
         })
         .catch(() => toast('Error', 'Could not delete — try again.', false));
 }
-function ignoreDQ(issueId,recId){DQ.ignored.add(recId);checkResolved(issueId);renderDQ();toast('Ignored','This record will not be flagged again.');}
+function ignoreDQ(issueId, recId) {
+    DQ.ignored.add(recId);
+
+    // Remove the record row from DOM instantly
+    const rowEl = document.getElementById('dqr-' + recId);
+    if (rowEl) rowEl.remove();
+
+    // Update the issue record count in the header
+    const issue = DQ.issues.find(i => i.id === issueId);
+    if (issue) {
+        const visRecs = issue.records.filter(r => !DQ.ignored.has(r.id));
+        const countEl = document.querySelector(`#dqi-${issueId} .dq-issue-count`);
+        if (countEl) countEl.textContent = `${visRecs.length} record${visRecs.length !== 1 ? 's' : ''}`;
+
+        if (visRecs.length === 0) {
+            const issueEl = document.getElementById('dqi-' + issueId);
+            if (issueEl) issueEl.remove();
+            DQ.resolved.add(issueId);
+        }
+    }
+
+    // Update summary counters
+    const active = DQ.issues.filter(i => !DQ.resolved.has(i.id) && !allRecordsIgnored(i));
+    const c = { high: 0, medium: 0, low: 0 };
+    active.forEach(i => c[i.severity]++);
+    document.getElementById('cnt-high').textContent = c.high;
+    document.getElementById('cnt-med').textContent  = c.medium;
+    document.getElementById('cnt-low').textContent  = c.low;
+    document.getElementById('cnt-res').textContent  = DQ.resolved.size + countAllIgnored();
+
+    // Check if all issues are resolved
+    if (active.length === 0) {
+        show('dq-empty');
+    }
+
+    toast('Ignored', 'This record will not be flagged again.');
+}
 function checkResolved(issueId){const issue=DQ.issues.find(i=>i.id===issueId);if(issue&&issue.records.every(r=>DQ.ignored.has(r.id)))DQ.resolved.add(issueId);}
 function allRecordsIgnored(issue){return issue.records.length>0&&issue.records.every(r=>DQ.ignored.has(r.id));}
 function countAllIgnored(){return DQ.issues.reduce((n,i)=>n+i.records.filter(r=>DQ.ignored.has(r.id)).length,0);}
@@ -824,5 +894,7 @@ function hide(id){const el=document.getElementById(id);if(el)el.style.display='n
 function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 </script>
 
+
+@livewireScripts    
 </body>
 </html>

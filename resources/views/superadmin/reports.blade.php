@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports — LGU Carmen</title>
-    <script>if(localStorage.getItem('lgu_dark')==='1')document.documentElement.classList.add('dark');</script>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/sa-sidebar.css') }}">
     <style>
-        /* ── LIGHT MODE (default) ── */
         :root {
             --bg:        #f0f2f5;
             --surface:   #ffffff;
@@ -17,66 +16,24 @@
             --text:      #111827;
             --muted:     #6b7280;
             --subtle:    #9ca3af;
-
             --blue:      #2563eb;
             --blue-bg:   rgba(37,99,235,.07);
             --blue-bd:   rgba(37,99,235,.18);
-
             --green:     #16a34a;
             --green-bg:  rgba(22,163,74,.07);
             --green-bd:  rgba(22,163,74,.2);
-
             --purple:    #7c3aed;
             --purple-bg: rgba(124,58,237,.07);
             --purple-bd: rgba(124,58,237,.18);
-
             --amber:     #d97706;
             --amber-bg:  rgba(217,119,6,.07);
             --amber-bd:  rgba(217,119,6,.2);
-
             --red:       #dc2626;
             --red-bg:    rgba(220,38,38,.07);
             --red-bd:    rgba(220,38,38,.18);
-
             --teal:      #0d9488;
             --teal-bg:   rgba(13,148,136,.07);
             --teal-bd:   rgba(13,148,136,.18);
-        }
-
-        /* ── DARK MODE ── */
-        .dark {
-            --bg:        #0d1117;
-            --surface:   #161b22;
-            --surface2:  #1c2230;
-            --border:    rgba(255,255,255,.07);
-            --border2:   rgba(255,255,255,.13);
-            --text:      #e6edf3;
-            --muted:     #7d8590;
-            --subtle:    #4d5566;
-
-            --blue:      #58a6ff;
-            --blue-bg:   rgba(88,166,255,.1);
-            --blue-bd:   rgba(88,166,255,.22);
-
-            --green:     #3fb950;
-            --green-bg:  rgba(63,185,80,.1);
-            --green-bd:  rgba(63,185,80,.25);
-
-            --purple:    #bc8cff;
-            --purple-bg: rgba(188,140,255,.1);
-            --purple-bd: rgba(188,140,255,.22);
-
-            --amber:     #e3b341;
-            --amber-bg:  rgba(227,179,65,.1);
-            --amber-bd:  rgba(227,179,65,.22);
-
-            --red:       #f85149;
-            --red-bg:    rgba(248,81,73,.1);
-            --red-bd:    rgba(248,81,73,.22);
-
-            --teal:      #2dd4bf;
-            --teal-bg:   rgba(45,212,191,.1);
-            --teal-bd:   rgba(45,212,191,.2);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -86,11 +43,7 @@
             color: var(--text);
             display: flex; min-height: 100vh;
             -webkit-font-smoothing: antialiased;
-            transition: background .2s, color .2s;
         }
-
-        /* sidebar always stays dark navy */
-        .sidebar { background: #1a2744 !important; }
 
         .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
 
@@ -122,7 +75,7 @@
             font-size: 10px; font-weight: 700;
             padding: 3px 10px; border-radius: 20px;
             letter-spacing: .06em; text-transform: uppercase;
-            background: #1a2744; color: #fff;
+            background: #0f172a; color: #fff;
         }
 
         /* ── CONTENT ── */
@@ -161,7 +114,7 @@
         .chip-b { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-bd); }
 
         /* ── STAT GRID ── */
-        .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+        .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
 
         .stat-card {
             background: var(--surface);
@@ -173,16 +126,12 @@
             cursor: default;
         }
         .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.06); }
-        .dark .stat-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.28); }
-
-        /* accent stripe bottom */
         .stat-card::after {
             content:''; position:absolute;
             bottom:0; left:0; right:0; height:3px;
             border-radius: 0 0 14px 14px;
         }
         .s-blue::after   { background: var(--blue); }
-        .s-amber::after  { background: var(--amber); }
         .s-green::after  { background: var(--green); }
         .s-purple::after { background: var(--purple); }
         .s-red::after    { background: var(--red); }
@@ -204,7 +153,6 @@
             display: flex; align-items: center; justify-content: center;
         }
         .ico-blue   { background: var(--blue-bg); }
-        .ico-amber  { background: var(--amber-bg); }
         .ico-green  { background: var(--green-bg); }
         .ico-purple { background: var(--purple-bg); }
         .ico-red    { background: var(--red-bg); }
@@ -226,10 +174,7 @@
         .panel-hd-s { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
 
         .renew-cells { display: grid; grid-template-columns: repeat(3,1fr); }
-        .renew-cell  {
-            padding: 1.25rem;
-            border-right: 1px solid var(--border);
-        }
+        .renew-cell  { padding: 1.25rem; border-right: 1px solid var(--border); }
         .renew-cell:last-child { border-right: none; }
         .renew-num   { font-size: 30px; font-weight: 700; color: var(--text); line-height: 1; letter-spacing: -.03em; }
         .renew-lbl   { font-size: 12px; font-weight: 600; color: var(--text); margin-top: 5px; }
@@ -280,7 +225,6 @@
         .mo-lbl   { font-size: 9px; color: var(--subtle); font-family: 'DM Mono', monospace; text-transform: uppercase; }
         .mo-count { font-size: 11px; font-weight: 700; color: var(--text); }
 
-        /* fee table */
         .fee-tbl { width: 100%; border-collapse: collapse; }
         .fee-tbl th {
             font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em;
@@ -293,10 +237,8 @@
         .fee-tbl tr:last-child td { border: none; }
         .fee-tbl .tot td { font-weight: 700; background: var(--surface2); border-top: 1px solid var(--border2); border-bottom: none; }
         .fee-tbl .tot td.r { color: var(--blue); font-size: 14px; }
-
         .fee-bar { height: 5px; border-radius: 3px; background: var(--blue); opacity: .45; display:inline-block; vertical-align: middle; margin-right: 7px; }
 
-        /* recent table */
         .rec-tbl { width: 100%; border-collapse: collapse; }
         .rec-tbl th {
             font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em;
@@ -312,9 +254,7 @@
             display: inline-flex; font-size: 10px; font-weight: 600;
             padding: 2px 9px; border-radius: 20px;
         }
-        .b-pending  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-bd); }
-        .b-approved { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
-        .b-released { background: var(--blue-bg);   color: var(--blue);   border: 1px solid var(--blue-bd); }
+        .b-active { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
         .b-expired  { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bd); }
 
         @media (max-width: 1100px) {
@@ -325,7 +265,8 @@
     </style>
 </head>
 <body>
-@include('admin.partials.sidebar')
+
+@include('superadmin.partials.sidebar')
 
 <div class="main">
     <div class="topbar">
@@ -334,8 +275,8 @@
             <div class="topbar-meta">Municipality of Carmen &nbsp;·&nbsp; {{ now()->year }} &nbsp;·&nbsp; Generated {{ now()->format('M d, Y g:i A') }} by {{ auth()->user()->name }}</div>
         </div>
         <div style="display:flex;align-items:center;gap:.75rem">
-            <span class="role-pill">Admin</span>
-            <a href="{{ route('reports.export') }}" class="btn-export">
+            <span class="role-pill">⚡ Super Admin</span>
+            <a href="{{ route('superadmin.export') }}" class="btn-export">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export PDF
             </a>
@@ -362,8 +303,8 @@
             </div>
         </div>
 
-        {{-- PERMIT STATUS --}}
-        <div class="section-label">Permit Status</div>
+        {{-- SYSTEM OVERVIEW --}}
+        <div class="section-label">System Overview</div>
         <div class="stat-grid">
 
             <div class="stat-card s-blue">
@@ -372,30 +313,6 @@
                 <div class="stat-val" style="color:var(--blue)">{{ $totalPermits }}</div>
                 <div class="stat-lbl">Total Permits</div>
                 <div class="stat-sub">Since system began</div>
-            </div>
-
-            <div class="stat-card s-amber">
-                <div class="stat-ico ico-amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                <div class="stat-eyebrow">Action Required</div>
-                <div class="stat-val" style="color:var(--amber)">{{ $pendingPermits }}</div>
-                <div class="stat-lbl">Pending</div>
-                <div class="stat-sub">Awaiting approval</div>
-            </div>
-
-            <div class="stat-card s-green">
-                <div class="stat-ico ico-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-                <div class="stat-eyebrow">Ready</div>
-                <div class="stat-val" style="color:var(--green)">{{ $approvedPermits }}</div>
-                <div class="stat-lbl">Approved</div>
-                <div class="stat-sub">Ready to release</div>
-            </div>
-
-            <div class="stat-card s-purple">
-                <div class="stat-ico ico-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                <div class="stat-eyebrow">Active</div>
-                <div class="stat-val" style="color:var(--purple)">{{ $releasedPermits }}</div>
-                <div class="stat-lbl">Released</div>
-                <div class="stat-sub">Currently valid</div>
             </div>
 
             <div class="stat-card s-red">
@@ -428,6 +345,14 @@
                 <div class="stat-val sm" style="color:var(--green)">₱{{ number_format($estimatedRevenue ?? 0) }}</div>
                 <div class="stat-lbl">All Time (Est.)</div>
                 <div class="stat-sub">Based on permit fee rates</div>
+            </div>
+
+            <div class="stat-card s-purple">
+                <div class="stat-ico ico-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg></div>
+                <div class="stat-eyebrow">Renewals</div>
+                <div class="stat-val" style="color:var(--purple)">{{ $renewedPermits }}</div>
+                <div class="stat-lbl">Renewed This Year</div>
+                <div class="stat-sub">{{ now()->year }} renewals processed</div>
             </div>
 
         </div>
@@ -499,9 +424,9 @@
                     <span class="panel-hd-s">Busiest: {{ $busiestMonth ?? '—' }} ({{ $busiestCount ?? 0 }})</span>
                 </div>
                 @php
-                    $mos    = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-                    $maxV   = max(array_merge($monthlyData ?? [0], [1]));
-                    $peakI  = array_search($maxV, $monthlyData ?? []);
+                    $mos   = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+                    $maxV  = max(array_merge($monthlyData ?? [0], [1]));
+                    $peakI = array_search($maxV, $monthlyData ?? []);
                 @endphp
                 <div class="monthly-grid">
                     @foreach($mos as $i => $m)
@@ -565,6 +490,17 @@
                 </thead>
                 <tbody>
                     @forelse($recentPermits ?? [] as $p)
+                    @php
+                        // Simplified status display - only Active/Expired
+                        $status = $p->status;
+                        $badgeClass = 'b-active'; // default for active permits
+                        $statusText = 'Active';
+                        
+                        if ($status === 'expired') {
+                            $badgeClass = 'b-expired';
+                            $statusText = 'Expired';
+                        }
+                    @endphp
                     <tr>
                         <td class="pno">{{ $p->permit_number }}</td>
                         <td class="nm">{{ optional($p->deceased)->last_name }}, {{ optional($p->deceased)->first_name }}</td>
@@ -572,7 +508,7 @@
                         <td>{{ $p->applicant_name ?? '—' }}</td>
                         <td>{{ $p->created_at->format('M d, Y') }}</td>
                         <td>{{ $p->expiry_date ? $p->expiry_date->format('M d, Y') : '—' }}</td>
-                        <td><span class="badge b-{{ $p->status }}">{{ ucfirst($p->status) }}</span></td>
+                        <td><span class="badge {{ $badgeClass }}">{{ $statusText }}</span></td>
                     </tr>
                     @empty
                     <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;font-size:13px">No permits yet.</td></tr>

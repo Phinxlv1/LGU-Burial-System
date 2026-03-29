@@ -2,65 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ActivityLog;
-use App\Models\BurialPermit;
-use App\Models\DeceasedPerson;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-class SuperAdminDashboardController extends Controller
+class UserController extends Controller
 {
+    /**
+     * Display a listing of the users.
+     */
     public function index()
     {
-        $year = now()->year;
+        $users = User::orderBy('name')->get();
 
-        $totalPermits      = BurialPermit::count();
-        $pendingPermits    = BurialPermit::where('status', 'pending')->count();
-        $approvedPermits   = BurialPermit::where('status', 'approved')->count();
-        $releasedPermits   = BurialPermit::where('status', 'released')->count();
-        $expiredPermits    = BurialPermit::where('status', 'expired')->count();
-        $permitsThisMonth  = BurialPermit::whereMonth('created_at', now()->month)
-                                          ->whereYear('created_at', $year)->count();
-        $totalDeceased     = DeceasedPerson::count();
-        $deceasedThisMonth = DeceasedPerson::whereMonth('created_at', now()->month)
-                                            ->whereYear('created_at', $year)->count();
-
-        // Monthly bar chart (Jan–Dec)
-        $monthly = BurialPermit::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
-            ->whereYear('created_at', $year)
-            ->groupBy('month')
-            ->pluck('total', 'month')
-            ->toArray();
-
-        $monthlyData = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $monthlyData[] = $monthly[$m] ?? 0;
+        if (Auth::user()->hasRole('super_admin') || Auth::user()->role === 'super_admin') {
+            return view('superadmin.users.index', compact('users'));
         }
 
-        // Fee type breakdown
-        $feeCounts = BurialPermit::selectRaw('permit_type, COUNT(*) as total')
-            ->groupBy('permit_type')
-            ->pluck('total', 'permit_type')
-            ->toArray();
+        return view('admin.users.index', compact('users'));
+    }
 
-        $feeTypeData = [
-            $feeCounts['cemented']    ?? 0,
-            $feeCounts['niche_1st']   ?? 0,
-            $feeCounts['niche_2nd']   ?? 0,
-            $feeCounts['niche_3rd']   ?? 0,
-            $feeCounts['niche_4th']   ?? 0,
-            $feeCounts['bone_niches'] ?? 0,
-            collect($feeCounts)->except(['cemented','niche_1st','niche_2nd','niche_3rd','niche_4th','bone_niches'])->sum(),
-        ];
+    /**
+     * Store a newly created user in storage.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role'     => 'required|string',
+        ]);
 
-        $recentPermits = BurialPermit::with('deceased')->latest()->limit(8)->get();
+        if (Auth::user()->role !== 'super_admin' && $validated['role'] === 'super_admin') {
+            return back()->withErrors(['role' => 'You cannot create super admin users.']);
+        }
 
-        // Recent activity for the dashboard preview (last 8)
-        $recentActivity = ActivityLog::with('user')->latest()->limit(8)->get();
+        $validated['password'] = bcrypt($validated['password']);
+        User::create($validated);
 
-        return view('superadmin.dashboard', compact(
-            'totalPermits', 'pendingPermits', 'approvedPermits',
-            'releasedPermits', 'expiredPermits',
-            'permitsThisMonth', 'totalDeceased', 'deceasedThisMonth',
-            'monthlyData', 'feeTypeData', 'recentPermits', 'recentActivity'
-        ));
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User created successfully.');
+    }
+
+    /**
+     * Update the specified user in storage.
+     */
+    public function update(Request $request, User $user)
+    {
+        if (Auth::user()->role !== 'super_admin' && $user->role === 'super_admin') {
+            return back()->withErrors(['error' => 'You cannot update super admin users.']);
+        }
+
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'role'     => 'required|string',
+        ]);
+
+        if (Auth::user()->role !== 'super_admin' && $validated['role'] === 'super_admin') {
+            return back()->withErrors(['role' => 'You cannot assign super admin role.']);
+        }
+
+        if ($request->filled('password')) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User updated successfully.');
+    }
+
+    /**
+     * Remove the specified user from storage.
+     */
+    public function destroy(User $user)
+    {
+        if (Auth::user()->role !== 'super_admin' && $user->role === 'super_admin') {
+            return back()->withErrors(['error' => 'You cannot delete super admin users.']);
+        }
+
+        if (Auth::id() === $user->id) {
+            return back()->withErrors(['error' => 'You cannot delete your own account.']);
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User deleted successfully.');
     }
 }

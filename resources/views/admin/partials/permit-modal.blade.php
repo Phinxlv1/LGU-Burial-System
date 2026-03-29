@@ -112,7 +112,6 @@
                             <option value="">Select…</option>
                             <option value="Ground"    {{ old('kind_of_burial')==='Ground'    ?'selected':'' }}>Ground</option>
                             <option value="Niche"     {{ old('kind_of_burial')==='Niche'     ?'selected':'' }}>Niche</option>
-                            <option value="Cremation" {{ old('kind_of_burial')==='Cremation' ?'selected':'' }}>Cremation</option>
                         </select>
                     </div>
                 </div>

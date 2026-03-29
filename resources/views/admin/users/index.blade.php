@@ -235,10 +235,10 @@
         /* ── TWO-COL ── */
         .two-col {
     display: grid;
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
     align-items: start;
-    margin-top: 100rem;
+    margin-top: -.5rem;
 }
 
         /* ── PANEL ── */
@@ -636,7 +636,7 @@
 </head>
 <body>
 
-@include('partials.sidebar')
+@include('admin.partials.sidebar')
 
 <div class="main">
 
@@ -681,16 +681,16 @@
 
        <div class="stat-grid">
             <div class="stat-card fade-up d1">
-                <div class="stat-top">
-                    <div class="stat-icon blue">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    </div>
-                    <span class="stat-pill neu">ALL TIME</span>
-                </div>
-                <div class="stat-value blue">{{ $stats['total'] }}</div>
-                <div class="stat-label">Total Permits</div>
-                <div class="stat-sub">{{ $stats['released'] }} released</div>
-            </div>
+    <div class="stat-top">
+        <div class="stat-icon blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <span class="stat-pill neu">ALL TIME</span>
+    </div>
+    <div class="stat-value blue">{{ $stats['total'] }}</div>
+    <div class="stat-label">Total Permits</div>
+    <div class="stat-sub">{{ $stats['released'] }} released</div>
+</div>
  
             
  
@@ -722,79 +722,7 @@
 
         <!-- TWO COLUMN -->
         <div class="two-col" style="align-items: start; margin-top: -.5rem;">
-            <!-- LEFT: PERMITS TABLE -->
-            <div class="panel fade-up d5">
-                <div class="panel-head">
-                    <div>
-                        <div class="panel-title">Recent Permit Applications</div>
-                        <div class="panel-sub">{{ $recentPermits->count() }} records</div>
-                    </div>
-                    <a href="{{ route('permits.index') }}" class="link-arrow">
-                        View all
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                    </a>
-                </div>
-
-                <div class="table-scroll">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Permit No.</th>
-                            <th>Deceased</th>
-                            <th>Type</th>
-                            <th>Issued</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($recentPermits as $permit)
-                        @php
-                            $expiring = $permit->status === 'released'
-                                && $permit->expiry_date
-                                && $permit->expiry_date->isFuture()
-                                && $permit->expiry_date->diffInDays(now()) <= 30;
-                        @endphp
-                        <tr class="{{ $permit->status === 'expired' ? 'row-expired' : '' }}">
-                            <td><span class="permit-mono">{{ $permit->permit_number }}</span></td>
-                            <td><span class="deceased-name">{{ optional($permit->deceased)->last_name }}, {{ optional($permit->deceased)->first_name }}</span></td>
-                            <td style="font-size:12px;color:var(--text-3)">{{ ucfirst(str_replace('_',' ',$permit->permit_type)) }}</td>
-                            <td style="font-size:11px;color:var(--text-3);font-family:var(--mono)">{{ $permit->created_at->format('M d, Y') }}</td>
-                            <td>
-                                @if($permit->status === 'expired')
-                                    <span class="badge badge-red"><span class="badge-dot"></span>Expired</span>
-                                @elseif($expiring)
-                                    <span class="badge badge-orange"><span class="badge-dot"></span>Expiring</span>
-                                @elseif($permit->status === 'released')
-                                    <span class="badge badge-blue"><span class="badge-dot"></span>Released</span>
-                                @elseif($permit->status === 'approved')
-                                    <span class="badge badge-green"><span class="badge-dot"></span>Approved</span>
-                                @else
-                                    <span class="badge badge-yellow"><span class="badge-dot"></span>Pending</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div style="display:flex;gap:4px;align-items:center">
-                                    <a href="{{ route('permits.show', $permit) }}" class="btn-xs">View</a>
-                                    @if($permit->status === 'expired')
-                                    <form method="POST" action="{{ route('permits.renew', $permit) }}" style="display:inline" onsubmit="return confirm('Renew this permit?')">
-                                        @csrf
-                                        <button type="submit" class="btn-xs danger">Renew</button>
-                                    </form>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr class="empty-row"><td colspan="6">No permits yet.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-                </div>
-            </div>
-
-            <!-- RIGHT COLUMN -->
-            <div class="side-stack">
+        
 
                 <!-- Monthly Chart -->
                 <div class="panel fade-up d6">
@@ -813,7 +741,7 @@
                 @php
                     $needsAction = \App\Models\BurialPermit::with('deceased')
                         ->whereIn('status', ['expired', 'pending'])
-                        ->latest()->limit(5)->get();
+                        ->latest()->limit(4)->get();
                 @endphp
                 <div class="panel fade-up d7">
                     <div class="panel-head">
@@ -900,7 +828,7 @@
 @endif
 
 
-@include('partials.permit-modal')
+@include('admin.partials.permit-modal')
 
 
 <script>
@@ -966,7 +894,7 @@ new Chart(document.getElementById('monthlyChart').getContext('2d'), {
     }
 });
 </script>
-@include('partials.permit-modal')
+@include('admin.partials.permit-modal')
 @livewireScripts
 </body>
 </html>

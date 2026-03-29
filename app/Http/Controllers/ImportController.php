@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
+
 use App\Models\BurialPermit;
 use App\Models\DeceasedPerson;
 use App\Models\ImportLog;
@@ -14,13 +16,15 @@ use Illuminate\Support\Facades\Schema;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
+
+
 class ImportController extends Controller
 {
     public function showImport()
     {
         $logs = $this->getLogs();
 
-        return view('import.index', compact('logs'));
+        return view('admin.import.index', compact('logs'));
     }
 
     public function index()
@@ -31,7 +35,7 @@ class ImportController extends Controller
     public function importExcel(Request $request)
     {
         $request->validate([
-            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10485760'],
         ]);
 
         $file = $request->file('file');
@@ -139,19 +143,21 @@ class ImportController extends Controller
                     $permitNo = $this->generateUniquePermitNumber($year);
 
                     BurialPermit::create([
-                        'permit_number' => $permitNo,
-                        'deceased_id' => $deceased->id,
-                        'permit_type' => $permitType,
-                        'kind_of_burial' => $this->col($row, $headerMap, 'kind_of_burial') ?? null,
-                        'applicant_name' => (string) ($this->col($row, $headerMap, 'applicant_name', 'Unknown') ?: 'Unknown'),
-                        'applicant_relationship' => (string) ($this->col($row, $headerMap, 'applicant_relationship', '') ?? ''),
-                        'applicant_contact' => (string) ($this->col($row, $headerMap, 'applicant_contact', '') ?? ''),
-                        'applicant_address' => $this->col($row, $headerMap, 'applicant_address') ?? null,
-                        'status' => $status,
-                        'issued_date' => $this->parseDate($this->col($row, $headerMap, 'issued_date')),
-                        'expiry_date' => $this->parseDate($this->col($row, $headerMap, 'expiry_date')),
-                        'processed_by' => Auth::id(),
-                    ]);
+    'permit_number'          => $permitNo,
+    'deceased_id'            => $deceased->id,
+    'permit_type'            => $permitType,
+    'kind_of_burial'         => $this->col($row, $headerMap, 'kind_of_burial') ?? null,
+    'applicant_name'         => (string) ($this->col($row, $headerMap, 'applicant_name', 'Unknown') ?: 'Unknown'),
+    'applicant_relationship' => (string) ($this->col($row, $headerMap, 'applicant_relationship', '') ?? ''),
+    'applicant_contact'      => (string) ($this->col($row, $headerMap, 'applicant_contact', '') ?? ''),
+    'applicant_address'      => $this->col($row, $headerMap, 'applicant_address') ?? null,
+    'status'                 => $status,
+    'issued_date'            => $this->parseDate($this->col($row, $headerMap, 'issued_date')),
+    'expiry_date'            => $this->parseDate($this->col($row, $headerMap, 'expiry_date')),
+    'renewal_count'          => (int) ($this->col($row, $headerMap, 'renewal_count', 0) ?? 0),  // ← add this
+    'remarks'                => (string) ($this->col($row, $headerMap, 'remarks', '') ?? ''),    // ← add this
+    'processed_by'           => Auth::id(),
+]);
 
                     $imported++;
                 });
@@ -162,7 +168,19 @@ class ImportController extends Controller
         }
 
         // Always save the log
+        
         $this->saveLog($originalName, count($dataRows), $imported, $skipped, $skipReasons);
+
+        if ($imported > 0) {
+            ActivityLog::record(
+                action: 'imported',
+                modelType: 'BurialPermit',
+                modelId: null,
+                modelLabel: $originalName,
+                newValues: ['imported' => $imported, 'skipped' => $skipped],
+                description: "Imported {$imported} permit(s) from {$originalName}" . ($skipped > 0 ? " ({$skipped} skipped)" : '')
+            );
+        }
 
         return back()
             ->with('import_success', true)

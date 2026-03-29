@@ -62,6 +62,8 @@ class ActivityLog extends Model
             'deleted'  => 'red',
             'approved' => 'indigo',
             'released' => 'teal',
+            'renewed'  => 'amber',
+            'imported' => 'violet',
             'login'    => 'gray',
             'logout'   => 'gray',
             default    => 'yellow',
@@ -76,6 +78,8 @@ class ActivityLog extends Model
             'deleted'  => '✕',
             'approved' => '✓',
             'released' => '↑',
+            'renewed'  => '↻',
+            'imported' => '⇩',
             default    => '•',
         };
     }

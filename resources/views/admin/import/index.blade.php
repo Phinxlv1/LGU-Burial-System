@@ -85,7 +85,7 @@
     </style>
 </head>
 <body>
-@include('partials.sidebar')
+@include('admin.partials.sidebar')
 
 <div class="main">
     <div class="topbar">
@@ -118,7 +118,7 @@
                         </svg>
                     </div>
                     <div class="dropzone-title">Click to upload or drag &amp; drop</div>
-                    <div class="dropzone-sub">.xlsx, .xls, or .csv &nbsp;·&nbsp; Max 10 MB</div>
+                    <div class="dropzone-sub">.xlsx, .xls, or .csv &nbsp;·&nbsp; Max 10 GB</div>
                     <div class="dropzone-file" id="fileName"></div>
                 </div>
                 <div class="upload-footer">

@@ -168,7 +168,7 @@
 </head>
 <body>
 
-@include('partials.sidebar')
+@include('admin.partials.sidebar')
 
 <div class="main">
     <div class="topbar">

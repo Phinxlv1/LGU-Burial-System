@@ -9,19 +9,20 @@ use Symfony\Component\HttpFoundation\Response;
 class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, string $roles): Response
-    {
-        if (! auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        $allowedRoles = explode('|', $roles);
-
-        foreach ($allowedRoles as $role) {
-            if (auth()->user()->hasRole(trim($role))) {
-                return $next($request);
-            }
-        }
-
-        abort(403, 'Unauthorized.');
+{
+    if (!auth()->check()) {
+        return redirect()->route('login');
     }
+
+    $allowedRoles = explode('|', $roles);
+
+    foreach ($allowedRoles as $role) {
+        // Check both Spatie role AND the role column
+        if (auth()->user()->hasRole(trim($role)) || auth()->user()->role === trim($role)) {
+            return $next($request);
+        }
+    }
+
+    abort(403, 'Unauthorized.');
+}
 }

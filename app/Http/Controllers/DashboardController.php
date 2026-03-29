@@ -7,12 +7,12 @@ use App\Models\BurialPermit;
 class DashboardController extends Controller
 {
     public function index()
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        if ($user->hasRole('super_admin')) {
-            return redirect()->route('superadmin.dashboard');
-        }
+    if ($user->hasRole('super_admin') || (isset($user->role) && $user->role === 'super_admin')) {
+        return redirect()->route('superadmin.dashboard');
+    }
 
         $recentPermits = BurialPermit::with('deceased')
             ->orderBy('created_at', 'desc')
@@ -35,8 +35,7 @@ class DashboardController extends Controller
             'monthly' => $this->getMonthlyData(),
         ];
 
-        return view('dashboard.admin', compact('stats', 'recentPermits'));
-    }
+        return view('admin.users.index', compact('stats', 'recentPermits'));    }
 
     private function getMonthlyData(): array
     {

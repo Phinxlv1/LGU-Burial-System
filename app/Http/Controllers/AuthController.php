@@ -38,6 +38,11 @@ class AuthController extends Controller
             RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
 
+            $user = Auth::user();
+            if ($user->hasRole('super_admin') || (isset($user->role) && $user->role === 'super_admin')) {
+                return redirect()->intended(route('superadmin.dashboard'));
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 

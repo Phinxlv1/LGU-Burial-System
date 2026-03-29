@@ -42,7 +42,7 @@ class SettingsController extends Controller
         $settings = $this->load();
         $users = User::orderBy('created_at')->get();
 
-        return view('settings.index', compact('settings', 'users'));
+        return view('superadmin.settings.index', compact('settings', 'users'));
     }
 
     // ──────────────────────────────────────────────────
@@ -429,6 +429,47 @@ class SettingsController extends Controller
             ];
         }
 
+        // ── 11. DUPLICATE: deceased persons with identical first + last name ──
+$dupNames = DeceasedPerson::select('first_name', 'last_name', DB::raw('COUNT(*) as cnt'), DB::raw('GROUP_CONCAT(id) as ids'))
+    ->groupBy('first_name', 'last_name')
+    ->having('cnt', '>', 1)
+    ->get();
+
+if ($dupNames->isNotEmpty()) {
+    $records = [];
+    foreach ($dupNames as $dup) {
+        $deceasedIds = explode(',', $dup->ids);
+        $persons = DeceasedPerson::whereIn('id', $deceasedIds)->get();
+        foreach ($persons as $d) {
+            $permit = BurialPermit::where('deceased_id', $d->id)->first();
+            $records[] = [
+                'id'          => 'dupname-dec-'.$d->id,
+                'permit_id'   => $permit?->id,
+                'label'       => $d->last_name.', '.$d->first_name,
+                'sub'         => 'Record #'.$d->id
+                                 .($permit ? ' · Permit '.$permit->permit_number : ' · No permit linked')
+                                 .' · Died '.(optional($d->date_of_death)?->format('M d, Y') ?? '—'),
+                'field_name'  => 'full_name',
+                'field_value' => $d->first_name.' '.$d->last_name,
+                'edit_url'    => $permit ? route('permits.show', $permit) : route('deceased.show', $d),
+            ];
+        }
+    }
+    $issues[] = [
+        'id'          => 'dup-deceased-names',
+        'type'        => 'duplicate',
+        'severity'    => 'high',
+        'title'       => 'Deceased persons with identical names',
+        'description' => 'Multiple deceased records share the same full name. This usually means a permit was created more than once for the same person. Review and delete the duplicate permit(s).',
+        'records'     => $records,
+    ];
+}
+
         return response()->json(['issues' => $issues, 'scanned_at' => now()->toISOString()]);
     }
+    
+    public function dataQualityPage()
+{
+    return view('superadmin.data-quality');
+}
 }
