@@ -100,7 +100,7 @@
                 </div>
 
                 {{-- Date of Death · Kind of Burial --}}
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem">
                     <div class="form-group">
                         <label class="form-label">Date of Death <span style="color:#ef4444">*</span></label>
                         <input type="date" name="date_of_death" class="form-control"
@@ -116,14 +116,48 @@
                     </div>
                 </div>
 
+                {{-- Place of Death · Residence --}}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+                    <div class="form-group">
+                        <label class="form-label">Place of Death</label>
+                        <input type="text" name="place_of_death" class="form-control"
+                               placeholder="e.g. Carmen, Davao del Norte" value="{{ old('place_of_death') }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Residence</label>
+                        <input type="text" name="address" class="form-control"
+                               placeholder="e.g. Brgy. Poblacion" value="{{ old('address') }}">
+                    </div>
+                </div>
+
                 {{-- FEES --}}
                 <div class="section-divider" style="margin-top:.5rem">Burial Permit Fees</div>
+
+                @php
+                    $__settingsPath = storage_path('app/settings.json');
+                    $__settings = file_exists($__settingsPath) ? json_decode(file_get_contents($__settingsPath), true) : [];
+
+                    $__defaultFees = [
+                        'cemented'    => ['tomb' => 1000, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                        'niche_1st'   => ['tomb' => 8000, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                        'niche_2nd'   => ['tomb' => 6600, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                        'niche_3rd'   => ['tomb' => 5700, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                        'niche_4th'   => ['tomb' => 5300, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                        'bone_niches' => ['tomb' => 5000, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                    ];
+
+                    $getFee = function($key) use ($__settings, $__defaultFees) {
+                        $raw = $__settings['fees'][$key] ?? $__defaultFees[$key] ?? $__defaultFees['cemented'];
+                        $total = ($raw['tomb'] ?? 0) + ($raw['permit'] ?? 0) + ($raw['maint'] ?? 0) + ($raw['app'] ?? 0);
+                        return number_format($total, 2);
+                    };
+                @endphp
 
                 <div class="fee-grid">
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">
                         <input type="radio" name="burial_fee_type" value="cemented" id="pm_fee_cemented" {{ old('burial_fee_type')==='cemented'?'checked':'' }}>
                         <label for="pm_fee_cemented">Cemented</label>
-                        <span class="fee-amount">₱1,000.00</span>
+                        <span class="fee-amount">₱{{ $getFee('cemented') }}</span>
                     </div>
 
                     <p style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin:.4rem 0 .1rem .25rem">Niches (New)</p>
@@ -131,22 +165,22 @@
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">
                         <input type="radio" name="burial_fee_type" value="niche_1st" id="pm_fee_1st" {{ old('burial_fee_type')==='niche_1st'?'checked':'' }}>
                         <label for="pm_fee_1st">1st Floor</label>
-                        <span class="fee-amount">₱8,000.00</span>
+                        <span class="fee-amount">₱{{ $getFee('niche_1st') }}</span>
                     </div>
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">
                         <input type="radio" name="burial_fee_type" value="niche_2nd" id="pm_fee_2nd" {{ old('burial_fee_type')==='niche_2nd'?'checked':'' }}>
                         <label for="pm_fee_2nd">2nd Floor</label>
-                        <span class="fee-amount">₱6,600.00</span>
+                        <span class="fee-amount">₱{{ $getFee('niche_2nd') }}</span>
                     </div>
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">
                         <input type="radio" name="burial_fee_type" value="niche_3rd" id="pm_fee_3rd" {{ old('burial_fee_type')==='niche_3rd'?'checked':'' }}>
                         <label for="pm_fee_3rd">3rd Floor</label>
-                        <span class="fee-amount">₱5,700.00</span>
+                        <span class="fee-amount">₱{{ $getFee('niche_3rd') }}</span>
                     </div>
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">
                         <input type="radio" name="burial_fee_type" value="niche_4th" id="pm_fee_4th" {{ old('burial_fee_type')==='niche_4th'?'checked':'' }}>
                         <label for="pm_fee_4th">4th Floor</label>
-                        <span class="fee-amount">₱5,300.00</span>
+                        <span class="fee-amount">₱{{ $getFee('niche_4th') }}</span>
                     </div>
 
                     <p style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin:.4rem 0 .1rem .25rem">Bone Niches</p>
@@ -154,7 +188,7 @@
                     <div class="fee-row" onclick="this.querySelector('input').checked=true">
                         <input type="radio" name="burial_fee_type" value="bone_niches" id="pm_fee_bone" {{ old('burial_fee_type')==='bone_niches'?'checked':'' }}>
                         <label for="pm_fee_bone">Bone Niches</label>
-                        <span class="fee-amount">₱5,000.00</span>
+                        <span class="fee-amount">₱{{ $getFee('bone_niches') }}</span>
                     </div>
                 </div>
 

@@ -38,6 +38,7 @@
             display: flex;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            scrollbar-gutter: stable;
         }
 
         .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -51,7 +52,7 @@
             padding: 0 1.75rem;
             position: sticky; top: 0; z-index: 40;
         }
-        .topbar-left { display: flex; align-items: center; gap: .75rem; }
+        .topbar-left  { display: flex; align-items: center; gap: .75rem; }
         .topbar-title { font-size: 15px; font-weight: 600; color: var(--text-1); letter-spacing: -.01em; }
         .topbar-date  { font-size: 11px; color: var(--text-3); font-family: var(--mono); }
         .topbar-right { display: flex; align-items: center; gap: .75rem; }
@@ -129,9 +130,7 @@
         /* ── TABLE ── */
         .log-table { width: 100%; border-collapse: collapse; }
 
-        .log-table thead tr {
-            border-bottom: 1px solid var(--border-2);
-        }
+        .log-table thead tr { border-bottom: 1px solid var(--border-2); }
         .log-table thead th {
             padding: .6rem 1.25rem;
             font-size: 10.5px; font-weight: 700;
@@ -171,9 +170,6 @@
         .dot-amber  { background: #fef3c7; color: #d97706; }
         .dot-violet { background: #ede9fe; color: #7c3aed; }
         .dot-blue   { background: #dbeafe; color: #1d4ed8; }
-        .dot-red    { background: #fee2e2; color: #dc2626; }
-        .dot-amber  { background: #fef3c7; color: #d97706; }
-        .dot-violet { background: #ede9fe; color: #7c3aed; }
 
         /* action badge */
         .badge {
@@ -191,8 +187,6 @@
         .badge-amber  { background: #fef3c7; color: #d97706; }
         .badge-violet { background: #ede9fe; color: #7c3aed; }
         .badge-blue   { background: #dbeafe; color: #1d4ed8; }
-        .badge-amber  { background: #fef3c7; color: #d97706; }
-        .badge-violet { background: #ede9fe; color: #7c3aed; }
 
         /* col: description */
         .td-desc { max-width: 340px; }
@@ -201,16 +195,8 @@
             color: var(--text-1); font-size: 13px;
         }
         .td-desc-text strong { font-weight: 600; }
-        .permit-code {
-            display: inline-flex; align-items: center;
-            font-size: 10.5px; font-weight: 600; color: var(--accent);
-            font-family: var(--mono);
-            background: var(--accent-bg);
-            border: 1px solid #bfdbfe;
-            border-radius: 4px; padding: 1px 5px; margin-left: 4px;
-        }
 
-        /* col: user */
+        /* col: user — THIS IS THE KEY FIX */
         .td-user { white-space: nowrap; }
         .user-chip {
             display: inline-flex; align-items: center; gap: 5px;
@@ -222,7 +208,11 @@
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
+        .user-avatar.system {
+            background: linear-gradient(135deg, #64748b, #94a3b8);
+        }
         .user-name { font-size: 12px; color: var(--text-2); font-weight: 500; }
+        .user-name.system { color: var(--text-3); font-style: italic; }
 
         /* col: time */
         .td-time { text-align: right; white-space: nowrap; }
@@ -243,9 +233,10 @@
             padding: .85rem 1.25rem;
             border-top: 1px solid var(--border-2);
             display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: .5rem;
         }
         .pagination-info { font-size: 11.5px; color: var(--text-3); font-family: var(--mono); }
-        .pagination-links { display: flex; gap: .3rem; }
+        .pagination-links { display: flex; gap: .3rem; flex-wrap: wrap; }
         .pagination-links a,
         .pagination-links span {
             padding: .3rem .65rem; border-radius: 6px;
@@ -254,13 +245,9 @@
             color: var(--text-2);
             transition: all .15s;
         }
-        .pagination-links a:hover { background: var(--surface-2); color: var(--text-1); }
-        .pagination-links span.current {
-            background: var(--accent-bg); border-color: #bfdbfe; color: var(--accent); font-weight: 600;
-        }
-        .pagination-links span.disabled {
-            opacity: .4; cursor: not-allowed;
-        }
+        .pagination-links a:hover         { background: var(--surface-2); color: var(--text-1); }
+        .pagination-links span.current    { background: var(--accent-bg); border-color: #bfdbfe; color: var(--accent); font-weight: 600; }
+        .pagination-links span.disabled   { opacity: .4; cursor: not-allowed; }
 
         /* ── ANIMATIONS ── */
         .fade-up { opacity: 0; transform: translateY(10px); animation: fadeUp .35s cubic-bezier(.4,0,.2,1) forwards; }
@@ -320,10 +307,15 @@
         <div class="panel fade-up d3">
             <div class="panel-head">
                 <div class="panel-title">All Events</div>
-                <span class="panel-count">{{ count($activity) }} records</span>
+                {{--
+                    FIX: $activity is a Paginator, not a plain collection.
+                    Use ->total() for the real record count across all pages.
+                    count($activity) only returns the count on the current page.
+                --}}
+                <span class="panel-count" id="recordCount">{{ $activity->total() }} records</span>
             </div>
 
-            @if(count($activity) > 0)
+            @if($activity->total() > 0)
             <table class="log-table" id="logTable">
                 <thead>
                     <tr>
@@ -339,8 +331,27 @@
                         $action      = $log->action      ?? 'updated';
                         $description = $log->description ?? '—';
                         $modelLabel  = $log->model_label  ?? null;
-                        $userName    = $log->user?->name  ?? 'System';
                         $createdAt   = $log->created_at;
+
+                        /*
+                        ┌─────────────────────────────────────────────────────┐
+                        │  PERFORMED BY — The fix lives here.                 │
+                        │                                                      │
+                        │  $log->user is the eager-loaded User model.         │
+                        │  The controller already does ->with('user') so the  │
+                        │  relationship is loaded. If it's still null it means │
+                        │  your ActivityLog model's user() relationship uses   │
+                        │  a different FK name than 'user_id'.                 │
+                        │                                                      │
+                        │  Check your activity_logs migration for the column  │
+                        │  name and update the model relationship to match.   │
+                        └─────────────────────────────────────────────────────┘
+                        */
+                        $userModel  = $log->user;               // eager-loaded User or null
+                        $userName   = $userModel?->name ?? null; // null = not found in DB
+                        $isSystem   = $userName === null;
+                        $displayName = $userName ?? 'System';
+                        $avatarLetter = strtoupper(substr($displayName, 0, 1));
 
                         $dotClass = match($action) {
                             'created'  => 'dot-green',
@@ -377,6 +388,7 @@
                         };
                     @endphp
                     <tr data-action="{{ $action }}">
+
                         {{-- Action --}}
                         <td>
                             <div class="td-action">
@@ -395,11 +407,23 @@
                             </div>
                         </td>
 
-                        {{-- User --}}
+                        {{-- ═══════════════════════════════════════════════════
+                             PERFORMED BY — Fixed rendering
+                             Before: used $log->user?->name which silently
+                             outputs nothing if the relation is null.
+                             Now: clearly shows "System" with distinct styling
+                             when no user is linked, so you can tell at a glance
+                             whether it's a missing relation or a genuine system
+                             action rather than just seeing a blank cell.
+                        ════════════════════════════════════════════════════ --}}
                         <td class="td-user">
                             <div class="user-chip">
-                                <div class="user-avatar">{{ strtoupper(substr($userName, 0, 1)) }}</div>
-                                <span class="user-name">{{ $userName }}</span>
+                                <div class="user-avatar {{ $isSystem ? 'system' : '' }}">
+                                    {{ $avatarLetter }}
+                                </div>
+                                <span class="user-name {{ $isSystem ? 'system' : '' }}">
+                                    {{ $displayName }}
+                                </span>
                             </div>
                         </td>
 
@@ -408,6 +432,7 @@
                             <div class="time-ago">{{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}</div>
                             <div class="time-full">{{ \Carbon\Carbon::parse($createdAt)->format('d M Y, H:i') }}</div>
                         </td>
+
                     </tr>
                     @endforeach
                 </tbody>
@@ -422,6 +447,62 @@
             </div>
             @endif
 
+            {{-- ═══════════════════════════════════════════════════════════
+                 PAGINATION — Fixed.
+                 Before: hand-rolled pagination HTML (non-functional).
+                 Now: uses Laravel's built-in paginator with custom styling,
+                 showing page info + prev/next/page links.
+            ════════════════════════════════════════════════════════════ --}}
+            @if($activity->hasPages())
+            <div class="pagination-wrap">
+                <div class="pagination-info">
+                    Showing {{ $activity->firstItem() }}–{{ $activity->lastItem() }}
+                    of {{ $activity->total() }} records
+                </div>
+                <div class="pagination-links">
+                    {{-- Previous --}}
+                    @if($activity->onFirstPage())
+                        <span class="disabled">‹ Prev</span>
+                    @else
+                        <a href="{{ $activity->previousPageUrl() }}">‹ Prev</a>
+                    @endif
+
+                    {{-- Page numbers (show up to 7 around current) --}}
+                    @php
+                        $currentPage = $activity->currentPage();
+                        $lastPage    = $activity->lastPage();
+                        $start = max(1, $currentPage - 3);
+                        $end   = min($lastPage, $currentPage + 3);
+                    @endphp
+
+                    @if($start > 1)
+                        <a href="{{ $activity->url(1) }}">1</a>
+                        @if($start > 2)<span class="disabled">…</span>@endif
+                    @endif
+
+                    @for($p = $start; $p <= $end; $p++)
+                        @if($p === $currentPage)
+                            <span class="current">{{ $p }}</span>
+                        @else
+                            <a href="{{ $activity->url($p) }}">{{ $p }}</a>
+                        @endif
+                    @endfor
+
+                    @if($end < $lastPage)
+                        @if($end < $lastPage - 1)<span class="disabled">…</span>@endif
+                        <a href="{{ $activity->url($lastPage) }}">{{ $lastPage }}</a>
+                    @endif
+
+                    {{-- Next --}}
+                    @if($activity->hasMorePages())
+                        <a href="{{ $activity->nextPageUrl() }}">Next ›</a>
+                    @else
+                        <span class="disabled">Next ›</span>
+                    @endif
+                </div>
+            </div>
+            @endif
+
         </div>{{-- /panel --}}
 
     </div>{{-- /content --}}
@@ -429,24 +510,22 @@
 
 <script>
 function filterTable(action, btn) {
-    // update button states
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
-    // filter rows
+    let visible = 0;
     document.querySelectorAll('#logTable tbody tr').forEach(row => {
-        if (action === 'all' || row.dataset.action === action) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        const match = action === 'all' || row.dataset.action === action;
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
     });
 
-    // update count
-    const visible = action === 'all'
-        ? document.querySelectorAll('#logTable tbody tr').length
-        : document.querySelectorAll(`#logTable tbody tr[data-action="${action}"]`).length;
-    document.querySelector('.panel-count').textContent = visible + ' records';
+    // Update the count badge to reflect filtered vs total
+    const total = {{ $activity->total() }};
+    document.getElementById('recordCount').textContent =
+        action === 'all'
+            ? total + ' records'
+            : visible + ' shown · ' + total + ' total';
 }
 </script>
 

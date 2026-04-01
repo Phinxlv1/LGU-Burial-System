@@ -90,9 +90,20 @@ class UserController extends Controller
             return back()->withErrors(['error' => 'You cannot delete your own account.']);
         }
 
+        $name = $user->name;
+
+        \App\Models\ActivityLog::record(
+            action: 'deleted',
+            modelType: 'User',
+            modelId: $user->id,
+            modelLabel: $name,
+            oldValues: $user->toArray(),
+            description: "User account for {$name} deleted by " . auth()->user()->name
+        );
+
         $user->delete();
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User deleted successfully.');
+            ->with('success', "User account for {$name} deleted.");
     }
 }

@@ -10,31 +10,30 @@ class ReportController extends Controller
 {
     public function index()
     {
-        $year = now()->year;
+        $year  = now()->year;
         $month = now()->month;
 
         $totalPermits    = BurialPermit::count();
-        $pendingPermits  = BurialPermit::where('status', 'pending')->count();
-        $approvedPermits = BurialPermit::where('status', 'approved')->count();
-        $releasedPermits = BurialPermit::where('status', 'released')->count();
+        $activePermits   = BurialPermit::where('status', 'active')->count();
+        $expiringPermits = BurialPermit::where('status', 'expiring')->count();
         $expiredPermits  = BurialPermit::where('status', 'expired')->count();
 
         $newPermits       = BurialPermit::whereYear('created_at', $year)->count();
         $permitsThisMonth = BurialPermit::whereYear('created_at', $year)->whereMonth('created_at', $month)->count();
         $permitsThisWeek  = BurialPermit::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
 
-        $renewalsThisYear  = BurialPermit::whereYear('updated_at', $year)->whereYear('created_at', '<', $year)->where('status', 'released')->count();
-        $renewalsThisMonth = BurialPermit::whereYear('updated_at', $year)->whereMonth('updated_at', $month)->whereYear('created_at', '<', $year)->where('status', 'released')->count();
-        $renewalsThisWeek  = BurialPermit::whereBetween('updated_at', [now()->startOfWeek(), now()->endOfWeek()])->whereYear('created_at', '<', $year)->where('status', 'released')->count();
+        $renewalsThisYear  = BurialPermit::whereYear('updated_at', $year)->whereYear('created_at', '<', $year)->where('status', 'active')->count();
+        $renewalsThisMonth = BurialPermit::whereYear('updated_at', $year)->whereMonth('updated_at', $month)->whereYear('created_at', '<', $year)->where('status', 'active')->count();
+        $renewalsThisWeek  = BurialPermit::whereBetween('updated_at', [now()->startOfWeek(), now()->endOfWeek()])->whereYear('created_at', '<', $year)->where('status', 'active')->count();
 
-        $urgentExpiring = BurialPermit::where('status', 'released')->whereNotNull('expiry_date')->whereDate('expiry_date', '>=', now())->whereDate('expiry_date', '<=', now()->addDays(7))->count();
-        $expiringSoon   = BurialPermit::where('status', 'released')->whereNotNull('expiry_date')->whereDate('expiry_date', '>=', now())->whereDate('expiry_date', '<=', now()->addDays(30))->count();
+        $urgentExpiring = BurialPermit::where('status', 'expiring')->whereNotNull('expiry_date')->whereDate('expiry_date', '>=', now())->whereDate('expiry_date', '<=', now()->addDays(7))->count();
+        $expiringSoon   = BurialPermit::where('status', 'expiring')->whereNotNull('expiry_date')->whereDate('expiry_date', '>=', now())->whereDate('expiry_date', '<=', now()->addDays(30))->count();
 
         $totalDeceased     = DeceasedPerson::count();
         $deceasedThisYear  = DeceasedPerson::whereYear('created_at', $year)->count();
         $deceasedThisMonth = DeceasedPerson::whereYear('created_at', $year)->whereMonth('created_at', $month)->count();
 
-        $monthly = BurialPermit::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+        $monthly = BurialPermit::selectRaw("CAST(strftime('%m', created_at) AS INTEGER) as month, COUNT(*) as total")
             ->whereYear('created_at', $year)
             ->groupBy('month')
             ->pluck('total', 'month')
@@ -65,7 +64,7 @@ class ReportController extends Controller
         $renewedPermits = $renewalsThisYear;
 
         return view('reports.index', compact(
-            'totalPermits', 'pendingPermits', 'approvedPermits', 'releasedPermits', 'expiredPermits',
+            'totalPermits', 'activePermits', 'expiringPermits', 'expiredPermits',
             'newPermits', 'permitsThisMonth', 'permitsThisWeek',
             'renewedPermits', 'renewalsThisYear', 'renewalsThisMonth', 'renewalsThisWeek',
             'urgentExpiring', 'expiringSoon',
@@ -78,32 +77,31 @@ class ReportController extends Controller
 
     public function superAdminIndex()
     {
-        $year = now()->year;
+        $year  = now()->year;
         $month = now()->month;
 
         $totalPermits    = BurialPermit::count();
-        $pendingPermits  = BurialPermit::where('status', 'pending')->count();
-        $approvedPermits = BurialPermit::where('status', 'approved')->count();
-        $releasedPermits = BurialPermit::where('status', 'released')->count();
+        $activePermits   = BurialPermit::where('status', 'active')->count();
+        $expiringPermits = BurialPermit::where('status', 'expiring')->count();
         $expiredPermits  = BurialPermit::where('status', 'expired')->count();
 
         $newPermits       = BurialPermit::whereYear('created_at', $year)->count();
         $permitsThisMonth = BurialPermit::whereYear('created_at', $year)->whereMonth('created_at', $month)->count();
         $permitsThisWeek  = BurialPermit::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
 
-        $renewedPermits    = BurialPermit::whereYear('updated_at', $year)->whereYear('created_at', '<', $year)->where('status', 'released')->count();
+        $renewedPermits    = BurialPermit::whereYear('updated_at', $year)->whereYear('created_at', '<', $year)->where('status', 'active')->count();
         $renewalsThisYear  = $renewedPermits;
-        $renewalsThisMonth = BurialPermit::whereYear('updated_at', $year)->whereMonth('updated_at', $month)->whereYear('created_at', '<', $year)->where('status', 'released')->count();
-        $renewalsThisWeek  = BurialPermit::whereBetween('updated_at', [now()->startOfWeek(), now()->endOfWeek()])->whereYear('created_at', '<', $year)->where('status', 'released')->count();
+        $renewalsThisMonth = BurialPermit::whereYear('updated_at', $year)->whereMonth('updated_at', $month)->whereYear('created_at', '<', $year)->where('status', 'active')->count();
+        $renewalsThisWeek  = BurialPermit::whereBetween('updated_at', [now()->startOfWeek(), now()->endOfWeek()])->whereYear('created_at', '<', $year)->where('status', 'active')->count();
 
-        $urgentExpiring = BurialPermit::where('status', 'released')->whereNotNull('expiry_date')->whereDate('expiry_date', '>=', now())->whereDate('expiry_date', '<=', now()->addDays(7))->count();
-        $expiringSoon   = BurialPermit::where('status', 'released')->whereNotNull('expiry_date')->whereDate('expiry_date', '>=', now())->whereDate('expiry_date', '<=', now()->addDays(30))->count();
+        $urgentExpiring = BurialPermit::where('status', 'expiring')->whereNotNull('expiry_date')->whereDate('expiry_date', '>=', now())->whereDate('expiry_date', '<=', now()->addDays(7))->count();
+        $expiringSoon   = BurialPermit::where('status', 'expiring')->whereNotNull('expiry_date')->whereDate('expiry_date', '>=', now())->whereDate('expiry_date', '<=', now()->addDays(30))->count();
 
         $totalDeceased     = DeceasedPerson::count();
         $deceasedThisYear  = DeceasedPerson::whereYear('created_at', $year)->count();
         $deceasedThisMonth = DeceasedPerson::whereYear('created_at', $year)->whereMonth('created_at', $month)->count();
 
-        $monthly = BurialPermit::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+        $monthly = BurialPermit::selectRaw("CAST(strftime('%m', created_at) AS INTEGER) as month, COUNT(*) as total")
             ->whereYear('created_at', $year)
             ->groupBy('month')
             ->pluck('total', 'month')
@@ -133,7 +131,7 @@ class ReportController extends Controller
         $recentPermits = BurialPermit::with('deceased')->latest()->limit(10)->get();
 
         return view('superadmin.reports', compact(
-            'totalPermits', 'pendingPermits', 'approvedPermits', 'releasedPermits', 'expiredPermits',
+            'totalPermits', 'activePermits', 'expiringPermits', 'expiredPermits',
             'newPermits', 'permitsThisMonth', 'permitsThisWeek',
             'renewedPermits', 'renewalsThisYear', 'renewalsThisMonth', 'renewalsThisWeek',
             'urgentExpiring', 'expiringSoon',
@@ -149,9 +147,8 @@ class ReportController extends Controller
         $year = now()->year;
 
         $totalPermits    = BurialPermit::count();
-        $pendingPermits  = BurialPermit::where('status', 'pending')->count();
-        $approvedPermits = BurialPermit::where('status', 'approved')->count();
-        $releasedPermits = BurialPermit::where('status', 'released')->count();
+        $activePermits   = BurialPermit::where('status', 'active')->count();
+        $expiringPermits = BurialPermit::where('status', 'expiring')->count();
         $expiredPermits  = BurialPermit::where('status', 'expired')->count();
         $totalDeceased   = DeceasedPerson::count();
 
@@ -159,19 +156,27 @@ class ReportController extends Controller
 
         $renewedPermits = BurialPermit::whereYear('updated_at', $year)
             ->whereYear('created_at', '<', $year)
-            ->where('status', 'released')
+            ->where('status', 'active')
             ->count();
 
-        $monthly = BurialPermit::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+        $monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+        $monthly = BurialPermit::selectRaw("CAST(strftime('%m', created_at) AS INTEGER) as month, COUNT(*) as total")
             ->whereYear('created_at', $year)
             ->groupBy('month')
             ->pluck('total', 'month')
             ->toArray();
 
+        // 0-indexed array (Jan=0 … Dec=11) to match the blade foreach
         $monthlyData = [];
         for ($m = 1; $m <= 12; $m++) {
-            $monthlyData[$m] = $monthly[$m] ?? 0;
+            $monthlyData[$m - 1] = $monthly[$m] ?? 0;
         }
+
+        $maxVal       = max(array_merge($monthlyData, [1]));
+        $peakIdx      = array_search($maxVal, $monthlyData);
+        $busiestMonth = $monthNames[$peakIdx] ?? '—';
+        $busiestCount = $maxVal;
 
         $feeCounts = BurialPermit::selectRaw('permit_type, COUNT(*) as total')
             ->groupBy('permit_type')
@@ -180,11 +185,12 @@ class ReportController extends Controller
 
         $recentPermits = BurialPermit::with('deceased')->latest()->limit(15)->get();
 
-        $pdf = Pdf::loadView('superadmin.report', compact(
-            'totalPermits', 'pendingPermits', 'approvedPermits',
-            'releasedPermits', 'expiredPermits', 'totalDeceased',
+        $pdf = Pdf::loadView('superadmin.pdf_export', compact(
+            'totalPermits', 'activePermits', 'expiringPermits',
+            'expiredPermits', 'totalDeceased',
             'newPermits', 'renewedPermits',
-            'monthlyData', 'feeCounts', 'recentPermits', 'year'
+            'monthlyData', 'busiestMonth', 'busiestCount',
+            'feeCounts', 'recentPermits', 'year'
         ))->setPaper('a4', 'portrait');
 
         return $pdf->download('LGU-Carmen-Burial-Report-'.now()->format('Y-m-d').'.pdf');

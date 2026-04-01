@@ -102,6 +102,17 @@ class CemeteryMapController extends Controller
      */
     public function destroy(CemeteryPlot $plot)
     {
+        $label = $plot->plot_code;
+
+        \App\Models\ActivityLog::record(
+            action: 'deleted',
+            modelType: 'CemeteryPlot',
+            modelId: $plot->id,
+            modelLabel: $label,
+            oldValues: $plot->toArray(),
+            description: "Cemetery plot {$label} deleted by " . auth()->user()->name
+        );
+
         $plot->delete();
 
         return response()->json(['success' => true]);

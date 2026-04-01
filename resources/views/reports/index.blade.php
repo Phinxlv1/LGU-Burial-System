@@ -312,9 +312,8 @@
             display: inline-flex; font-size: 10px; font-weight: 600;
             padding: 2px 9px; border-radius: 20px;
         }
-        .b-pending  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-bd); }
-        .b-approved { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
-        .b-released { background: var(--blue-bg);   color: var(--blue);   border: 1px solid var(--blue-bd); }
+        .b-active   { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
+        .b-expiring { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-bd); }
         .b-expired  { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bd); }
 
         @media (max-width: 1100px) {
@@ -374,28 +373,28 @@
                 <div class="stat-sub">Since system began</div>
             </div>
 
-            <div class="stat-card s-amber">
-                <div class="stat-ico ico-amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                <div class="stat-eyebrow">Action Required</div>
-                <div class="stat-val" style="color:var(--amber)">{{ $pendingPermits }}</div>
-                <div class="stat-lbl">Pending</div>
-                <div class="stat-sub">Awaiting approval</div>
-            </div>
-
             <div class="stat-card s-green">
                 <div class="stat-ico ico-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-                <div class="stat-eyebrow">Ready</div>
-                <div class="stat-val" style="color:var(--green)">{{ $approvedPermits }}</div>
-                <div class="stat-lbl">Approved</div>
-                <div class="stat-sub">Ready to release</div>
+                <div class="stat-eyebrow">Valid</div>
+                <div class="stat-val" style="color:var(--green)">{{ $activePermits }}</div>
+                <div class="stat-lbl">Active Permits</div>
+                <div class="stat-sub">Ready & Released</div>
             </div>
 
-            <div class="stat-card s-purple">
+            <div class="stat-card s-amber">
+                <div class="stat-ico ico-amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div class="stat-eyebrow">Action Needed</div>
+                <div class="stat-val" style="color:var(--amber)">{{ $expiringPermits }}</div>
+                <div class="stat-lbl">Expiring Soon</div>
+                <div class="stat-sub">Within 30 days</div>
+            </div>
+
+            <div class="stat-card s-grad" style="opacity:0.5; pointer-events:none;">
                 <div class="stat-ico ico-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                <div class="stat-eyebrow">Active</div>
-                <div class="stat-val" style="color:var(--purple)">{{ $releasedPermits }}</div>
-                <div class="stat-lbl">Released</div>
-                <div class="stat-sub">Currently valid</div>
+                <div class="stat-eyebrow">Legacy</div>
+                <div class="stat-val" style="color:var(--purple)">0</div>
+                <div class="stat-lbl">Deactivated</div>
+                <div class="stat-sub">Space reserved</div>
             </div>
 
             <div class="stat-card s-red">
@@ -572,7 +571,17 @@
                         <td>{{ $p->applicant_name ?? '—' }}</td>
                         <td>{{ $p->created_at->format('M d, Y') }}</td>
                         <td>{{ $p->expiry_date ? $p->expiry_date->format('M d, Y') : '—' }}</td>
-                        <td><span class="badge b-{{ $p->status }}">{{ ucfirst($p->status) }}</span></td>
+                        <td>
+                            @if($p->status === 'active')
+                                <span class="badge b-active">Active</span>
+                            @elseif($p->status === 'expiring')
+                                <span class="badge b-expiring">Expiring Soon</span>
+                            @elseif($p->status === 'expired')
+                                <span class="badge b-expired">Expired</span>
+                            @else
+                                <span class="badge">{{ ucfirst($p->status) }}</span>
+                            @endif
+                        </td>
                     </tr>
                     @empty
                     <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;font-size:13px">No permits yet.</td></tr>

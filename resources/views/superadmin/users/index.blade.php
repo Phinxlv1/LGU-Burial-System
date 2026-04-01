@@ -40,6 +40,8 @@
             display: flex;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            /* Prevent content shift when scrollbar appears */
+            scrollbar-gutter: stable;
         }
 
         .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--surface-2); }   
@@ -412,15 +414,6 @@ html.dark .empty-activity { color: #4b5563 !important; }
 </head>
 <body>
 
-<!-- Mobile Toggle Button -->
-<button class="sa-sidebar-toggle" id="sidebarToggle" style="display: none;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="3" y1="12" x2="21" y2="12"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <line x1="3" y1="18" x2="21" y2="18"/>
-    </svg>
-</button>
-
 @include('superadmin.partials.sidebar')
 
 <div class="main">
@@ -479,11 +472,11 @@ html.dark .empty-activity { color: #4b5563 !important; }
                     <div class="stat-icon green">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <span class="stat-pill ok">DONE</span>
+                    <span class="stat-pill ok">VALID</span>
                 </div>
-                <div class="stat-value green">{{ $releasedPermits }}</div>
-                <div class="stat-label">Released</div>
-                <div class="stat-sub">{{ $totalPermits > 0 ? round(($releasedPermits/$totalPermits)*100) : 0 }}% of total</div>
+                <div class="stat-value green">{{ $activePermits }}</div>
+                <div class="stat-label">Active Permits</div>
+                <div class="stat-sub">Current valid permits</div>
             </div>
 
             <div class="stat-card fade-up d3">
@@ -491,23 +484,23 @@ html.dark .empty-activity { color: #4b5563 !important; }
                     <div class="stat-icon amber">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
-                    <span class="stat-pill {{ $pendingPermits > 5 ? 'warn' : 'neu' }}">{{ $pendingPermits > 5 ? 'BACKLOG' : 'PENDING' }}</span>
+                    <span class="stat-pill {{ $expiringPermits > 0 ? 'warn' : 'neu' }}">{{ $expiringPermits > 0 ? 'ATTENTION' : 'NONE' }}</span>
                 </div>
-                <div class="stat-value amber">{{ $pendingPermits }}</div>
-                <div class="stat-label">Pending</div>
-                <div class="stat-sub">Awaiting action</div>
+                <div class="stat-value amber">{{ $expiringPermits }}</div>
+                <div class="stat-label">Expiring Soon</div>
+                <div class="stat-sub">Expiring within 30 days</div>
             </div>
 
-            <div class="stat-card fade-up d4">
+            <div class="stat-card fade-up d4" style="opacity:0.5; pointer-events:none;">
                 <div class="stat-top">
                     <div class="stat-icon cyan">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
                     </div>
-                    <span class="stat-pill ok">READY</span>
+                    <span class="stat-pill neu">OFFLINE</span>
                 </div>
-                <div class="stat-value cyan">{{ $approvedPermits }}</div>
-                <div class="stat-label">Approved</div>
-                <div class="stat-sub">Ready to release</div>
+                <div class="stat-value cyan">0</div>
+                <div class="stat-label">Legacy Status</div>
+                <div class="stat-sub">Reserved slot</div>
             </div>
 
             <div class="stat-card fade-up d5">
@@ -593,16 +586,12 @@ html.dark .empty-activity { color: #4b5563 !important; }
 
                 <div class="legend-list">
                     <div class="legend-row">
-                        <div class="legend-left"><div class="legend-dot" style="background:#f59e0b"></div><span class="legend-label">Pending</span></div>
-                        <div class="legend-right"><span class="legend-count">{{ $pendingPermits }}</span><span class="legend-pct">{{ $totalPermits > 0 ? round(($pendingPermits/$totalPermits)*100) : 0 }}%</span></div>
+                        <div class="legend-left"><div class="legend-dot" style="background:#10b981"></div><span class="legend-label">Active</span></div>
+                        <div class="legend-right"><span class="legend-count">{{ $activePermits }}</span><span class="legend-pct">{{ $totalPermits > 0 ? round(($activePermits/$totalPermits)*100) : 0 }}%</span></div>
                     </div>
                     <div class="legend-row">
-                        <div class="legend-left"><div class="legend-dot" style="background:#10b981"></div><span class="legend-label">Approved</span></div>
-                        <div class="legend-right"><span class="legend-count">{{ $approvedPermits }}</span><span class="legend-pct">{{ $totalPermits > 0 ? round(($approvedPermits/$totalPermits)*100) : 0 }}%</span></div>
-                    </div>
-                    <div class="legend-row">
-                        <div class="legend-left"><div class="legend-dot" style="background:#3b82f6"></div><span class="legend-label">Released</span></div>
-                        <div class="legend-right"><span class="legend-count">{{ $releasedPermits }}</span><span class="legend-pct">{{ $totalPermits > 0 ? round(($releasedPermits/$totalPermits)*100) : 0 }}%</span></div>
+                        <div class="legend-left"><div class="legend-dot" style="background:#f59e0b"></div><span class="legend-label">Expiring Soon</span></div>
+                        <div class="legend-right"><span class="legend-count">{{ $expiringPermits }}</span><span class="legend-pct">{{ $totalPermits > 0 ? round(($expiringPermits/$totalPermits)*100) : 0 }}%</span></div>
                     </div>
                     <div class="legend-row">
                         <div class="legend-left"><div class="legend-dot" style="background:#ef4444"></div><span class="legend-label">Expired</span></div>
@@ -633,16 +622,17 @@ html.dark .empty-activity { color: #4b5563 !important; }
                     @php
                         $dotClass = match($log->action) {
                             'created'  => 'dot-green',
-                            'approved' => 'dot-indigo',
-                            'released' => 'dot-teal',
+                            'active'   => 'dot-green',
+                            'expiring' => 'dot-gray',
                             'expired'  => 'dot-red',
+                            'renewed'  => 'dot-indigo',
                             default    => 'dot-gray',
                         };
                         $icon = match($log->action) {
                             'created'  => '+',
-                            'approved' => '✓',
-                            'released' => '↑',
+                            'active'   => '✓',
                             'expired'  => '!',
+                            'renewed'  => '↻',
                             default    => '•',
                         };
                     @endphp
@@ -762,10 +752,10 @@ new Chart(document.getElementById('monthlyChart').getContext('2d'), {
 new Chart(document.getElementById('statusChart').getContext('2d'), {
     type: 'doughnut',
     data: {
-        labels: ['Pending','Approved','Released','Expired'],
+        labels: ['Active','Expiring Soon','Expired'],
         datasets: [{
-            data: [{{ $pendingPermits }},{{ $approvedPermits }},{{ $releasedPermits }},{{ $expiredPermits }}],
-            backgroundColor: ['#f59e0b','#10b981','#3b82f6','#ef4444'],
+            data: [{{ $activePermits }},{{ $expiringPermits }},{{ $expiredPermits }}],
+            backgroundColor: ['#10b981','#f59e0b','#ef4444'],
             borderWidth: 3,
             borderColor: '#ffffff',
             hoverOffset: 6,

@@ -11,7 +11,7 @@
     $contact = $permit->applicant_contact;
     $canSend = !empty($contact);
     $daysLeft = $permit->expiry_date ? now()->diffInDays($permit->expiry_date, false) : null;
-    $isExpiringSoon = $permit->status === 'released' && $daysLeft !== null && $daysLeft <= 30 && $daysLeft >= 0;
+    $isExpiringSoon = $permit->status === 'expiring';
     $isExpired = $permit->status === 'expired';
 @endphp
 
@@ -151,26 +151,14 @@
                     </button>
                 </form>
 
-                {{-- Approved --}}
-                @if($permit->status === 'approved')
+                {{-- Active / Issued --}}
+                @if($permit->status === 'active')
                 <form method="POST" action="{{ route('sms.send', $permit) }}" style="display:inline">
                     @csrf
-                    <input type="hidden" name="message_type" value="approved">
-                    <button type="submit" class="btn-sms-quick btn-sms-green" {{ !$canSend ? 'disabled' : '' }}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Permit Approved
-                    </button>
-                </form>
-                @endif
-
-                {{-- Released --}}
-                @if($permit->status === 'released')
-                <form method="POST" action="{{ route('sms.send', $permit) }}" style="display:inline">
-                    @csrf
-                    <input type="hidden" name="message_type" value="released">
+                    <input type="hidden" name="message_type" value="active">
                     <button type="submit" class="btn-sms-quick btn-sms-blue" {{ !$canSend ? 'disabled' : '' }}>
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        Permit Released
+                        Permit Issued
                     </button>
                 </form>
                 @endif

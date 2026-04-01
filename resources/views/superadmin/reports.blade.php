@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports — LGU Carmen</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/sa-sidebar.css') }}">
     <style>
         :root {
@@ -254,8 +254,9 @@
             display: inline-flex; font-size: 10px; font-weight: 600;
             padding: 2px 9px; border-radius: 20px;
         }
-        .b-active { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
-        .b-expired  { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bd); }
+        .b-active  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
+        .b-expiring { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-bd); }
+        .b-expired { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bd); }
 
         @media (max-width: 1100px) {
             .stat-grid  { grid-template-columns: repeat(2,1fr); }
@@ -313,6 +314,22 @@
                 <div class="stat-val" style="color:var(--blue)">{{ $totalPermits }}</div>
                 <div class="stat-lbl">Total Permits</div>
                 <div class="stat-sub">Since system began</div>
+            </div>
+
+            <div class="stat-card s-green">
+                <div class="stat-ico ico-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="stat-eyebrow">Valid</div>
+                <div class="stat-val" style="color:var(--green)">{{ $activePermits }}</div>
+                <div class="stat-lbl">Active Permits</div>
+                <div class="stat-sub">Ready & Released</div>
+            </div>
+
+            <div class="stat-card s-amber">
+                <div class="stat-ico ico-amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div class="stat-eyebrow">Action Needed</div>
+                <div class="stat-val" style="color:var(--amber)">{{ $expiringPermits }}</div>
+                <div class="stat-lbl">Expiring Soon</div>
+                <div class="stat-sub">Within 30 days</div>
             </div>
 
             <div class="stat-card s-red">
@@ -491,15 +508,20 @@
                 <tbody>
                     @forelse($recentPermits ?? [] as $p)
                     @php
-                        // Simplified status display - only Active/Expired
+                        // Updated status display to use helper mapping or explicit match
                         $status = $p->status;
-                        $badgeClass = 'b-active'; // default for active permits
-                        $statusText = 'Active';
-                        
-                        if ($status === 'expired') {
-                            $badgeClass = 'b-expired';
-                            $statusText = 'Expired';
-                        }
+                        $badgeClass = match($status) {
+                            'active'   => 'b-active',
+                            'expiring' => 'b-expiring',
+                            'expired'  => 'b-expired',
+                            default    => 'b-active',
+                        };
+                        $statusText = match($status) {
+                            'active'   => 'Active',
+                            'expiring' => 'Expiring Soon',
+                            'expired'  => 'Expired',
+                            default    => 'Active',
+                        };
                     @endphp
                     <tr>
                         <td class="pno">{{ $p->permit_number }}</td>

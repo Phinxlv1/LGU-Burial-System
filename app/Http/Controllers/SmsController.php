@@ -17,7 +17,7 @@ class SmsController extends Controller
     public function send(Request $request, BurialPermit $permit)
     {
         $request->validate([
-            'message_type' => 'required|in:expiry_warning,approved,released,custom',
+            'message_type' => 'required|in:expiry_warning,active,custom',
             'custom_message' => 'nullable|string|max:160',
         ]);
 
@@ -54,7 +54,7 @@ class SmsController extends Controller
      */
     public function sendExpiryWarningsBulk(int $daysAhead = 30): array
     {
-        $permits = BurialPermit::where('status', 'released')
+        $permits = BurialPermit::where('status', 'expiring')
             ->whereNotNull('expiry_date')
             ->whereNotNull('applicant_contact')
             ->whereDate('expiry_date', '>=', now()->toDateString())
@@ -151,11 +151,8 @@ class SmsController extends Controller
                                 ($daysLeft !== null ? " ({$daysLeft} days left)" : '').
                                 '. Please renew at the Municipal Civil Registrar office.',
 
-            'approved' => "LGU Carmen: Burial permit {$permitNo} for {$name} has been APPROVED. ".
-                           'Please visit the office for release.',
-
-            'released' => "LGU Carmen: Burial permit {$permitNo} for {$name} has been RELEASED. ".
-                           "Expiry: {$expiry}. Keep this for your records.",
+            'active' => "LGU Carmen: Burial permit {$permitNo} for {$name} is now ACTIVE and valid until {$expiry}. ".
+                           'Keep this for your records.',
 
             'custom' => $custom ?? "LGU Carmen: Update regarding permit {$permitNo}.",
 

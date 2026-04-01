@@ -56,31 +56,30 @@ class ActivityLog extends Model
     /* Helpers for badge colors in views */
     public function actionColor(): string
     {
-        return match($this->action) {
-            'created'  => 'green',
-            'updated'  => 'blue',
-            'deleted'  => 'red',
-            'approved' => 'indigo',
-            'released' => 'teal',
-            'renewed'  => 'amber',
-            'imported' => 'violet',
-            'login'    => 'gray',
-            'logout'   => 'gray',
-            default    => 'yellow',
-        };
+        switch ($this->action) {
+            case 'created':  return 'green';
+            case 'updated':  return 'blue';
+            case 'deleted':  return 'red';
+            case 'active':   return 'green';
+            case 'expiring': return 'amber';
+            case 'expired':  return 'red';
+            case 'renewed':  return 'amber';
+            case 'imported': return 'violet';
+            case 'login':    return 'gray';
+            case 'logout':   return 'gray';
+            default:         return 'yellow';
+        }
     }
 
     public function actionIcon(): string
     {
-        return match($this->action) {
-            'created'  => '+',
-            'updated'  => '✎',
-            'deleted'  => '✕',
-            'approved' => '✓',
-            'released' => '↑',
-            'renewed'  => '↻',
-            'imported' => '⇩',
-            default    => '•',
-        };
+        switch ($this->action) {
+            case 'created':  return '+';
+            case 'updated':  return '✎';
+            case 'deleted':  return '✕';
+            case 'renewed':  return '↻';
+            case 'imported': return '⇩';
+            default:         return '•';
+        }
     }
 }

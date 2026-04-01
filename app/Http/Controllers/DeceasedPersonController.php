@@ -59,9 +59,21 @@ class DeceasedPersonController extends Controller
 
     public function destroy(DeceasedPerson $deceased)
     {
+        $name = "{$deceased->first_name} {$deceased->last_name}";
+
+        \App\Models\ActivityLog::record(
+            action: 'deleted',
+            modelType: 'DeceasedPerson',
+            modelId: $deceased->id,
+            modelLabel: $name,
+            oldValues: $deceased->toArray(),
+            description: "Deceased record for {$name} deleted by " . auth()->user()->name
+        );
+
         $deceased->delete();
 
-        return redirect()->route('deceased.index');
+        return redirect()->route('deceased.index')
+            ->with('success', "Deceased record for {$name} deleted.");
     }
 
     // Unused stubs required by Route::resource

@@ -90,7 +90,7 @@ class PermitsImport implements ToCollection, WithHeadingRow
                 'applicant_name' => $row['requesting_party'] ?? null,
                 'applicant_contact' => $row['contact_no'] ?? null,
                 'applicant_address' => $row['address'] ?? null,
-                'status' => 'released',
+                'status' => 'active',
                 'processed_by' => Auth::id(),
             ]);
 

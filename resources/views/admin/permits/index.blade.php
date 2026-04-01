@@ -20,9 +20,13 @@
         .permit-row td .actions-cell button {
             pointer-events: auto;
         }
-        .permit-row { cursor: pointer; }
+        .permit-row { cursor: pointer; transition: background-color .15s; }
+        .permit-row:hover td { background-color: #eff6ff !important; }
+        .permit-row:hover td:first-child { box-shadow: inset 4px 0 0 #2563eb !important; }
+        html.dark .permit-row:hover td { background-color: #1e293b !important; }
+        html.dark .permit-row:hover td:first-child { box-shadow: inset 4px 0 0 #6366f1 !important; }
 
-        tr.row-expiring td { background: #fffbeb; border-top-color: #fde68a; }
+        tr.row-expiring td { background: #fffbeb; border-top-color: #fde68a; transition: background-color .15s; }
         tr.row-expiring td:first-child { border-left: 3px solid #f59e0b; }
         html.dark tr.row-expiring td { background: #2a1f00 !important; border-top-color: #854d0e !important; }
 
@@ -58,7 +62,7 @@
         table colgroup col:nth-child(7) { width: 185px; }
         td, th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         th { font-size: 11px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; padding: .5rem .75rem; text-align: left; background: #fafafa; }
-        td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; vertical-align: middle; }
+        td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; vertical-align: middle; transition: background-color .15s ease; }
 
         tr.row-expired td { background: #fff5f5; border-top-color: #fecaca; }
         tr.row-expired td:first-child { border-left: 3px solid #ef4444; }
@@ -97,13 +101,18 @@
         .sort-link:hover { color: #1a2744; }
         .sort-link.active { color: #1a2744; font-weight: 700; }
         .sort-icon { opacity: .4; font-size: 10px; }
-        .sort-icon.asc::after  { content: ' ↑'; }
-        .sort-icon.desc::after { content: ' ↓'; }
+        .sort-icon.asc::after  { content: ' ↑'; color: #1a2744; opacity: 1; }
+        .sort-icon.desc::after { content: ' ↓'; color: #1a2744; opacity: 1; }
         .sort-icon.none::after { content: ' ↕'; }
+        .sort-icon.mid::after  { content: ' ↕'; color: #1a2744; opacity: 1; }
+        .sort-icon.t1::after, .sort-icon.t2::after, .sort-icon.t3::after, 
+        .sort-icon.t4::after, .sort-icon.t5::after, .sort-icon.t6::after { content: ' ↕'; color: #1a2744; opacity: 1; }
 
         /* ── TOAST ── */
-        .toast { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 9999; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,.12); width: 320px; overflow: hidden; transform: translateX(calc(100% + 1.5rem)); transition: transform .35s cubic-bezier(.34,1.56,.64,1); pointer-events: none; }
-        .toast.show { transform: translateX(0); pointer-events: auto; }
+        .toast-container { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-end; pointer-events: none; }
+        .toast { position: relative; width: 320px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,.12); overflow: hidden; transform: translateX(calc(100% + 1.5rem)); transition: transform .35s cubic-bezier(.34,1.56,.64,1); pointer-events: none; display: none; }
+        .toast.show { transform: translateX(0); pointer-events: auto; display: block; animation: toastIn .35s cubic-bezier(.34,1.56,.64,1); }
+        @keyframes toastIn { from { transform: translateX(calc(100% + 1.5rem)); } to { transform: translateX(0); } }
         .toast-body { display: flex; align-items: flex-start; gap: .75rem; padding: .9rem 1rem; }
         .toast-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .toast-icon.green { background: #d1fae5; }
@@ -245,12 +254,12 @@
                 <colgroup><col/><col/><col/><col/><col/><col/><col/></colgroup>
                 <thead>
                     <tr>
-                        <th><a href="{{ $sortUrl('permit_number') }}" class="sort-link {{ request('sort', 'status')==='permit_number'?'active':'' }}">Permit No. {!! $sortIcon('permit_number') !!}</a></th>
-                        <th><a href="{{ $sortUrl('last_name') }}"     class="sort-link {{ request('sort', 'status')==='last_name'?'active':'' }}">Deceased {!! $sortIcon('last_name') !!}</a></th>
-                        <th><a href="{{ $sortUrl('permit_type') }}"   class="sort-link {{ request('sort', 'status')==='permit_type'?'active':'' }}">Type {!! $sortIcon('permit_type') !!}</a></th>
-                        <th><a href="{{ $sortUrl('date_of_death') }}" class="sort-link {{ request('sort', 'status')==='date_of_death'?'active':'' }}">Date of Death {!! $sortIcon('date_of_death') !!}</a></th>
+                        <th><a href="{{ $sortUrl('permit_number') }}" class="sort-link {{ request('sort')==='permit_number'?'active':'' }}">Permit No. {!! $sortIcon('permit_number') !!}</a></th>
+                        <th><a href="{{ $sortUrl('last_name') }}"     class="sort-link {{ request('sort')==='last_name'?'active':'' }}">Deceased {!! $sortIcon('last_name') !!}</a></th>
+                        <th><a href="{{ $sortUrl('permit_type') }}"   class="sort-link {{ request('sort')==='permit_type'?'active':'' }}">Type {!! $sortIcon('permit_type') !!}</a></th>
+                        <th><a href="{{ $sortUrl('date_of_death') }}" class="sort-link {{ request('sort')==='date_of_death'?'active':'' }}">Date of Death {!! $sortIcon('date_of_death') !!}</a></th>
                         <th style="text-align:center">
-                            <a href="{{ $sortUrl('renewal_count') }}" class="sort-link {{ request('sort', 'status')==='renewal_count'?'active':'' }}" style="justify-content:center">
+                            <a href="{{ $sortUrl('renewal_count') }}" class="sort-link {{ request('sort')==='renewal_count'?'active':'' }}" style="justify-content:center">
                                 Renewals {!! $sortIcon('renewal_count') !!}
                             </a>
                         </th>
@@ -261,19 +270,8 @@
                 <tbody>
                     @forelse($permits as $permit)
                     @php
-    $now    = \Carbon\Carbon::now('Asia/Manila');
-    $expiry = $permit->expiry_date
-                ? \Carbon\Carbon::parse($permit->expiry_date)->setTimezone('Asia/Manila')->endOfDay()
-                : null;
-
-    if ($expiry && $expiry->lt($now)) {
-        $cs = 'expired';
-    } elseif ($expiry && $expiry->gt($now) && $now->diffInDays($expiry) <= 30) {
-        $cs = 'expiring';
-    } else {
-        $cs = 'active';
-    }
-@endphp
+                        $cs = $permit->status;
+                    @endphp
                            <tr class="permit-row {{ $cs === 'expired' ? 'row-expired' : ($cs === 'expiring' ? 'row-expiring' : '') }}"
     onclick="window.location='{{ route('permits.show', $permit) }}'"
     style="cursor:pointer;">
@@ -285,7 +283,15 @@
                                 <span style="font-size:10px;font-weight:700;color:#f59e0b;margin-left:4px;vertical-align:middle">⏰</span>
                             @endif
                         </td>
-                        <td>{{ optional($permit->deceased)->last_name }}, {{ optional($permit->deceased)->first_name }}</td>
+                        <td>
+                            @php
+                                $d = $permit->deceased;
+                                $fullName = $d->last_name . ', ' . $d->first_name;
+                                if ($d->middle_name) $fullName .= ' ' . strtoupper(substr($d->middle_name, 0, 1)) . '.';
+                                if ($d->name_extension) $fullName .= ' ' . $d->name_extension;
+                            @endphp
+                            {{ $fullName }}
+                        </td>
                         <td style="font-size:12px;color:#6b7280;text-transform:capitalize">{{ ucfirst(str_replace('_',' ',$permit->permit_type)) }}</td>
                         <td style="font-size:12px;color:#6b7280">{{ optional(optional($permit->deceased)->date_of_death)->format('M d, Y') ?? '—' }}</td>
                         <td style="text-align:center">
@@ -341,8 +347,10 @@
     </div>
 </div>
 
-{{-- SUCCESS TOAST --}}
-@if(session('success'))
+{{-- TOAST CONTAINER --}}
+<div class="toast-container">
+    {{-- SUCCESS TOAST --}}
+    @if(session('success'))
 <div class="toast" id="successToast">
     <div class="toast-body">
         <div class="toast-icon green">
@@ -393,6 +401,26 @@
     <div class="toast-progress"><div class="toast-progress-bar blue" id="printToastBar"></div></div>
 </div>
 
+{{-- REDIRECT TOAST --}}
+@if(session('redirect_url'))
+<div class="toast" id="redirectToast">
+    <div class="toast-body">
+        <div class="toast-icon blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="toast-text">
+            <div class="toast-title" style="color:#1e40af">Smart Redirect</div>
+            <div class="toast-sub">Redirecting to <strong id="redirectPNum">{{ session('redirect_name') }}</strong> in <span id="redirectCount">5</span>s...</div>
+        </div>
+        <button class="toast-close" onclick="dismissToast('redirectToast')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="toast-progress"><div class="toast-progress-bar blue" id="redirectBar"></div></div>
+</div>
+@endif
+</div>
+
 @include('admin.partials.permit-modal')
 
 <script>
@@ -422,10 +450,47 @@ function dismissToast(id) {
     }
 })();
 
-if (window.location.hash === '#new') {
+if (window.location.hash === '#new' || @json(session('open_modal'))) {
     document.getElementById('permitModal').classList.add('open');
     history.replaceState(null, '', window.location.pathname);
 }
+
+// ── Smart Redirect Logic ──
+(function() {
+    const redirectUrl = @json(session('redirect_url'));
+    if (!redirectUrl) return;
+
+    // Wait 2 seconds before showing the redirection toast
+    setTimeout(() => {
+        const toast = document.getElementById('redirectToast');
+        if (!toast) return;
+
+        toast.classList.add('show');
+        let count = 5;
+        const countEl = document.getElementById('redirectCount');
+        const barEl = document.getElementById('redirectBar');
+        
+        // Reset and start bar animation
+        barEl.style.animation = 'none';
+        barEl.offsetHeight; 
+        barEl.style.animation = 'toastDrain 5s linear forwards';
+
+        const timer = setInterval(() => {
+            count--;
+            if (countEl) countEl.textContent = count;
+            if (count <= 0) {
+                clearInterval(timer);
+                window.location.href = redirectUrl;
+            }
+        }, 1000);
+
+        // Allow closing to cancel redirect
+        toast.querySelector('.toast-close').onclick = () => {
+            clearInterval(timer);
+            dismissToast('redirectToast');
+        };
+    }, 2500); // 2.5s delay after the error toast appears
+})();
 
 function filterTable(q) {
     q = q.toLowerCase();

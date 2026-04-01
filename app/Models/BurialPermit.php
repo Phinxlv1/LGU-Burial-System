@@ -21,6 +21,7 @@ class BurialPermit extends Model
         'remarks',
         'processed_by',
         'issued_by',
+        'or_number',
         'renewal_count',
     ];
 
@@ -52,5 +53,24 @@ class BurialPermit extends Model
     public function smsNotifications()
     {
         return $this->hasMany(SmsNotification::class, 'permit_id');
+    }
+    public function statusColor(): string
+    {
+        switch ($this->status) {
+            case 'active':   return 'green';
+            case 'expiring': return 'amber';
+            case 'expired':  return 'red';
+            default:         return 'gray';
+        }
+    }
+
+    public function statusLabel(): string
+    {
+        switch ($this->status) {
+            case 'active':   return 'Active';
+            case 'expiring': return 'Expiring Soon';
+            case 'expired':  return 'Expired';
+            default:         return 'Unknown';
+        }
     }
 }

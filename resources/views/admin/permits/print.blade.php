@@ -36,7 +36,7 @@ body {
     line-height: 1.5;
 }
 .oval td:first-child { border-right: 1px solid #000; }
-.oval .yr { font-size: 13px; font-weight: bold; display: block; color: #000; }
+.oval .yr { font-size: 13px; font-weight: bold; display: block; color: #000; white-space: nowrap; }
 .oval .lbl { font-size: 8px; font-weight: bold; color: #000; display: block; }
 
 .ren-cell { width: 22%; text-align: center; vertical-align: middle; }
@@ -59,7 +59,7 @@ body {
 }
 
 .date-cell { width: 38%; text-align: right; vertical-align: top; font-size: 10px; line-height: 1.9; }
-.date-cell .reg { font-size: 26px; font-weight: bold; line-height: 1; }
+.date-cell .reg { font-size: 26px; font-weight: bold; line-height: 1; color: #cc0000; }
 
 /* APPLICANT */
 .app { margin: 10px 0 6px; }
@@ -117,6 +117,17 @@ hr { border: none; border-top: 1px solid #000; margin: 8px 0; }
     $isB = $type === 'bone_niches';
     $ey  = $permit->expiry_date ? $permit->expiry_date->format('Y') : now()->addYears(5)->format('Y');
     $ef  = $permit->expiry_date ? $permit->expiry_date->format('F d, Y') : now()->addYears(5)->format('F d, Y');
+
+    // Logic: NEW if renewal_count is 0, otherwise RENEWAL
+    $isRenewalActual = ($permit->renewal_count ?? 0) > 0;
+    $isNewActual     = !$isRenewalActual;
+
+    // Clean strings function
+    $clean = fn($val) => (trim($val) === '=' || empty($val)) ? '' : $val;
+
+    // Registration number numeric suffix
+    $parts = explode('-', $permit->permit_number ?? '');
+    $regNo = $parts[2] ?? $permit->id;
 @endphp
 
 {{-- HEADER --}}
@@ -149,25 +160,25 @@ hr { border: none; border-top: 1px solid #000; margin: 8px 0; }
         <td class="ren-cell">
             <div class="ren-box">
                 <div class="rt">RENEWAL &nbsp; NEW</div>
-                <div class="ren-row"><span class="cb">{{ $permit->is_renewal ? 'X' : '' }}</span> RENEWAL</div>
-                <div class="ren-row"><span class="cb">{{ !$permit->is_renewal ? 'X' : '' }}</span> NEW</div>
+                <div class="ren-row"><span class="cb">{{ $isRenewalActual ? '✓' : '' }}</span> RENEWAL</div>
+                <div class="ren-row"><span class="cb">{{ $isNewActual ? '✓' : '' }}</span> NEW</div>
             </div>
         </td>
         <td class="date-cell">
             {{ $permit->created_at->format('F d, Y') }}<br>
             <span style="font-size:9px">DATE</span><br><br>
             <span style="font-size:9px">Registration No. {{ $permit->created_at->format('Y') }} -</span>
-            <span class="reg"> {{ $permit->id }}</span>
+            <span class="reg"> {{ $regNo }}</span>
         </td>
     </tr>
 </table>
 
 {{-- APPLICANT --}}
 <div class="app">
-    <div>{{ $permit->applicant_name ?? '' }}</div>
-    <div>{{ $permit->applicant_relationship ?? 'APPLICANT' }}</div>
-    <div>{{ $permit->applicant_address ?? '' }}</div>
-    <div class="contact">CONTACT #: {{ $permit->applicant_contact ?? '' }}</div>
+    <div>{{ $clean($permit->applicant_name) }}</div>
+    <div>{{ $clean($permit->applicant_relationship) ?: 'APPLICANT' }}</div>
+    <div>{{ $clean($permit->applicant_address) }}</div>
+    <div class="contact">CONTACT #: {{ $clean($permit->applicant_contact) }}</div>
 </div>
 
 <div class="para">
@@ -240,7 +251,7 @@ hr { border: none; border-top: 1px solid #000; margin: 8px 0; }
 <table class="bot">
     <tr>
         <td style="width:35%;vertical-align:top">
-            <div>O.R No.  &nbsp;&nbsp; <span class="orln">{{ $permit->or_number ?? '' }}</span></div>
+            <div>O.R No.  &nbsp;&nbsp; <span class="orln">{{ $clean($permit->or_number) }}</span></div>
             <div style="margin:4px 0">Paid on    <span class="orln">{{ $permit->created_at->format('F d, Y') }}</span></div>
             <div>Amount Paid &nbsp; <span class="orln">{{ number_format($fee['total'],2) }}</span></div>
             <br>
@@ -264,10 +275,6 @@ window.onload = function() {
 
 window.onafterprint = function() {
     window.close();
-};
-<script>
-window.onload = function() {
-    window.print();
 };
 </script>
 </body>

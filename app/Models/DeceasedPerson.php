@@ -15,14 +15,21 @@ class DeceasedPerson extends Model
         'first_name',
         'middle_name',
         'last_name',
-        'name_extension',  // ← make sure this is here
-        'name_number',     // ← make sure this is here
-        'phone_number',    // ← make sure this is here
+        'name_extension',
+        'name_number',
+        'phone_number',
+        'date_of_birth',
         'date_of_death',
         'nationality',
         'age',
         'sex',
+        'civil_status',
+        'religion',
         'kind_of_burial',
+        'place_of_death',
+        'cause_of_death',
+        'address',
+        'age_at_death',
     ];
 
     protected $casts = [

@@ -8,13 +8,40 @@
 .sidebar-brand { padding: 1.25rem 1rem 1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
 .sidebar-brand-top { display: flex; align-items: center; gap: 8px; margin-bottom: .3rem; }
 .sidebar-seal { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.2); }
-.sidebar-brand h1 { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.3; }
-.sidebar-brand p { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 2px; padding-left: 42px; }
+
+/* Locked Brand Title Style */
+.sidebar-brand .sidebar-brand-top h1 { 
+    font-family: 'DM Sans', sans-serif !important; 
+    font-size: 12px !important; 
+    font-weight: 600 !important; 
+    color: #fff !important; 
+    line-height: 1.3 !important; 
+}
+
+.sidebar-brand p { font-family: 'DM Sans', sans-serif; font-size: 10px; color: rgba(255,255,255,.4); margin-top: 2px; padding-left: 42px; }
 .sidebar-nav { flex: 1; padding: .75rem 0; overflow-y: auto; }
-.nav-section { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); padding: .75rem 1rem .3rem; }
-.nav-item { display: flex; align-items: center; gap: 9px; padding: .55rem 1rem; font-size: 13px; color: rgba(255,255,255,.65); text-decoration: none; border-radius: 6px; margin: 1px .5rem; transition: background .15s, color .15s; }
+.nav-section { font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); padding: .75rem 1rem .3rem; }
+
+/* Pre-spaced Nav Items (Constant Weight) */
+.nav-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 9px; 
+    padding: .55rem 1rem; 
+    font-family: 'DM Sans', sans-serif; 
+    font-size: 13px; 
+    color: rgba(255,255,255,.65); 
+    text-decoration: none; 
+    border-radius: 6px; 
+    margin: 1px .5rem; 
+    transition: background .15s, color .15s; 
+    font-weight: 500; /* Set constant weight to avoid shifting */
+}
 .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
-.nav-item.active { background: rgba(255,255,255,.12); color: #fff; font-weight: 500; }
+.nav-item.active { 
+    background: rgba(255,255,255,.12); 
+    color: #fff; 
+}
 .nav-item svg { flex-shrink: 0; opacity: .7; }
 .nav-item.active svg { opacity: 1; }
 .sidebar-footer { padding: .75rem; border-top: 1px solid rgba(255,255,255,.08); }
@@ -22,11 +49,11 @@
 .user-avatar { width: 28px; height: 28px; background: rgba(255,255,255,.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
 .user-name { font-size: 12px; color: #fff; font-weight: 500; }
 .user-role { font-size: 10px; color: rgba(255,255,255,.4); }
-.btn-logout { width: 100%; background: none; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; padding: .45rem; font-family: 'Inter', sans-serif; font-size: 12px; color: rgba(255,255,255,.5); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-logout { width: 100%; background: none; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; padding: .45rem; font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(255,255,255,.5); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
 
 /* Dark mode toggle button */
-.dark-toggle { width: 100%; background: none; border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: .4rem .75rem; font-family: 'Inter', sans-serif; font-size: 11px; color: rgba(255,255,255,.45); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
+.dark-toggle { width: 100%; background: none; border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: .4rem .75rem; font-family: 'DM Sans', sans-serif; font-size: 11px; color: rgba(255,255,255,.45); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
 .dark-toggle:hover { border-color: rgba(255,255,255,.3); color: rgba(255,255,255,.8); }
 .dark-toggle-pill { width: 30px; height: 16px; background: rgba(255,255,255,.15); border-radius: 8px; position: relative; transition: background .2s; flex-shrink: 0; }
 .dark-toggle-pill::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: #fff; border-radius: 50%; transition: transform .2s; }
@@ -147,6 +174,12 @@ html.dark .info-item { border-bottom-color: #2d3148 !important; }
 html.dark .info-label { color: #64748b !important; }
 html.dark .info-value { color: #e2e8f0 !important; }
 html.dark .info-value.empty { color: #374151 !important; }
+
+/* ── SCROLLBAR ──────────────────────────────────────────────── */
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.25); }
 </style>
 
 <aside class="sidebar">
@@ -159,7 +192,7 @@ html.dark .info-value.empty { color: #374151 !important; }
     </div>
 
     <nav class="sidebar-nav">
-        <div class="nav-section">Overview</div>
+        <div class="nav-section">OVERVIEW</div>
         <a href="{{ auth()->user()->role === 'super_admin' ? route('superadmin.dashboard') : route('dashboard') }}"
            class="nav-item {{ request()->routeIs('dashboard') || request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
@@ -167,32 +200,42 @@ html.dark .info-value.empty { color: #374151 !important; }
         </a>
 
         @if(auth()->user()->role === 'super_admin')
-            <div class="nav-section">Reports</div>
-            <a href="{{ route('reports.index') }}" class="nav-item {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+            <div class="nav-section">ANALYTICS</div>
+            <a href="{{ route('superadmin.reports') }}" class="nav-item {{ request()->routeIs('superadmin.reports') ? 'active' : '' }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                 Reports
             </a>
-            <a href="{{ route('superadmin.export') }}" class="nav-item">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export PDF
+            <a href="{{ route('superadmin.activity') }}" class="nav-item {{ request()->routeIs('superadmin.activity') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                Activity Log
             </a>
-            <div class="nav-section">System</div>
+            
+            <div class="nav-section">SYSTEM</div>
             <a href="{{ route('settings.index') }}" class="nav-item {{ request()->routeIs('settings.*') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83 2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
                 Settings
             </a>
+            <a href="{{ route('superadmin.dataquality') }}" class="nav-item {{ request()->routeIs('superadmin.dataquality') ? 'active' : '' }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                Data Quality
+            </a>
         @else
-            <div class="nav-section">Permits</div>
+            <div class="nav-section">PERMITS</div>
             <a href="{{ route('permits.index') }}" class="nav-item {{ request()->routeIs('permits.*') ? 'active' : '' }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Burial Permits
             </a>
-            <div class="nav-section">Cemetery</div>
+            <div class="nav-section">CEMETERY</div>
             <a href="{{ route('cemetery.map') }}" class="nav-item {{ request()->routeIs('cemetery.*') ? 'active' : '' }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 Cemetery Map
             </a>
-            <div class="nav-section">Tools</div>
+            <div class="nav-section">TOOLS</div>
             <a href="{{ route('reports.index') }}" class="nav-item {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                 Reports
@@ -201,7 +244,6 @@ html.dark .info-value.empty { color: #374151 !important; }
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Import Excel
             </a>
-            {{-- REMOVED Settings link for regular admin users --}}
         @endif
     </nav>
 

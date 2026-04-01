@@ -116,18 +116,20 @@
            EDIT MODAL — clean light mode
         ══════════════════════════════ */
         .em-overlay {
-            display:none; position:fixed; inset:0;
-            background:rgba(15,23,42,.4);
-            z-index:200;
-            align-items:center; justify-content:center;
-            padding:1.5rem;
-            pointer-events:none;
-        }
+    display:none; position:fixed; inset:0;
+    background:rgba(15,23,42,.55);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    z-index:200;
+    align-items:center; justify-content:center;
+    padding:1.5rem;
+    pointer-events:none;
+}   
         .em-overlay.open { display:flex; pointer-events:auto; }
 
         .em-box {
-            background:#fff;
-            border:1px solid #e2e8f0;
+            background:#1a2744;
+            border:none;
             border-radius:14px;
             width:100%; max-width:660px;
             max-height:88vh;
@@ -144,6 +146,10 @@
         /* Header */
         .em-header {
     padding:.85rem 1.1rem;
+    margin: 0 !important;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 14px 14px 0 0;
     display:flex; align-items:center; justify-content:space-between;
     border-bottom:1px solid #1a2744;
     background:linear-gradient(135deg, #1a2744 0%, #243564 100%);
@@ -170,20 +176,28 @@
         .em-close:hover { background:#fee2e2; border-color:#fca5a5; color:#dc2626; }
 
         /* Scrollable body — thin scrollbar */
+       
         .em-body {
-            overflow-y:auto;
-            flex:1;
-            padding:1rem 1.1rem;
-            display:flex; flex-direction:column; gap:1rem;
-            background:#fff;
-            scrollbar-width:thin;
-            scrollbar-color:#e2e8f0 transparent;
-        }
-        .em-body::-webkit-scrollbar { width:4px; }
-.em-body::-webkit-scrollbar-track { background:#f1f5f9; border-radius:99px; }
-        .em-body::-webkit-scrollbar-track { background:transparent; }
-        .em-body::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:99px; }
-        .em-body::-webkit-scrollbar-thumb:hover { background:#cbd5e1; }
+    overflow-y: auto;
+    flex: 1;
+    padding: 1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: #fff;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+.em-body::-webkit-scrollbar { width: 5px; }
+.em-body::-webkit-scrollbar-track { background: transparent; }
+.em-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+.em-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+html.dark .em-body::-webkit-scrollbar-thumb { background: #2d3148; }
+html.dark .em-body::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+
+
+
 
         /* Sections */
         .em-section { display:flex; flex-direction:column; gap:.65rem; }
@@ -298,25 +312,39 @@
     <div class="content">
 
         @php
-            $feeMap = [
-                'cemented'    => ['label'=>'Cemented',        'amount'=>'₱1,000.00'],
-                'niche_1st'   => ['label'=>'1st Floor Niche', 'amount'=>'₱8,000.00'],
-                'niche_2nd'   => ['label'=>'2nd Floor Niche', 'amount'=>'₱6,600.00'],
-                'niche_3rd'   => ['label'=>'3rd Floor Niche', 'amount'=>'₱5,700.00'],
-                'niche_4th'   => ['label'=>'4th Floor Niche', 'amount'=>'₱5,300.00'],
-                'bone_niches' => ['label'=>'Bone Niches',     'amount'=>'₱5,000.00'],
+            $settingsPath = storage_path('app/settings.json');
+            $settings = file_exists($settingsPath) ? json_decode(file_get_contents($settingsPath), true) : [];
+
+            $defaultFees = [
+                'cemented'    => ['tomb' => 1000, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                'niche_1st'   => ['tomb' => 8000, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                'niche_2nd'   => ['tomb' => 6600, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                'niche_3rd'   => ['tomb' => 5700, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                'niche_4th'   => ['tomb' => 5300, 'permit' => 20, 'maint' => 100, 'app' => 20],
+                'bone_niches' => ['tomb' => 5000, 'permit' => 20, 'maint' => 100, 'app' => 20],
             ];
-            $feeInfo = $feeMap[$permit->permit_type] ?? ['label'=>ucfirst(str_replace(['_','-'],' ',$permit->permit_type)),'amount'=>null];
+
+            $feeLabels = [
+                'cemented'    => 'Cemented',
+                'niche_1st'   => '1st Floor Niche',
+                'niche_2nd'   => '2nd Floor Niche',
+                'niche_3rd'   => '3rd Floor Niche',
+                'niche_4th'   => '4th Floor Niche',
+                'bone_niches' => 'Bone Niches',
+            ];
+
+            $ptype = $permit->permit_type ?? 'cemented';
+            $rawFees = $settings['fees'][$ptype] ?? $defaultFees[$ptype] ?? $defaultFees['cemented'];
+            $totalFee = ($rawFees['tomb'] ?? 0) + ($rawFees['permit'] ?? 0) + ($rawFees['maint'] ?? 0) + ($rawFees['app'] ?? 0);
+
+            $feeInfo = [
+                'label' => $feeLabels[$ptype] ?? ucfirst(str_replace(['_','-'],' ',$ptype)),
+                'amount'=> '₱' . number_format($totalFee, 2)
+            ];
         @endphp
 
         @php
-            $expiry = $permit->expiry_date ? \Carbon\Carbon::parse($permit->expiry_date) : null;
-            $cs = 'active';
-            if ($expiry && $expiry->isPast()) {
-                $cs = 'expired';
-            } elseif ($expiry && $expiry->isFuture() && now()->diffInDays($expiry) <= 30) {
-                $cs = 'expiring';
-            }
+            $cs = $permit->status;
         @endphp
 
         {{-- HERO --}}
@@ -435,6 +463,9 @@
                         </div>
                     </div>
                     @endif
+                    @if($permit->or_number)
+                    <div class="field"><div class="fl">O.R. Number</div><div class="fv" style="font-family:var(--mono);color:var(--accent);font-weight:600">{{ $permit->or_number }}</div></div>
+                    @endif
                     @if($permit->remarks)
                     <div class="field"><div class="fl">Remarks</div><div class="fv" style="font-size:12px">{{ $permit->remarks }}</div></div>
                     @endif
@@ -511,6 +542,85 @@
             </div>
         </div>
 
+
+        {{-- RENEWAL HISTORY TABLE --}}
+@if($renewalHistory->isNotEmpty())
+<div class="docs-card">
+    <div class="docs-head">
+        <div class="docs-head-left">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/>
+            </svg>
+            <span class="docs-head-title">Renewal History</span>
+            <span class="docs-head-sub">— {{ $renewalHistory->count() }} renewal{{ $renewalHistory->count() !== 1 ? 's' : '' }}</span>
+        </div>
+        <span style="font-size:11px;color:var(--text-3);font-family:var(--mono)">Full audit trail</span>
+    </div>
+    <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse">
+            <thead>
+                <tr>
+                    <th style="padding:.6rem 1.25rem;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;text-align:left;background:var(--surface-2);border-bottom:1px solid var(--border-2);white-space:nowrap">#</th>
+                    <th style="padding:.6rem 1.25rem;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;text-align:left;background:var(--surface-2);border-bottom:1px solid var(--border-2);white-space:nowrap">Date Renewed</th>
+                    <th style="padding:.6rem 1.25rem;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;text-align:left;background:var(--surface-2);border-bottom:1px solid var(--border-2);white-space:nowrap">Previous Expiry</th>
+                    <th style="padding:.6rem 1.25rem;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;text-align:left;background:var(--surface-2);border-bottom:1px solid var(--border-2);white-space:nowrap">New Expiry</th>
+                    <th style="padding:.6rem 1.25rem;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;text-align:left;background:var(--surface-2);border-bottom:1px solid var(--border-2);white-space:nowrap">Renewed By</th>
+                    <th style="padding:.6rem 1.25rem;font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;text-align:left;background:var(--surface-2);border-bottom:1px solid var(--border-2);white-space:nowrap">Remarks / Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($renewalHistory as $i => $log)
+                @php
+                    $old = is_string($log->old_values) ? json_decode($log->old_values, true) : (array)($log->old_values ?? []);
+                    $new = is_string($log->new_values) ? json_decode($log->new_values, true) : (array)($log->new_values ?? []);
+                    $prevExpiry = isset($old['expiry_date']) ? \Carbon\Carbon::parse($old['expiry_date'])->format('M d, Y') : '—';
+                    $newExpiry  = isset($new['expiry_date']) ? \Carbon\Carbon::parse($new['expiry_date'])->format('M d, Y') : '—';
+                    $renewedBy  = $log->user?->name ?? 'System';
+                @endphp
+                <tr style="border-bottom:1px solid var(--border-2);transition:background .12s"
+                    onmouseover="this.style.background='var(--surface-2)'"
+                    onmouseout="this.style.background=''">
+                    <td style="padding:.75rem 1.25rem;vertical-align:middle">
+                        <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#fef3c7;color:#d97706;font-size:10px;font-weight:700;font-family:var(--mono)">
+                            {{ $renewalHistory->count() - $i }}
+                        </span>
+                    </td>
+                    <td style="padding:.75rem 1.25rem;vertical-align:middle">
+                        <div style="font-size:12.5px;font-weight:600;color:var(--text-1)">{{ $log->created_at->format('M d, Y') }}</div>
+                        <div style="font-size:10.5px;color:var(--text-3);font-family:var(--mono);margin-top:2px">{{ $log->created_at->format('h:i A') }} · {{ $log->created_at->diffForHumans() }}</div>
+                    </td>
+                    <td style="padding:.75rem 1.25rem;vertical-align:middle">
+                        <span style="display:inline-block;font-size:11.5px;color:#dc2626;font-family:var(--mono);background:#fee2e2;padding:3px 10px;border-radius:5px;font-weight:600;border:1px solid #fca5a5">
+                            {{ $prevExpiry }}
+                        </span>
+                    </td>
+                    <td style="padding:.75rem 1.25rem;vertical-align:middle">
+                        <span style="display:inline-block;font-size:11.5px;color:#16a34a;font-family:var(--mono);background:#dcfce7;padding:3px 10px;border-radius:5px;font-weight:600;border:1px solid #86efac">
+                            {{ $newExpiry }}
+                        </span>
+                    </td>
+                    <td style="padding:.75rem 1.25rem;vertical-align:middle">
+                        <div style="display:inline-flex;align-items:center;gap:6px">
+                            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                {{ strtoupper(substr($renewedBy, 0, 1)) }}
+                            </div>
+                            <span style="font-size:12px;color:var(--text-1);font-weight:500">{{ $renewedBy }}</span>
+                        </div>
+                    </td>
+                    <td style="padding:.75rem 1.25rem;vertical-align:middle;max-width:280px">
+                        <span style="font-size:12px;color:var(--text-2);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+                              title="{{ $log->description ?? '' }}">
+                            {{ $log->description ?? '—' }}
+                        </span>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
         <div class="lightbox" id="lightbox" onclick="closeLightbox()">
             <button class="lightbox-close" onclick="closeLightbox()">×</button>
             <img id="lightboxImg" src="" alt="">
@@ -518,6 +628,8 @@
 
     </div>
 </div>
+
+
 
 @if(session('success'))
 <div class="toast show" id="sToast">
@@ -613,7 +725,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLight
             </button>
         </div>
 
-        <form method="POST" action="{{ route('permits.update', $permit) }}" id="editForm">
+        <form method="POST" action="{{ route('permits.update', $permit) }}" id="editForm" style="display:flex; flex-direction:column; flex:1; overflow:hidden; background:#fff; border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0; border-radius:0 0 14px 14px;">
             @csrf @method('PUT')
 
             {{-- Scrollable body --}}
@@ -660,7 +772,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLight
                         </div>
                         <div class="em-field">
                             <label class="em-label">Kind of Burial</label>
-                            <input class="em-input" name="kind_of_burial" value="{{ optional($permit->deceased)->kind_of_burial }}" placeholder="e.g. Ground, Niche">
+                            <input class="em-input" name="kind_of_burial" value="{{ $permit->kind_of_burial }}" placeholder="e.g. Ground, Niche">
                         </div>
                         <div class="em-field">
                             <label class="em-label">Place of Death</label>
@@ -717,6 +829,12 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLight
                             <input class="em-input" name="applicant_address" value="{{ $permit->applicant_address }}" placeholder="e.g. Brgy. Sto. Niño, Carmen">
                         </div>
                     </div>
+                    <div class="em-grid g1">
+                        <div class="em-field">
+                            <label class="em-label">Official Receipt (O.R.) Number</label>
+                            <input class="em-input" name="or_number" value="{{ $permit->or_number }}" placeholder="e.g. 1234567">
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -738,6 +856,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLight
         </form>
     </div>
 </div>
+
+
+   
 
 <script>
 function openEditModal() {
@@ -789,6 +910,10 @@ document.querySelectorAll('#editForm .em-input').forEach(el => {
 
 const err = document.getElementById('errToast');
 if (err) setTimeout(() => err.classList.remove('show'), 6000);
+
+@if(session('open_edit'))
+setTimeout(() => openEditModal(), 300);
+@endif
 </script>
 
 {{-- FLOATING EDIT BUTTON --}}

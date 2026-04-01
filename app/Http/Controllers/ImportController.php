@@ -120,9 +120,9 @@ class ImportController extends Controller
             $rawType = strtolower(trim((string) $this->col($row, $headerMap, 'permit_type', 'cemented')));
             $permitType = in_array($rawType, $validTypes) ? $rawType : 'cemented';
 
-            $validStatuses = ['pending', 'approved', 'released', 'expired'];
-            $rawStatus = strtolower(trim((string) $this->col($row, $headerMap, 'status', 'pending')));
-            $status = in_array($rawStatus, $validStatuses) ? $rawStatus : 'pending';
+            $validStatuses = ['active', 'expiring', 'expired'];
+            $rawStatus = strtolower(trim((string) $this->col($row, $headerMap, 'status', 'active')));
+            $status = in_array($rawStatus, $validStatuses) ? $rawStatus : 'active';
 
             try {
                 DB::transaction(function () use (

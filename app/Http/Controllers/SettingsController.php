@@ -139,6 +139,13 @@ class SettingsController extends Controller
 
         $this->save($settings);
 
+        \App\Models\ActivityLog::record(
+            action: 'updated',
+            modelType: 'Settings',
+            modelLabel: $target,
+            description: "Settings reset: {$msg} performed by " . auth()->user()->name
+        );
+
         return redirect()->route('settings.index')->with('success', $msg);
     }
 
@@ -179,6 +186,16 @@ class SettingsController extends Controller
         abort_if($user->id === auth()->id(), 403, 'You cannot remove your own account.');
 
         $name = $user->name;
+
+        \App\Models\ActivityLog::record(
+            action: 'deleted',
+            modelType: 'User',
+            modelId: $user->id,
+            modelLabel: $name,
+            oldValues: $user->toArray(),
+            description: "User account for {$name} deleted by " . auth()->user()->name
+        );
+
         $user->delete();
 
         return redirect()->route('settings.index', ['#users'])

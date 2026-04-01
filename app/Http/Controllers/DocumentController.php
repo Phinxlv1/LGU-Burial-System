@@ -79,6 +79,18 @@ class DocumentController extends Controller
             Storage::disk('local')->delete($document->file_path);
         }
 
+        $name = $document->file_name;
+        $label = $permit?->permit_number ?? 'Unknown';
+
+        \App\Models\ActivityLog::record(
+            action: 'deleted',
+            modelType: 'Document',
+            modelId: $document->id,
+            modelLabel: $name,
+            oldValues: $document->toArray(),
+            description: "Document \"{$name}\" removed from Permit {$label} by " . auth()->user()->name
+        );
+
         $document->delete();
 
         return redirect()->route('permits.show', $permit)

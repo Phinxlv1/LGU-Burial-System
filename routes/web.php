@@ -43,8 +43,6 @@ Route::middleware(['auth'])->group(function () {
 
         // Permits
         Route::resource('permits', BurialPermitController::class);
-        Route::post('permits/{permit}/approve', [BurialPermitController::class, 'approve'])->name('permits.approve');
-        Route::post('permits/{permit}/release', [BurialPermitController::class, 'release'])->name('permits.release');
         Route::post('permits/{permit}/renew',   [BurialPermitController::class, 'renew'])->name('permits.renew');
         Route::get('permits/{permit}/print',     [BurialPermitController::class, 'print'])->name('permits.print');
 
