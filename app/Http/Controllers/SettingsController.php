@@ -22,7 +22,7 @@ class SettingsController extends Controller
 
     private function load(): array
     {
-        if (! file_exists($this->path)) {
+        if (!file_exists($this->path)) {
             return [];
         }
 
@@ -62,7 +62,7 @@ class SettingsController extends Controller
         $this->save($settings);
 
         return redirect()->route('settings.index')
-            ->with('success', ucfirst($section).' settings saved successfully.');
+            ->with('success', ucfirst($section) . ' settings saved successfully.');
     }
 
     private function updateGeneral(Request $request, array &$settings): void
@@ -81,9 +81,16 @@ class SettingsController extends Controller
         ]);
 
         foreach ([
-            'municipality_name', 'province', 'registrar_name', 'mayor_name',
-            'office_address', 'permit_prefix', 'permit_expiry_years',
-            'expiry_warning_days', 'date_format', 'per_page',
+            'municipality_name',
+            'province',
+            'registrar_name',
+            'mayor_name',
+            'office_address',
+            'permit_prefix',
+            'permit_expiry_years',
+            'expiry_warning_days',
+            'date_format',
+            'per_page',
         ] as $key) {
             $settings[$key] = $request->input($key);
         }
@@ -221,10 +228,10 @@ class SettingsController extends Controller
                 foreach ($permits as $p) {
                     $deceased = $dup->deceased;
                     $records[] = [
-                        'id' => 'dup-permit-'.$p->id,
+                        'id' => 'dup-permit-' . $p->id,
                         'permit_id' => $p->id,
                         'label' => $p->permit_number,
-                        'sub' => ($deceased ? $deceased->last_name.', '.$deceased->first_name : 'Unknown').' — '.ucfirst($p->status),
+                        'sub' => ($deceased ? $deceased->last_name . ', ' . $deceased->first_name : 'Unknown') . ' — ' . ucfirst($p->status),
                         'field_name' => 'deceased_id',
                         'field_value' => (string) $p->deceased_id,
                         'edit_url' => route('permits.show', $p),
@@ -253,10 +260,10 @@ class SettingsController extends Controller
                 $permits = BurialPermit::where('permit_number', $num)->with('deceased')->get();
                 foreach ($permits as $p) {
                     $records[] = [
-                        'id' => 'dupnum-'.$p->id,
+                        'id' => 'dupnum-' . $p->id,
                         'permit_id' => $p->id,
                         'label' => $p->permit_number,
-                        'sub' => optional($p->deceased)->last_name.', '.optional($p->deceased)->first_name,
+                        'sub' => optional($p->deceased)->last_name . ', ' . optional($p->deceased)->first_name,
                         'field_name' => 'permit_number',
                         'field_value' => $p->permit_number,
                         'edit_url' => route('permits.show', $p),
@@ -282,11 +289,11 @@ class SettingsController extends Controller
                 'severity' => 'high',
                 'title' => 'Permits missing a deceased person record',
                 'description' => 'These permits have no linked deceased person. They may have been imported incorrectly. Attach the correct deceased record or delete the permit.',
-                'records' => $noDeceased->map(fn ($p) => [
-                    'id' => 'miss-dec-'.$p->id,
+                'records' => $noDeceased->map(fn($p) => [
+                    'id' => 'miss-dec-' . $p->id,
                     'permit_id' => $p->id,
                     'label' => $p->permit_number,
-                    'sub' => 'Applicant: '.($p->applicant_name ?? 'Unknown'),
+                    'sub' => 'Applicant: ' . ($p->applicant_name ?? 'Unknown'),
                     'field_name' => 'deceased_id',
                     'field_value' => null,
                     'edit_url' => route('permits.show', $p),
@@ -303,11 +310,11 @@ class SettingsController extends Controller
                 'severity' => 'medium',
                 'title' => 'Deceased records missing date of death',
                 'description' => 'Date of death is required for official permits. Fill in the missing date on each record.',
-                'records' => $noDod->map(fn ($d) => [
-                    'id' => 'miss-dod-'.$d->id,
+                'records' => $noDod->map(fn($d) => [
+                    'id' => 'miss-dod-' . $d->id,
                     'permit_id' => null,
-                    'label' => $d->last_name.', '.$d->first_name,
-                    'sub' => 'Record #'.$d->id.' — Added '.$d->created_at->format('M d, Y'),
+                    'label' => $d->last_name . ', ' . $d->first_name,
+                    'sub' => 'Record #' . $d->id . ' — Added ' . $d->created_at->format('M d, Y'),
                     'field_name' => 'date_of_death',
                     'field_value' => null,
                     'edit_url' => route('deceased.show', $d),
@@ -326,11 +333,11 @@ class SettingsController extends Controller
                 'severity' => 'medium',
                 'title' => 'Permits with missing or placeholder applicant name',
                 'description' => 'The requesting party\'s name is required. Update these permits with the correct applicant information.',
-                'records' => $noApplicant->map(fn ($p) => [
-                    'id' => 'miss-app-'.$p->id,
+                'records' => $noApplicant->map(fn($p) => [
+                    'id' => 'miss-app-' . $p->id,
                     'permit_id' => $p->id,
                     'label' => $p->permit_number,
-                    'sub' => optional($p->deceased)->last_name.', '.optional($p->deceased)->first_name,
+                    'sub' => optional($p->deceased)->last_name . ', ' . optional($p->deceased)->first_name,
                     'field_name' => 'applicant_name',
                     'field_value' => $p->applicant_name ?? null,
                     'edit_url' => route('permits.show', $p),
@@ -338,20 +345,20 @@ class SettingsController extends Controller
             ];
         }
 
-        // ── 6. MISSING: released permits with no expiry date ──
-        $noExpiry = BurialPermit::where('status', 'released')->whereNull('expiry_date')->with('deceased')->get();
+        // ── 6. MISSING: active permits with no expiry date ──
+        $noExpiry = BurialPermit::where('status', 'active')->whereNull('expiry_date')->with('deceased')->get();
         if ($noExpiry->isNotEmpty()) {
             $issues[] = [
                 'id' => 'missing-expiry',
                 'type' => 'missing',
                 'severity' => 'medium',
-                'title' => 'Released permits with no expiry date set',
-                'description' => 'Released permits should always have an expiry date. These were likely released without the system auto-setting one. Review and set expiry dates.',
-                'records' => $noExpiry->map(fn ($p) => [
-                    'id' => 'miss-exp-'.$p->id,
+                'title' => 'Active permits with no expiry date set',
+                'description' => 'Active permits should always have an expiry date. These were likely issued without the system auto-setting one. Review and set expiry dates.',
+                'records' => $noExpiry->map(fn($p) => [
+                    'id' => 'miss-exp-' . $p->id,
                     'permit_id' => $p->id,
                     'label' => $p->permit_number,
-                    'sub' => optional($p->deceased)->last_name.', '.optional($p->deceased)->first_name.' — Released '.$p->updated_at->format('M d, Y'),
+                    'sub' => optional($p->deceased)->last_name . ', ' . optional($p->deceased)->first_name . ' — Issued ' . $p->updated_at->format('M d, Y'),
                     'field_name' => 'expiry_date',
                     'field_value' => null,
                     'edit_url' => route('permits.show', $p),
@@ -369,11 +376,11 @@ class SettingsController extends Controller
                 'severity' => 'low',
                 'title' => 'Possible first/last name swap in deceased records',
                 'description' => 'These records have a very short last name and a long first name, which may indicate the names were entered in the wrong fields.',
-                'records' => $possibleSwapped->map(fn ($d) => [
-                    'id' => 'swap-'.$d->id,
+                'records' => $possibleSwapped->map(fn($d) => [
+                    'id' => 'swap-' . $d->id,
                     'permit_id' => null,
-                    'label' => $d->last_name.', '.$d->first_name,
-                    'sub' => 'Record #'.$d->id,
+                    'label' => $d->last_name . ', ' . $d->first_name,
+                    'sub' => 'Record #' . $d->id,
                     'field_name' => 'last_name',
                     'field_value' => $d->last_name,
                     'edit_url' => route('deceased.show', $d),
@@ -391,11 +398,11 @@ class SettingsController extends Controller
                 'severity' => 'low',
                 'title' => 'Permits with unrecognised permit type values',
                 'description' => 'These permits have a permit_type that does not match any known fee category. They may have been imported with old or incorrect values.',
-                'records' => $badType->map(fn ($p) => [
-                    'id' => 'badtype-'.$p->id,
+                'records' => $badType->map(fn($p) => [
+                    'id' => 'badtype-' . $p->id,
                     'permit_id' => $p->id,
                     'label' => $p->permit_number,
-                    'sub' => optional($p->deceased)->last_name.', '.optional($p->deceased)->first_name,
+                    'sub' => optional($p->deceased)->last_name . ', ' . optional($p->deceased)->first_name,
                     'field_name' => 'permit_type',
                     'field_value' => $p->permit_type,
                     'edit_url' => route('permits.show', $p),
@@ -412,11 +419,11 @@ class SettingsController extends Controller
                 'severity' => 'low',
                 'title' => 'Deceased records with invalid age (0 or negative)',
                 'description' => 'Age at death should be a positive number. These records likely have a data entry error.',
-                'records' => $badAge->map(fn ($d) => [
-                    'id' => 'badage-'.$d->id,
+                'records' => $badAge->map(fn($d) => [
+                    'id' => 'badage-' . $d->id,
                     'permit_id' => null,
-                    'label' => $d->last_name.', '.$d->first_name,
-                    'sub' => 'Record #'.$d->id,
+                    'label' => $d->last_name . ', ' . $d->first_name,
+                    'sub' => 'Record #' . $d->id,
                     'field_name' => 'age',
                     'field_value' => (string) $d->age,
                     'edit_url' => route('deceased.show', $d),
@@ -434,11 +441,11 @@ class SettingsController extends Controller
                 'severity' => 'medium',
                 'title' => 'Deceased records with a future date of death',
                 'description' => 'Date of death cannot be in the future. These records likely have a data entry error (e.g. wrong year).',
-                'records' => $futureDod->map(fn ($d) => [
-                    'id' => 'futdod-'.$d->id,
+                'records' => $futureDod->map(fn($d) => [
+                    'id' => 'futdod-' . $d->id,
                     'permit_id' => null,
-                    'label' => $d->last_name.', '.$d->first_name,
-                    'sub' => 'Record #'.$d->id,
+                    'label' => $d->last_name . ', ' . $d->first_name,
+                    'sub' => 'Record #' . $d->id,
                     'field_name' => 'date_of_death',
                     'field_value' => $d->date_of_death->format('Y-m-d'),
                     'edit_url' => route('deceased.show', $d),
@@ -447,46 +454,98 @@ class SettingsController extends Controller
         }
 
         // ── 11. DUPLICATE: deceased persons with identical first + last name ──
-$dupNames = DeceasedPerson::select('first_name', 'last_name', DB::raw('COUNT(*) as cnt'), DB::raw('GROUP_CONCAT(id) as ids'))
-    ->groupBy('first_name', 'last_name')
-    ->having('cnt', '>', 1)
-    ->get();
+        $dupNames = DeceasedPerson::select('first_name', 'last_name', DB::raw('COUNT(*) as cnt'), DB::raw('GROUP_CONCAT(id) as ids'))
+            ->groupBy('first_name', 'last_name')
+            ->having('cnt', '>', 1)
+            ->get();
 
-if ($dupNames->isNotEmpty()) {
-    $records = [];
-    foreach ($dupNames as $dup) {
-        $deceasedIds = explode(',', $dup->ids);
-        $persons = DeceasedPerson::whereIn('id', $deceasedIds)->get();
-        foreach ($persons as $d) {
-            $permit = BurialPermit::where('deceased_id', $d->id)->first();
-            $records[] = [
-                'id'          => 'dupname-dec-'.$d->id,
-                'permit_id'   => $permit?->id,
-                'label'       => $d->last_name.', '.$d->first_name,
-                'sub'         => 'Record #'.$d->id
-                                 .($permit ? ' · Permit '.$permit->permit_number : ' · No permit linked')
-                                 .' · Died '.(optional($d->date_of_death)?->format('M d, Y') ?? '—'),
-                'field_name'  => 'full_name',
-                'field_value' => $d->first_name.' '.$d->last_name,
-                'edit_url'    => $permit ? route('permits.show', $permit) : route('deceased.show', $d),
+        if ($dupNames->isNotEmpty()) {
+            $records = [];
+            foreach ($dupNames as $dup) {
+                $deceasedIds = explode(',', $dup->ids);
+                $persons = DeceasedPerson::whereIn('id', $deceasedIds)->get();
+                foreach ($persons as $d) {
+                    $permit = BurialPermit::where('deceased_id', $d->id)->first();
+                    $records[] = [
+                        'id' => 'dupname-dec-' . $d->id,
+                        'permit_id' => $permit?->id,
+                        'label' => $d->last_name . ', ' . $d->first_name,
+                        'sub' => 'Record #' . $d->id
+                            . ($permit ? ' · Permit ' . $permit->permit_number : ' · No permit linked')
+                            . ' · Died ' . (optional($d->date_of_death)?->format('M d, Y') ?? '—'),
+                        'field_name' => 'full_name',
+                        'field_value' => $d->first_name . ' ' . $d->last_name,
+                        'edit_url' => $permit ? route('permits.show', $permit) : route('deceased.show', $d),
+                    ];
+                }
+            }
+            $issues[] = [
+                'id' => 'dup-deceased-names',
+                'type' => 'duplicate',
+                'severity' => 'high',
+                'title' => 'Deceased persons with identical names',
+                'description' => 'Multiple deceased records share the same full name. This usually means a permit was created more than once for the same person. Review and delete the duplicate permit(s).',
+                'records' => $records,
             ];
         }
-    }
-    $issues[] = [
-        'id'          => 'dup-deceased-names',
-        'type'        => 'duplicate',
-        'severity'    => 'high',
-        'title'       => 'Deceased persons with identical names',
-        'description' => 'Multiple deceased records share the same full name. This usually means a permit was created more than once for the same person. Review and delete the duplicate permit(s).',
-        'records'     => $records,
-    ];
-}
 
         return response()->json(['issues' => $issues, 'scanned_at' => now()->toISOString()]);
     }
-    
+
     public function dataQualityPage()
-{
-    return view('superadmin.data-quality');
-}
+    {
+        return view('superadmin.data-quality');
+    }
+
+    /**
+     * AJAX Endpoint for Data Quality Scanner quick-edits.
+     */
+    public function updateRecord(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'type' => 'required|in:permit,deceased',
+            'field' => 'required|string',
+            'value' => 'nullable',
+        ]);
+
+        $id = $request->id;
+        $type = $request->type;
+        $field = $request->field;
+        $value = $request->value;
+
+        if ($type === 'permit') {
+            $record = BurialPermit::find($id);
+            if (!$record)
+                return response()->json(['error' => 'Permit not found'], 404);
+
+            $oldVal = $record->{$field};
+            $record->update([$field => $value]);
+
+            ActivityLog::record(
+                action: 'updated',
+                modelType: 'BurialPermit',
+                modelId: $id,
+                modelLabel: $record->permit_number,
+                description: "Field '{$field}' updated via Data Quality Scanner from \"{$oldVal}\" to \"{$value}\""
+            );
+        } else {
+            $record = DeceasedPerson::find($id);
+            if (!$record)
+                return response()->json(['error' => 'Record not found'], 404);
+
+            $oldVal = $record->{$field};
+            $record->update([$field => $value]);
+
+            ActivityLog::record(
+                action: 'updated',
+                modelType: 'DeceasedPerson',
+                modelId: $id,
+                modelLabel: "{$record->first_name} {$record->last_name}",
+                description: "Field '{$field}' updated via Data Quality Scanner from \"{$oldVal}\" to \"{$value}\""
+            );
+        }
+
+        return response()->json(['success' => true]);
+    }
 }

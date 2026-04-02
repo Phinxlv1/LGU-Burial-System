@@ -1,0 +1,270 @@
+import { useState, useEffect } from 'react'
+import { MapView } from './components/Map/MapView'
+import { NicheGrid } from './components/Map/NicheGrid'
+import { PlotSearch } from './components/Map/PlotSearch'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, ZoomIn, ZoomOut } from 'lucide-react'
+import { useMapStore } from './store/useMapStore'
+
+function buildLinesGeoJSON(grids: any[]) {
+  const features = grids
+    .filter(g => g.lineStart && g.lineEnd)
+    .map(g => ({
+      type: 'Feature',
+      properties: { 
+        id: String(g.id),
+        color: g.color || '#ef4444' 
+      },
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [g.lineStart.lng, g.lineStart.lat],
+          [g.lineEnd.lng,   g.lineEnd.lat]
+        ]
+      }
+    }))
+  return { type: 'FeatureCollection', features }
+}
+
+function App() {
+  const { 
+    isLoaded, map, 
+    gridOverlays, setGridOverlays
+  } = useMapStore()
+  
+  const [selectedFeature, setSelectedFeature] = useState<any>(null)
+  const [pointsData, setPointsData] = useState<any>(null)
+  
+  // Real-time Data Sync
+  useEffect(() => {
+    const fetchPlots = async () => {
+       try {
+         const res = await fetch('/cemetery/plots')
+         const data = await res.json()
+         if (data && data.type === 'FeatureCollection') setPointsData(data)
+       } catch (err) { /* silent */ }
+    }
+    const fetchGrids = async () => {
+      try {
+        const res  = await fetch('/niche-grids')
+        const data = await res.json()
+        setGridOverlays(data.map((g: any) => ({
+          id:          String(g.id),
+          name:        g.name,
+          rows:        g.rows,
+          cols:        g.cols,
+          labelFormat: g.label_format,
+          color:       g.color || '#ef4444',
+          lineStart:   (g.start_lat != null) ? { lat: parseFloat(g.start_lat), lng: parseFloat(g.start_lng) } : undefined,
+          lineEnd:     (g.end_lat   != null) ? { lat: parseFloat(g.end_lat),   lng: parseFloat(g.end_lng)   } : undefined,
+          position:    { lat: parseFloat(g.latitude), lng: parseFloat(g.longitude) },
+          rotation:    g.rotation,
+          widthScale:  g.width_scale,
+          cells:       g.cells || {},
+        })))
+      } catch {}
+    }
+    fetchPlots()
+    fetchGrids()
+
+    // Setup real-time polling every 5 seconds
+    const interval = setInterval(() => {
+      fetchPlots()
+      fetchGrids()
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [setGridOverlays])
+
+  // Sync Data to Map Engine
+  useEffect(() => {
+    if (!map || !isLoaded || !pointsData) return
+    if (!map.getSource('plots')) {
+      map.addSource('plots', {
+        type: 'geojson',
+        data: pointsData,
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50
+      })
+      map.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'plots',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': '#111827',
+          'circle-radius': 7,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#3b82f6'
+        }
+      })
+    } else {
+      (map.getSource('plots') as any).setData(pointsData)
+    }
+  }, [map, isLoaded, pointsData])
+
+  // ─── Niche-grid lines layer ────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!map || !isLoaded) return
+
+    const geojson = buildLinesGeoJSON(gridOverlays)
+
+    if (!map.getSource('niche-lines')) {
+      map.addSource('niche-lines', { type: 'geojson', data: geojson })
+
+      // Halo (wide invisible hit area + glow)
+      map.addLayer({
+        id: 'niche-lines-halo', type: 'line', source: 'niche-lines',
+        paint: { 'line-color': ['get', 'color'], 'line-width': 18, 'line-opacity': 0.0 }
+      })
+      // Solid-colored line
+      map.addLayer({
+        id: 'niche-lines-base', type: 'line', source: 'niche-lines',
+        paint: { 'line-color': ['get', 'color'], 'line-width': 5, 'line-blur': 0, 'line-opacity': 1 }
+      })
+      // Dot endpoints
+      map.addLayer({
+        id: 'niche-lines-dots', type: 'circle', source: 'niche-lines',
+        paint: { 'circle-color': ['get', 'color'], 'circle-radius': 7, 'circle-stroke-color': 'white', 'circle-stroke-width': 2 }
+      })
+
+      // ── Hover handling ──────────────────────────────────────────
+      map.on('mousemove', 'niche-lines-halo', (e: any) => {
+        if (e.features?.[0]) {
+          map.getCanvas().style.cursor = 'pointer'
+          const id = String(e.features[0].properties.id)
+          if (useMapStore.getState().selectedGridId !== id)
+            useMapStore.getState().setHoveredGridId(id)
+        }
+      })
+      map.on('mouseleave', 'niche-lines-halo', () => {
+        map.getCanvas().style.cursor = ''
+        useMapStore.getState().setHoveredGridId(null)
+      })
+
+      // ── Click handling ──────────────────────────────────────────
+      map.on('click', 'niche-lines-halo', (e: any) => {
+        if (e.features?.[0]) {
+          e.preventDefault()
+          const id = String(e.features[0].properties.id)
+          const state = useMapStore.getState()
+          state.setSelectedGridId(state.selectedGridId === id ? null : id)
+        }
+      })
+    } else {
+      (map.getSource('niche-lines') as any).setData(geojson as any)
+    }
+  }, [map, isLoaded, gridOverlays])
+
+  // Keep line width reactive to hover/selected
+  const hoveredGridId = useMapStore(s => s.hoveredGridId)
+  const selectedGridId = useMapStore(s => s.selectedGridId)
+  useEffect(() => {
+    if (!map || !isLoaded || !map.getLayer('niche-lines-base')) return
+    map.setPaintProperty('niche-lines-base', 'line-width', [
+      'case',
+      ['==', ['get', 'id'], ['literal', selectedGridId ?? '']], 10,
+      ['==', ['get', 'id'], ['literal', hoveredGridId  ?? '']], 8,
+      5
+  }, [map, isLoaded, hoveredGridId, selectedGridId])
+
+  // ─── Fly-to from search ────────────────────────────────────────────────────────
+  const handleFlyTo = (res: any) => {
+    if (!map) return
+    map.flyTo({ center: [res.longitude, res.latitude], zoom: 20, speed: 1.2, essential: true })
+    setSelectedFeature({ ...res })
+  }
+
+  const island: React.CSSProperties = {
+    background: 'rgba(10, 16, 33, 0.95)',
+    backdropFilter: 'blur(32px)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '18px',
+    boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+    padding: '16px 24px',
+  }
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+      {/* 🧩 MAP ENGINE - BOTTOM LAYER */}
+      <MapView />
+
+      {/* 📡 ENGINE STATUS & SEARCH BAR */}
+      <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 1000, pointerEvents: 'none' }}>
+        <div style={{ ...island, display: 'flex', alignItems: 'center', gap: '20px', pointerEvents: 'auto', maxWidth: '600px' }}>
+           <PlotSearch pointsData={pointsData} onSelect={handleFlyTo} />
+           
+           <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.08)' }} />
+           
+           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+             <div className={`h-2 w-2 rounded-full ${isLoaded ? 'bg-blue-500 animate-pulse' : 'bg-red-500'}`} />
+             <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+               Engine {isLoaded ? 'Online' : 'Booting'}
+             </span>
+           </div>
+        </div>
+      </div>
+
+      {/* 🔍 ZOOM CONTROLS (TUCKED AWAY) */}
+      <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <button onClick={() => map?.zoomIn()} style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '12px', borderRadius: '12px', cursor: 'pointer' }}><ZoomIn size={18} /></button>
+          <button onClick={() => map?.zoomOut()} style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '12px', borderRadius: '12px', cursor: 'pointer' }}><ZoomOut size={18} /></button>
+      </div>
+      
+      {/* 🪟 NICHE GRID LAYER (Z-10) */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
+        {gridOverlays.map((sec) => (
+          <NicheGrid key={sec.id} section={sec} />
+        ))}
+      </div>
+
+      {/* ℹ️ SELECTED PLOT OVERLAY (LEGEND) */}
+      <AnimatePresence>
+        {selectedFeature && (
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              style={{
+                width: '380px',
+                backgroundColor: '#0f172a',
+                borderRadius: '32px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                padding: '40px',
+                boxShadow: '0 50px 100px -20px rgba(0, 0, 0, 1)',
+                position: 'relative'
+              }}
+            >
+               <button 
+                 onClick={() => setSelectedFeature(null)}
+                 style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+               >
+                 <X size={20} />
+               </button>
+
+               <div style={{ marginBottom: '24px' }}>
+                 <div style={{ fontSize: '10px', color: '#3b82f6', fontWeight: '900', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '8px' }}>Plot Registry</div>
+                 <h2 style={{ fontSize: '42px', fontWeight: '900', color: 'white', margin: 0, letterSpacing: '-0.04em' }}>{selectedFeature.plot_code}</h2>
+               </div>
+               
+               <div style={{ padding: '24px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '32px' }}>
+                  <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px' }}>Status / Occupant</div>
+                  <div style={{ fontSize: '18px', color: 'white', fontWeight: 'bold' }}>
+                     {selectedFeature.deceased_name || 'Assignment: Available'}
+                  </div>
+               </div>
+
+               <button style={{ width: '100%', backgroundColor: 'white', color: '#0f172a', border: 'none', padding: '18px', borderRadius: '18px', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>
+                 Open Permitting Record
+               </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+export default App

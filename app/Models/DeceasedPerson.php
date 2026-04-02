@@ -36,6 +36,18 @@ class DeceasedPerson extends Model
         'date_of_death' => 'date',
     ];
 
+    public function getFullNameAttribute(): string
+    {
+        $fullName = $this->last_name . ', ' . $this->first_name;
+        if ($this->middle_name) {
+            $fullName .= ' ' . strtoupper(substr($this->middle_name, 0, 1)) . '.';
+        }
+        if ($this->name_extension) {
+            $fullName .= ' ' . $this->name_extension;
+        }
+        return $fullName;
+    }
+
     public function permits()
     {
         return $this->hasMany(BurialPermit::class, 'deceased_id');

@@ -321,7 +321,7 @@
                 <div class="stat-eyebrow">Valid</div>
                 <div class="stat-val" style="color:var(--green)">{{ $activePermits }}</div>
                 <div class="stat-lbl">Active Permits</div>
-                <div class="stat-sub">Ready & Released</div>
+                <div class="stat-sub">Valid & Current</div>
             </div>
 
             <div class="stat-card s-amber">
@@ -358,10 +358,10 @@
 
             <div class="stat-card s-grad">
                 <div class="stat-ico ico-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-                <div class="stat-eyebrow">Estimated Revenue</div>
+                <div class="stat-eyebrow">Potential</div>
                 <div class="stat-val sm" style="color:var(--green)">₱{{ number_format($estimatedRevenue ?? 0) }}</div>
-                <div class="stat-lbl">All Time (Est.)</div>
-                <div class="stat-sub">Based on permit fee rates</div>
+                <div class="stat-lbl">Expected Revenue</div>
+                <div class="stat-sub">Active & Overdue Permits</div>
             </div>
 
             <div class="stat-card s-purple">
@@ -467,24 +467,24 @@
                 </div>
                 @php
                     $fL = ['cemented'=>'Cemented','niche_1st'=>'1st Floor Niche','niche_2nd'=>'2nd Floor Niche','niche_3rd'=>'3rd Floor Niche','niche_4th'=>'4th Floor Niche','bone_niches'=>'Bone Niches'];
-                    $fA = ['cemented'=>1000,'niche_1st'=>8000,'niche_2nd'=>6600,'niche_3rd'=>5700,'niche_4th'=>5300,'bone_niches'=>5000];
+                    // Note: Revenue breakdown per row is now an estimation based on the overall Expected Revenue logic
                     $fTotal = array_sum(array_values($feeCounts ?? []));
-                    $fRev   = 0; foreach(($feeCounts??[]) as $k=>$c){ $fRev += $c*($fA[$k]??0); }
-                    $fMax   = max(array_merge(array_values($feeCounts??[]),[1]));
+                    $fRev   = $estimatedRevenue ?? 0;
+                    $fMax   = max(array_merge(array_values($feeCounts ?? []), [1]));
                 @endphp
                 <table class="fee-tbl">
-                    <thead><tr><th>Type</th><th style="text-align:center">Count</th><th style="text-align:right">Revenue</th></tr></thead>
+                    <thead><tr><th>Type</th><th style="text-align:center">Count</th><th style="text-align:right">Expected</th></tr></thead>
                     <tbody>
                         @foreach($fL as $k => $lbl)
-                        @php $c = $feeCounts[$k]??0; $r=$c*($fA[$k]??0); @endphp
+                        @php $c = $feeCounts[$k]??0; @endphp
                         <tr>
                             <td><div style="display:flex;align-items:center"><div class="fee-bar" style="width:{{ $fMax>0?max(4,round(($c/$fMax)*36)):4 }}px"></div>{{ $lbl }}</div></td>
                             <td class="c">{{ $c }}</td>
-                            <td class="r">₱{{ number_format($r) }}</td>
+                            <td class="r" style="color:var(--muted); font-size: 11px;">(Incl.)</td>
                         </tr>
                         @endforeach
                         <tr class="tot">
-                            <td>TOTAL</td>
+                            <td>TOTAL EXPECTED</td>
                             <td class="c">{{ $fTotal }}</td>
                             <td class="r">₱{{ number_format($fRev) }}</td>
                         </tr>

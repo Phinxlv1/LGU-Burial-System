@@ -9,8 +9,22 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use App\Services\BurialPermitService;
+
 class BurialPermitController extends Controller
 {
+    protected $permitService;
+
+    public function __construct(BurialPermitService $permitService)
+    {
+        $this->permitService = $permitService;
+    }
+
+    private function loadSettings(): array
+    {
+        return $this->permitService->getSettings();
+    }
+
     public function index(Request $request)
     {
         $sort      = $request->get('sort', 'status');
@@ -90,48 +104,48 @@ class BurialPermitController extends Controller
         $permits = $query->get();
 
         $sortUrl = function (string $col) {
-    if ($col === 'status') {
-        $cur = request()->get('sort', 'status');
-        $dir = request()->get('direction', 'asc');
-        if ($cur !== 'status') {
-            $nextDir = 'asc';       // first click → expired first
-        } elseif ($dir === 'asc') {
-            $nextDir = 'desc';      // second click → active first
-        } elseif ($dir === 'desc') {
-            $nextDir = 'mid';       // third click → expiring first
-        } else {
-            $nextDir = 'asc';       // reset
-        }
-        return request()->fullUrlWithQuery(['sort' => 'status', 'direction' => $nextDir, 'page' => 1]);
-    }
-    if ($col === 'permit_type') {
-        $cur = request()->get('sort', 'status');
-        $dir = request()->get('direction', 't1');
-        if ($cur !== 'permit_type') {
-            $nextDir = 't1';
-        } else {
-            switch ($dir) {
-                case 't1': $nextDir = 't2'; break;
-                case 't2': $nextDir = 't3'; break;
-                case 't3': $nextDir = 't4'; break;
-                case 't4': $nextDir = 't5'; break;
-                case 't5': $nextDir = 't6'; break;
-                case 't6': $nextDir = 't1'; break;
-                default:   $nextDir = 't1'; break;
+            if ($col === 'status') {
+                $cur = request()->get('sort', 'status');
+                $dir = request()->get('direction', 'asc');
+                if ($cur !== 'status') {
+                    $nextDir = 'asc';
+                } elseif ($dir === 'asc') {
+                    $nextDir = 'desc';
+                } elseif ($dir === 'desc') {
+                    $nextDir = 'mid';
+                } else {
+                    $nextDir = 'asc';
+                }
+                return request()->fullUrlWithQuery(['sort' => 'status', 'direction' => $nextDir, 'page' => 1]);
             }
-        }
-        return request()->fullUrlWithQuery(['sort' => 'permit_type', 'direction' => $nextDir, 'page' => 1]);
-    }
-    return request()->fullUrlWithQuery([
-        'sort'      => $col,
-        'direction' => (request()->get('sort', 'status') === $col && request()->get('direction', 'asc') === 'asc') ? 'desc' : 'asc',
-        'page'      => 1,
-    ]);
-};
+            if ($col === 'permit_type') {
+                $cur = request()->get('sort', 'status');
+                $dir = request()->get('direction', 't1');
+                if ($cur !== 'permit_type') {
+                    $nextDir = 't1';
+                } else {
+                    switch ($dir) {
+                        case 't1': $nextDir = 't2'; break;
+                        case 't2': $nextDir = 't3'; break;
+                        case 't3': $nextDir = 't4'; break;
+                        case 't4': $nextDir = 't5'; break;
+                        case 't5': $nextDir = 't6'; break;
+                        case 't6': $nextDir = 't1'; break;
+                        default:   $nextDir = 't1'; break;
+                    }
+                }
+                return request()->fullUrlWithQuery(['sort' => 'permit_type', 'direction' => $nextDir, 'page' => 1]);
+            }
+            return request()->fullUrlWithQuery([
+                'sort'      => $col,
+                'direction' => (request()->get('sort', 'status') === $col && request()->get('direction', 'asc') === 'asc') ? 'desc' : 'asc',
+                'page'      => 1,
+            ]);
+        };
 
         $sortIcon = fn (string $col) => request()->get('sort', 'status') === $col
-    ? '<span class="sort-icon ' . request()->get('direction', 'desc') . '"></span>'
-    : '<span class="sort-icon none"></span>';
+            ? '<span class="sort-icon ' . request()->get('direction', 'desc') . '"></span>'
+            : '<span class="sort-icon none"></span>';
 
         return view('admin.permits.index', compact('permits', 'sortUrl', 'sortIcon'));
     }
@@ -153,49 +167,23 @@ class BurialPermitController extends Controller
             'kind_of_burial'    => 'nullable|string|max:100',
         ]);
 
-        // ── Anti-Duplication Check (Hardened) ──
-        $fName = trim(strtolower($request->first_name));
-        $lName = trim(strtolower($request->last_name));
-        $mName = trim(strtolower($request->middle_name ?? ''));
-        $suffix = trim(strtolower($request->name_extension ?? ''));
-
-        $duplicate = DeceasedPerson::whereRaw('LOWER(trim(first_name)) = ?', [$fName])
-            ->whereRaw('LOWER(trim(last_name)) = ?', [$lName])
-            ->where(function($q) use ($mName) {
-                if ($mName !== '') {
-                    $q->whereRaw('LOWER(trim(middle_name)) = ?', [$mName]);
-                } else {
-                    $q->whereNull('middle_name')->orWhereRaw('trim(middle_name) = ""');
-                }
-            })
-            ->where(function($q) use ($suffix) {
-                if ($suffix !== '') {
-                    $q->whereRaw('LOWER(trim(name_extension)) = ?', [$suffix]);
-                } else {
-                    $q->whereNull('name_extension')->orWhereRaw('trim(name_extension) = ""');
-                }
-            })
-            ->first();
+        // ── Anti-Duplication Check ──
+        $duplicate = $this->permitService->checkDuplicate($request->all());
 
         if ($duplicate) {
-            $nameStr = $request->first_name . ' ' . $request->last_name . ($request->name_extension ? " ({$request->name_extension})" : "");
             $p = $duplicate->permits()->latest()->first();
             $redirectUrl = $p ? route('permits.show', $p->id) : null;
             $pNum = $p ? $p->permit_number : 'the existing record';
             
             return back()->withInput()
-                ->with('error', "Cannot create permit: A person with the name \"{$nameStr}\" already has an existing record.")
+                ->with('error', "Cannot create permit: A person with the name \"{$duplicate->full_name}\" already has an existing record.")
                 ->with('open_modal', true)
                 ->with('redirect_url', $redirectUrl)
                 ->with('redirect_name', $pNum);
         }
 
-        // ── Similarity Protection (No. 1 & 2 Hybrid) ──
-        // If the First + Last match, but they are NOT exact twins, we still block it 
-        // to force the user to confirm they really meant to create a different person.
-        $similar = DeceasedPerson::whereRaw('LOWER(trim(first_name)) = ?', [$fName])
-            ->whereRaw('LOWER(trim(last_name)) = ?', [$lName])
-            ->first();
+        // ── Similarity Protection ──
+        $similar = $this->permitService->checkSimilar($request->first_name, $request->last_name);
 
         if ($similar) {
             $p = $similar->permits()->latest()->first();
@@ -203,7 +191,7 @@ class BurialPermitController extends Controller
             $pNum = $p ? $p->permit_number : 'the existing record';
 
             return back()->withInput()
-                ->with('error', "Cannot create permit: A person with the name \"{$request->first_name} {$request->last_name}\" already exists. If this is a different person (e.g. Jr. or Sr. or a different Middle Name), please specify those details to distinguish them.")
+                ->with('error', "Cannot create permit: A person with the name \"{$similar->full_name}\" already exists. Please provide distinguishing details.")
                 ->with('open_modal', true)
                 ->with('redirect_url', $redirectUrl)
                 ->with('redirect_name', $pNum);
@@ -223,26 +211,7 @@ class BurialPermitController extends Controller
             'address'        => $request->address,
         ]);
 
-        // ── Duplicate-safe permit number (SQLite-compatible) ──
-        // Replaced SUBSTRING_INDEX (MySQL-only) with a PHP-side approach
-        $year       = now()->year;
-        $lastPermit = BurialPermit::whereYear('created_at', $year)
-            ->orderBy('permit_number', 'desc')
-            ->get()
-            ->sortByDesc(function ($p) {
-                $parts = explode('-', $p->permit_number);
-                return (int) ($parts[2] ?? 0);
-            })
-            ->first();
-
-        $nextNumber = $lastPermit
-            ? (int) explode('-', $lastPermit->permit_number)[2] + 1
-            : 1;
-
-        do {
-            $permitNumber = 'BP-' . $year . '-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
-            $nextNumber++;
-        } while (BurialPermit::where('permit_number', $permitNumber)->exists());
+        $permitNumber = $this->permitService->generatePermitNumber();
 
         $permit = BurialPermit::create([
             'permit_number'          => $permitNumber,
@@ -254,7 +223,7 @@ class BurialPermitController extends Controller
             'applicant_contact'      => $request->applicant_contact ?? '',
             'status'                 => 'active',
             'issued_date'            => now(),
-            'expiry_date'            => now()->addYears(5),
+            'expiry_date'            => now()->addYears((int) ($this->loadSettings()['permit_expiry_years'] ?? 5)),
             'processed_by'           => Auth::id(),
         ]);
 
@@ -447,64 +416,16 @@ class BurialPermitController extends Controller
 
     public function renew(BurialPermit $permit)
     {
-        $expiry = $permit->expiry_date ? Carbon::parse($permit->expiry_date) : null;
-
-        $isExpired  = $expiry && $expiry->isPast();
-        $isExpiring = $expiry && $expiry->isFuture() && now()->diffInDays($expiry) <= 30;
-
-        if (! $isExpired && ! $isExpiring) {
-            return back()->with('error', 'This permit is not eligible for renewal. Only expired or expiring permits can be renewed.');
+        $years = (int) ($this->loadSettings()['permit_expiry_years'] ?? 5);
+        
+        try {
+            $this->permitService->renewPermit($permit, $years);
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        $old = $permit->only(['status', 'expiry_date', 'remarks']);
-
-        $newExpiry = now()->addYears(5);
-
-        $permit->update([
-            'status'        => 'active',
-            'expiry_date'   => $newExpiry,
-            'processed_by'  => Auth::id(),
-            'renewal_count' => ($permit->renewal_count ?? 0) + 1,
-            'remarks'       => 'Last renewed on ' . now()->format('F d, Y') . ' by ' . auth()->user()->name,
-        ]);
-
-        ActivityLog::record(
-            action: 'renewed',
-            modelType: 'BurialPermit',
-            modelId: $permit->id,
-            modelLabel: $permit->permit_number,
-            oldValues: $old,
-            newValues: [
-                'status'      => 'active',
-                'expiry_date' => $newExpiry->toDateString(),
-                'remarks'     => $permit->fresh()->remarks,
-            ],
-            description: "Permit {$permit->permit_number} renewed until " . $newExpiry->format('F d, Y')
-        );
 
         return redirect()->route('permits.show', $permit)
-            ->with('success', "Permit {$permit->permit_number} renewed successfully. New expiry: " . $newExpiry->format('F d, Y') . '.');
-    }
-
-    private function sortUrl(string $col): string
-    {
-        $current   = request()->get('sort', 'status');
-        $direction = request()->get('direction', 'asc');
-        $newDir    = ($current === $col && $direction === 'asc') ? 'desc' : 'asc';
-
-        return request()->fullUrlWithQuery(['sort' => $col, 'direction' => $newDir, 'page' => 1]);
-    }
-
-    private function sortIcon(string $col): string
-    {
-        $current   = request()->get('sort', 'status');
-        $direction = request()->get('direction', 'asc');
-        if ($current !== $col) {
-            return '<span class="sort-icon none"></span>';
-        }
-        $cls = $direction === 'asc' ? 'asc' : 'desc';
-
-        return "<span class=\"sort-icon {$cls}\"></span>";
+            ->with('success', "Permit {$permit->permit_number} renewed successfully.");
     }
 
     public function create() {}

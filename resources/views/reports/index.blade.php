@@ -378,7 +378,7 @@
                 <div class="stat-eyebrow">Valid</div>
                 <div class="stat-val" style="color:var(--green)">{{ $activePermits }}</div>
                 <div class="stat-lbl">Active Permits</div>
-                <div class="stat-sub">Ready & Released</div>
+                <div class="stat-sub">Valid & Current</div>
             </div>
 
             <div class="stat-card s-amber">
@@ -389,12 +389,12 @@
                 <div class="stat-sub">Within 30 days</div>
             </div>
 
-            <div class="stat-card s-grad" style="opacity:0.5; pointer-events:none;">
-                <div class="stat-ico ico-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                <div class="stat-eyebrow">Legacy</div>
-                <div class="stat-val" style="color:var(--purple)">0</div>
-                <div class="stat-lbl">Deactivated</div>
-                <div class="stat-sub">Space reserved</div>
+            <div class="stat-card s-grad">
+                <div class="stat-ico ico-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+                <div class="stat-eyebrow">Potential</div>
+                <div class="stat-val sm" style="color:var(--purple)">₱{{ number_format($estimatedRevenue ?? 0) }}</div>
+                <div class="stat-lbl">Expected Revenue</div>
+                <div class="stat-sub">Active & Overdue</div>
             </div>
 
             <div class="stat-card s-red">
@@ -421,12 +421,12 @@
                 <div class="stat-sub">{{ $deceasedThisYear ?? 0 }} this year &nbsp;·&nbsp; {{ $deceasedThisMonth ?? 0 }} this month</div>
             </div>
 
-            <div class="stat-card s-grad">
+            <div class="stat-card s-grad" style="opacity: 0.7">
                 <div class="stat-ico ico-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-                <div class="stat-eyebrow">Estimated Revenue</div>
+                <div class="stat-eyebrow">Financial Info</div>
                 <div class="stat-val sm" style="color:var(--green)">₱{{ number_format($estimatedRevenue ?? 0) }}</div>
-                <div class="stat-lbl">All Time (Est.)</div>
-                <div class="stat-sub">Based on permit fee rates</div>
+                <div class="stat-lbl">Estimated Billing</div>
+                <div class="stat-sub">Per Settings.json</div>
             </div>
 
         </div>

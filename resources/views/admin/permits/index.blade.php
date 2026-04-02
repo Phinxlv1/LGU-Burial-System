@@ -284,13 +284,7 @@
                             @endif
                         </td>
                         <td>
-                            @php
-                                $d = $permit->deceased;
-                                $fullName = $d->last_name . ', ' . $d->first_name;
-                                if ($d->middle_name) $fullName .= ' ' . strtoupper(substr($d->middle_name, 0, 1)) . '.';
-                                if ($d->name_extension) $fullName .= ' ' . $d->name_extension;
-                            @endphp
-                            {{ $fullName }}
+                            {{ $permit->deceased->full_name }}
                         </td>
                         <td style="font-size:12px;color:#6b7280;text-transform:capitalize">{{ ucfirst(str_replace('_',' ',$permit->permit_type)) }}</td>
                         <td style="font-size:12px;color:#6b7280">{{ optional(optional($permit->deceased)->date_of_death)->format('M d, Y') ?? '—' }}</td>
@@ -343,6 +337,7 @@
                 </tbody>
             </table>
             </div>
+
         </div>
     </div>
 </div>

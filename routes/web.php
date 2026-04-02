@@ -6,6 +6,7 @@ use App\Http\Controllers\SuperAdminDashboardController;
 use App\Http\Controllers\DeceasedPersonController;
 use App\Http\Controllers\BurialPermitController;
 use App\Http\Controllers\CemeteryMapController;
+use App\Http\Controllers\CemeteryGridController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\SmsController;
 use App\Http\Controllers\ImportController;
@@ -29,17 +30,23 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/superadmin/changelog', [SuperAdminDashboardController::class, 'changelog'])->name('superadmin.changelog');
         Route::get('/superadmin/dashboard', [SuperAdminDashboardController::class, 'index'])->name('superadmin.dashboard');
         Route::get('/superadmin/export', [SuperAdminDashboardController::class, 'export'])->name('superadmin.export');
+        Route::get('/superadmin/export-excel', [SuperAdminDashboardController::class, 'exportExcel'])->name('superadmin.export-excel');
         Route::get('/superadmin/activity', [SuperAdminDashboardController::class, 'activityLog'])->name('superadmin.activity');
         Route::get('/superadmin/reports', [ReportController::class, 'superAdminIndex'])->name('superadmin.reports');
         Route::get('/reports', fn() => redirect()->route('superadmin.reports'));
         Route::resource('users', UserController::class)->names('admin.users');
         Route::get('/superadmin/data-quality', [SettingsController::class, 'dataQualityPage'])
-     ->name('superadmin.dataquality')
-     ->middleware(['auth', 'role:super_admin']);
+            ->name('superadmin.dataquality');
+        Route::get('/superadmin/geomap', [SuperAdminDashboardController::class, 'geomap'])
+            ->name('superadmin.geomap');
+        Route::apiResource('/niche-grids', CemeteryGridController::class)->except(['index'])->names('superadmin.nichegrids');
     });
 
     // ── Admin + Super Admin ──
     Route::middleware(['role:admin|super_admin'])->group(function () {
+        
+        // Niche Grids (Read-Only for Admin)
+        Route::get('/niche-grids', [CemeteryGridController::class, 'index'])->name('nichegrids.index');
 
         // Permits
         Route::resource('permits', BurialPermitController::class);
@@ -78,6 +85,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/settings/users',            [SettingsController::class, 'storeUser'])->name('settings.users.store');
         Route::delete('/settings/users/{user}',   [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
         Route::get('/settings/dataquality/scan',  [SettingsController::class, 'dataQualityScan'])->name('settings.dataquality.scan');
+        Route::post('/settings/dataquality/update', [SettingsController::class, 'updateRecord'])->name('settings.dataquality.update');
 
         // SMS
         Route::post('permits/{permit}/sms', [SmsController::class, 'send'])->name('sms.send');

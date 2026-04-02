@@ -13,7 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::orderBy('name')->get();
+        $users = User::orderBy('name')->paginate(25);
 
         if (Auth::user()->hasRole('super_admin') || Auth::user()->role === 'super_admin') {
             return view('superadmin.users.index', compact('users'));

@@ -28,24 +28,31 @@ class CemeteryMapController extends Controller
         $plots = CemeteryPlot::with('deceased')->get();
 
         $features = $plots->map(function ($plot) {
+            $deceased = $plot->deceased;
+            $permit   = $deceased ? $deceased->permits()->latest()->first() : null;
+
             return [
                 'type' => 'Feature',
                 'geometry' => [
                     'type' => 'Point',
-                    'coordinates' => [$plot->longitude ?? 0, $plot->latitude ?? 0],
+                    'coordinates' => [(float)$plot->longitude, (float)$plot->latitude],
                 ],
                 'properties' => [
-                    'id' => $plot->id,
-                    'plot_code' => $plot->plot_code,
-                    'section' => $plot->section,
-                    'row' => $plot->row,
-                    'column' => $plot->column,
-                    'status' => $plot->status,
-                    'notes' => $plot->notes,
-                    'deceased_name' => $plot->deceased
-                                        ? $plot->deceased->first_name.' '.$plot->deceased->last_name
-                                        : null,
-                    'date_of_death' => $plot->deceased?->date_of_death?->format('M d, Y'),
+                    'id'            => $plot->id,
+                    'plot_code'     => $plot->plot_code,
+                    'section'       => $plot->section,
+                    'row'           => $plot->row,
+                    'column'        => $plot->column,
+                    'status'        => $plot->status, // available, occupied, reserved
+                    'permit_status' => $permit ? $permit->status : 'none', // active, expiring, expired
+                    'expiry_date'   => $permit ? $permit->expiry_date?->format('Y-m-d') : null,
+                    'permit_number' => $permit ? $permit->permit_number : null,
+                    'deceased_name' => $deceased ? $deceased->first_name.' '.$deceased->last_name : null,
+                    'deceased_id'   => $deceased ? $deceased->id : null,
+                    'deceased_age'  => $deceased ? $deceased->age : null,
+                    'deceased_sex'  => $deceased ? $deceased->sex : null,
+                    'date_of_death' => $deceased?->date_of_death?->format('M d, Y'),
+                    'notes'         => $plot->notes,
                 ],
             ];
         });

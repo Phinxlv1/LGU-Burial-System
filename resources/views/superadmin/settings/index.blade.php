@@ -424,7 +424,7 @@
                         <div class="divider-label">Permit Numbering</div>
                         <div class="field-row cols-3">
                             <div class="field-group"><label class="field-label">Permit Prefix</label><input type="text" name="permit_prefix" class="form-control" value="{{ $settings['permit_prefix'] ?? 'BP' }}"><span class="field-hint">e.g. BP-2026-00001</span></div>
-                            <div class="field-group"><label class="field-label">Permit Expiry (Years)</label><select name="permit_expiry_years" class="form-control">@foreach([1,2,3,5] as $yr)<option value="{{ $yr }}" {{ ($settings['permit_expiry_years'] ?? 1) == $yr ? 'selected' : '' }}>{{ $yr }} Year{{ $yr>1?'s':'' }}</option>@endforeach</select></div>
+                            <div class="field-group"><label class="field-label">Permit Expiry (Years)</label><select name="permit_expiry_years" class="form-control">@foreach(range(1,10) as $yr)<option value="{{ $yr }}" {{ ($settings['permit_expiry_years'] ?? 5) == $yr ? 'selected' : '' }}>{{ $yr }} Year{{ $yr>1?'s':'' }}</option>@endforeach</select></div>
                             <div class="field-group"><label class="field-label">Expiry Warning (Days)</label><input type="number" name="expiry_warning_days" class="form-control" min="7" max="90" value="{{ $settings['expiry_warning_days'] ?? 30 }}"><span class="field-hint">Show "Expiring Soon" badge</span></div>
                         </div>
                         <div class="divider-label">Display</div>

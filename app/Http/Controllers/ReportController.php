@@ -8,6 +8,16 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
+    private function loadSettings(): array
+    {
+        $path = storage_path('app/settings.json');
+        if (! file_exists($path)) {
+            return [];
+        }
+
+        return json_decode(file_get_contents($path), true) ?? [];
+    }
+
     public function index()
     {
         $year  = now()->year;
@@ -50,14 +60,26 @@ class ReportController extends Controller
         $busiestCount = $maxVal;
 
         $feeCounts = BurialPermit::selectRaw('permit_type, COUNT(*) as total')
+            ->whereIn('status', ['active', 'expiring', 'expired'])
             ->groupBy('permit_type')
             ->pluck('total', 'permit_type')
             ->toArray();
 
-        $feeAmounts = ['cemented'=>1000,'niche_1st'=>8000,'niche_2nd'=>6600,'niche_3rd'=>5700,'niche_4th'=>5300,'bone_niches'=>5000];
+        $settings = $this->loadSettings();
+        $fees = $settings['fees'] ?? [
+            'cemented' => ['tomb'=>910, 'permit'=>20, 'maint'=>50, 'app'=>20],
+            'niche_1st' => ['tomb'=>7960, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'niche_2nd' => ['tomb'=>6560, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'niche_3rd' => ['tomb'=>5660, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'niche_4th' => ['tomb'=>5260, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'bone_niches' => ['bone_niches'=>4960, 'permit'=>20, 'maint'=>0, 'app'=>20]
+        ];
+
         $estimatedRevenue = 0;
         foreach ($feeCounts as $type => $count) {
-            $estimatedRevenue += $count * ($feeAmounts[$type] ?? 0);
+            $f = $fees[$type] ?? ($fees['cemented'] ?? []);
+            $totalFee = ($f['tomb']??0) + ($f['permit']??0) + ($f['maint']??0) + ($f['app']??0);
+            $estimatedRevenue += $count * $totalFee;
         }
 
         $recentPermits  = BurialPermit::with('deceased')->latest()->limit(10)->get();
@@ -118,14 +140,26 @@ class ReportController extends Controller
         $busiestCount = $maxVal;
 
         $feeCounts = BurialPermit::selectRaw('permit_type, COUNT(*) as total')
+            ->whereIn('status', ['active', 'expiring', 'expired'])
             ->groupBy('permit_type')
             ->pluck('total', 'permit_type')
             ->toArray();
 
-        $feeAmounts = ['cemented'=>1000,'niche_1st'=>8000,'niche_2nd'=>6600,'niche_3rd'=>5700,'niche_4th'=>5300,'bone_niches'=>5000];
+        $settings = $this->loadSettings();
+        $fees = $settings['fees'] ?? [
+            'cemented' => ['tomb'=>910, 'permit'=>20, 'maint'=>50, 'app'=>20],
+            'niche_1st' => ['tomb'=>7960, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'niche_2nd' => ['tomb'=>6560, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'niche_3rd' => ['tomb'=>5660, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'niche_4th' => ['tomb'=>5260, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'bone_niches' => ['bone_niches'=>4960, 'permit'=>20, 'maint'=>0, 'app'=>20]
+        ];
+
         $estimatedRevenue = 0;
         foreach ($feeCounts as $type => $count) {
-            $estimatedRevenue += $count * ($feeAmounts[$type] ?? 0);
+            $f = $fees[$type] ?? ($fees['cemented'] ?? []);
+            $totalFee = ($f['tomb']??0) + ($f['permit']??0) + ($f['maint']??0) + ($f['app']??0);
+            $estimatedRevenue += $count * $totalFee;
         }
 
         $recentPermits = BurialPermit::with('deceased')->latest()->limit(10)->get();
@@ -179,9 +213,27 @@ class ReportController extends Controller
         $busiestCount = $maxVal;
 
         $feeCounts = BurialPermit::selectRaw('permit_type, COUNT(*) as total')
+            ->whereIn('status', ['active', 'expiring', 'expired'])
             ->groupBy('permit_type')
             ->pluck('total', 'permit_type')
             ->toArray();
+
+        $settings = $this->loadSettings();
+        $fees = $settings['fees'] ?? [
+            'cemented' => ['tomb'=>910, 'permit'=>20, 'maint'=>50, 'app'=>20],
+            'niche_1st' => ['tomb'=>7960, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'niche_2nd' => ['tomb'=>6560, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'niche_3rd' => ['tomb'=>5660, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'niche_4th' => ['tomb'=>5260, 'permit'=>20, 'maint'=>0, 'app'=>20],
+            'bone_niches' => ['bone_niches'=>4960, 'permit'=>20, 'maint'=>0, 'app'=>20]
+        ];
+
+        $estimatedRevenue = 0;
+        foreach ($feeCounts as $type => $count) {
+            $f = $fees[$type] ?? ($fees['cemented'] ?? []);
+            $totalFee = ($f['tomb']??0) + ($f['permit']??0) + ($f['maint']??0) + ($f['app']??0);
+            $estimatedRevenue += $count * $totalFee;
+        }
 
         $recentPermits = BurialPermit::with('deceased')->latest()->limit(15)->get();
 
@@ -190,7 +242,7 @@ class ReportController extends Controller
             'expiredPermits', 'totalDeceased',
             'newPermits', 'renewedPermits',
             'monthlyData', 'busiestMonth', 'busiestCount',
-            'feeCounts', 'recentPermits', 'year'
+            'feeCounts', 'recentPermits', 'year', 'estimatedRevenue'
         ))->setPaper('a4', 'portrait');
 
         return $pdf->download('LGU-Carmen-Burial-Report-'.now()->format('Y-m-d').'.pdf');

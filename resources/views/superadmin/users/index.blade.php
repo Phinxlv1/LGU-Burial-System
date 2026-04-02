@@ -442,20 +442,20 @@ html.dark .empty-activity { color: #4b5563 !important; }
                 <p>MUNICIPALITY OF CARMEN · DAVAO DEL NORTE · MUNICIPAL CIVIL REGISTRAR · {{ strtoupper(now()->format('F Y')) }}</p>
             </div>
             <div class="hero-actions">
-                <a href="{{ route('reports.index') }}" class="btn-export">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    Reports
+                <a href="{{ route('superadmin.export-excel') }}" class="btn-export">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    Export Excel (Raw Data)
                 </a>
                 <a href="{{ route('superadmin.export') }}" class="btn-export primary">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Export PDF Report
+                    Export Premium PDF
                 </a>
             </div>
         </div>
 
         {{-- STAT CARDS (8) --}}
         <div class="stat-grid">
-            <div class="stat-card fade-up d1">
+            <a href="{{ route('permits.index') }}" class="stat-card fade-up d1" style="text-decoration:none">
                 <div class="stat-top">
                     <div class="stat-icon blue">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -465,9 +465,9 @@ html.dark .empty-activity { color: #4b5563 !important; }
                 <div class="stat-value blue">{{ $totalPermits }}</div>
                 <div class="stat-label">Total Permits</div>
                 <div class="stat-sub">↑ {{ $permitsThisMonth }} this month</div>
-            </div>
+            </a>
 
-            <div class="stat-card fade-up d2">
+            <a href="{{ route('permits.index', ['status' => 'active']) }}" class="stat-card fade-up d2" style="text-decoration:none">
                 <div class="stat-top">
                     <div class="stat-icon green">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
@@ -477,9 +477,9 @@ html.dark .empty-activity { color: #4b5563 !important; }
                 <div class="stat-value green">{{ $activePermits }}</div>
                 <div class="stat-label">Active Permits</div>
                 <div class="stat-sub">Current valid permits</div>
-            </div>
+            </a>
 
-            <div class="stat-card fade-up d3">
+            <a href="{{ route('permits.index', ['status' => 'expiring']) }}" class="stat-card fade-up d3" style="text-decoration:none">
                 <div class="stat-top">
                     <div class="stat-icon amber">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -489,7 +489,7 @@ html.dark .empty-activity { color: #4b5563 !important; }
                 <div class="stat-value amber">{{ $expiringPermits }}</div>
                 <div class="stat-label">Expiring Soon</div>
                 <div class="stat-sub">Expiring within 30 days</div>
-            </div>
+            </a>
 
             <div class="stat-card fade-up d4" style="opacity:0.5; pointer-events:none;">
                 <div class="stat-top">
@@ -503,7 +503,7 @@ html.dark .empty-activity { color: #4b5563 !important; }
                 <div class="stat-sub">Reserved slot</div>
             </div>
 
-            <div class="stat-card fade-up d5">
+            <a href="{{ route('permits.index', ['status' => 'expired']) }}" class="stat-card fade-up d5" style="text-decoration:none">
                 <div class="stat-top">
                     <div class="stat-icon red">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -513,7 +513,7 @@ html.dark .empty-activity { color: #4b5563 !important; }
                 <div class="stat-value red">{{ $expiredPermits }}</div>
                 <div class="stat-label">Expired</div>
                 <div class="stat-sub">Need renewal</div>
-            </div>
+            </a>
 
             <div class="stat-card fade-up d6">
                 <div class="stat-top">
@@ -527,7 +527,7 @@ html.dark .empty-activity { color: #4b5563 !important; }
                 <div class="stat-sub">↑ {{ $deceasedThisMonth }} this month</div>
             </div>
 
-            <div class="stat-card fade-up d7">
+            <a href="{{ route('reports.index') }}" class="stat-card fade-up d7" style="text-decoration:none">
                 <div class="stat-top">
                     <div class="stat-icon rose">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -536,8 +536,8 @@ html.dark .empty-activity { color: #4b5563 !important; }
                 </div>
                 <div class="stat-value rose">{{ $newPermits }}</div>
                 <div class="stat-label">New This Year</div>
-                <div class="stat-sub">{{ now()->year }} permits issued</div>
-            </div>
+                <div class="stat-sub">Detailed in Reports</div>
+            </a>
 
             <div class="stat-card fade-up d8">
                 <div class="stat-top">

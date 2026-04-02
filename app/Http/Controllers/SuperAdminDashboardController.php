@@ -6,6 +6,8 @@ use App\Models\BurialPermit;
 use App\Models\DeceasedPerson;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\DB;
+use App\Exports\BurialPermitExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SuperAdminDashboardController extends Controller
 {
@@ -135,6 +137,11 @@ class SuperAdminDashboardController extends Controller
         return $pdf->download('LGU-Carmen-Burial-Report-' . now()->format('Y-m-d') . '.pdf');
     }
 
+    public function exportExcel()
+    {
+        return Excel::download(new BurialPermitExport, 'LGU-Carmen-Burial-Data-' . now()->format('Y-m-d') . '.xlsx');
+    }
+
     public function activityLog()
     {
         $activity = ActivityLog::with('user')
@@ -178,5 +185,18 @@ class SuperAdminDashboardController extends Controller
             'newPermits',
             'renewedPermits'
         ));
+    }
+
+    public function geomap()
+    {
+        $stats = [
+            'total'    => \App\Models\CemeteryPlot::count(),
+            'occupied' => \App\Models\CemeteryPlot::where('status', 'occupied')->count(),
+            'active'   => \App\Models\BurialPermit::where('status', 'active')->count(),
+            'expiring' => \App\Models\BurialPermit::where('status', 'expiring')->count(),
+            'expired'  => \App\Models\BurialPermit::where('status', 'expired')->count(),
+        ];
+
+        return view('superadmin.geomap', compact('stats'));
     }
 }

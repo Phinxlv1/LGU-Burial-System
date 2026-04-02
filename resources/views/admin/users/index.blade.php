@@ -469,6 +469,8 @@
         html.dark .stat-pill.ok  { background: #052e16 !important; color: #86efac !important; }
         html.dark .stat-pill.bad { background: #450a0a !important; color: #fca5a5 !important; }
 
+        html.dark .stat-value.blue { color: #818cf8 !important; }
+
         html.dark .panel { background: #1e2130 !important; border-color: #2d3148 !important; }
         html.dark .panel-head { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
         html.dark .panel-title { color: #e2e8f0 !important; }
