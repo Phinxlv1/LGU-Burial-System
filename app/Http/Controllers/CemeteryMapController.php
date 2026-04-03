@@ -147,4 +147,86 @@ class CemeteryMapController extends Controller
             'dod' => optional($d->date_of_death)->format('M d, Y'),
         ]));
     }
+
+    /**
+     * Search burial permits by name
+     */
+    public function searchPermits(Request $request)
+    {
+        $q = $request->get('q', '');
+        $unassignedOnly = $request->has('unassigned');
+
+        // Allow 1 character search. If empty and unassigned requested, show initial list.
+        if (empty($q) && !$unassignedOnly) {
+            return response()->json([]);
+        }
+
+        $query = \App\Models\BurialPermit::with(['deceased']);
+
+        if (!empty($q)) {
+            $query->whereHas('deceased', function ($query) use ($q) {
+                $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$q}%"])
+                      ->orWhereRaw("CONCAT(last_name, ', ', first_name) LIKE ?", ["%{$q}%"])
+                      ->orWhere('first_name', 'like', "%{$q}%")
+                      ->orWhere('last_name', 'like', "%{$q}%");
+            });
+        }
+
+        $permits = $query->latest()->limit(50)->get();
+
+        $nicheAssignedIds = [];
+        if ($unassignedOnly) {
+            // Get all deceased_ids currently assigned in any Niche Grid
+            $nicheAssignedIds = collect(\App\Models\CemeteryGrid::pluck('cells'))
+                ->flatMap(function($cells) {
+                    return collect($cells ?? [])->pluck('deceased_id');
+                })
+                ->filter()
+                ->unique()
+                ->toArray();
+        }
+
+        $results = $permits->map(function ($permit) {
+            // Check legacy plot first
+            $plot = \App\Models\CemeteryPlot::where('deceased_id', $permit->deceased_id)->first();
+            
+            // NEW: Check Niche Grids
+            $gridMatch = null;
+            $allGrids = \App\Models\CemeteryGrid::all();
+            foreach ($allGrids as $grid) {
+                if ($grid->cells && (is_array($grid->cells) || is_object($grid->cells))) {
+                    foreach ($grid->cells as $cell) {
+                        if (isset($cell['deceased_id']) && $cell['deceased_id'] == $permit->deceased_id) {
+                            $gridMatch = $grid;
+                            break 2;
+                        }
+                    }
+                }
+            }
+
+            return [
+                'id' => $permit->id,
+                'permit_id' => $permit->id,
+                'plot_code' => ($plot && $plot->plot_code) ? $plot->plot_code : ($gridMatch ? $gridMatch->name : 'Unassigned'),
+                'deceased_name' => $permit->deceased ? $permit->deceased->first_name . ' ' . $permit->deceased->last_name : $permit->deceased_name,
+                'permit_status' => $permit->status,
+                'permit_number' => $permit->permit_number,
+                'deceased_id' => $permit->deceased_id,
+                'has_plot' => ($plot || $gridMatch) ? true : false,
+                'grid_id' => $gridMatch ? $gridMatch->id : null,
+                'latitude' => $gridMatch ? $gridMatch->latitude : ($plot ? (float)$plot->latitude : null),
+                'longitude' => $gridMatch ? $gridMatch->longitude : ($plot ? (float)$plot->longitude : null),
+            ];
+        });
+
+        if ($unassignedOnly) {
+            $results = $results->filter(function($res) use ($nicheAssignedIds) {
+                if ($res['has_plot']) return false;
+                if (in_array($res['deceased_id'], $nicheAssignedIds)) return false;
+                return true;
+            });
+        }
+
+        return response()->json($results->values()->take(15));
+    }
 }

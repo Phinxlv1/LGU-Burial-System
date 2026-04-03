@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Map } from 'maplibre-gl'
+// Using any for the Map object to resolve IDE typing conflicts
 
 export interface GridSection {
   id: string
@@ -8,7 +8,7 @@ export interface GridSection {
   cols: number
   labelFormat: string
   color: string
-  cells: Record<string, { status: string; label?: string; notes?: string }>
+  cells: Record<string, { status: string; label?: string; notes?: string; deceased_id?: number | null; deceased_name?: string | null; permit_number?: string | null; permit_status?: string | null }>
   // Line endpoints (primary representation)
   lineStart?: { lat: number; lng: number }
   lineEnd?:   { lat: number; lng: number }
@@ -27,8 +27,8 @@ export interface PendingGrid {
 }
 
 interface MapState {
-  map: Map | null
-  setMap: (map: Map | null) => void
+  map: any | null
+  setMap: (map: any | null) => void
   isLoaded: boolean
   setIsLoaded: (isLoaded: boolean) => void
   zoom: number
@@ -55,8 +55,10 @@ interface MapState {
   // Interaction State
   hoveredGridId: string | null
   selectedGridId: string | null
+  selectedFeature: any | null
   setHoveredGridId: (id: string | null) => void
   setSelectedGridId: (id: string | null) => void
+  setSelectedFeature: (feature: any | null) => void
 
   // Niche Grid Overlay State
   gridOverlays: GridSection[]
@@ -66,12 +68,12 @@ interface MapState {
   addGridSection: (section: GridSection) => Promise<void>
   removeGridSection: (id: string) => Promise<void>
   updateGridStatus: (secId: string, key: string, status: string) => void
-  updateGridCell: (secId: string, key: string, data: { label?: string; status?: string; notes?: string }) => void
+  updateGridCell: (secId: string, key: string, data: { label?: string; status?: string; notes?: string; deceased_id?: number | null; deceased_name?: string | null; permit_number?: string | null; permit_status?: string | null }) => void
 }
 
 export const useMapStore = create<MapState>((set, get) => ({
   map: null,
-  setMap: (map) => set({ map }),
+  setMap: (map: any | null) => set({ map }),
   isLoaded: false,
   setIsLoaded: (isLoaded) => set({ isLoaded }),
   zoom: 19,
@@ -93,8 +95,10 @@ export const useMapStore = create<MapState>((set, get) => ({
 
   hoveredGridId: null,
   selectedGridId: null,
+  selectedFeature: null,
   setHoveredGridId: (id) => set({ hoveredGridId: id }),
   setSelectedGridId: (id) => set({ selectedGridId: id }),
+  setSelectedFeature: (feature) => set({ selectedFeature: feature }),
 
   gridOverlays: [],
   isGridConfigOpen: false,

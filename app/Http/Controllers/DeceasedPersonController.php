@@ -23,6 +23,38 @@ class DeceasedPersonController extends Controller
         return view('deceased.show', compact('deceased'));
     }
 
+    public function infoJson(DeceasedPerson $deceased)
+    {
+        $deceased->load('permits');
+
+        $permit = $deceased->permits->first();
+
+        return response()->json([
+            'id'             => $deceased->id,
+            'full_name'      => trim("{$deceased->first_name} {$deceased->middle_name} {$deceased->last_name}" . ($deceased->name_extension ? ", {$deceased->name_extension}" : '')),
+            'sex'            => $deceased->sex,
+            'age'            => $deceased->age,
+            'civil_status'   => $deceased->civil_status,
+            'nationality'    => $deceased->nationality,
+            'religion'       => $deceased->religion,
+            'address'        => $deceased->address,
+            'date_of_death'  => optional($deceased->date_of_death)->format('M d, Y'),
+            'date_of_birth'  => optional($deceased->date_of_birth)->format('M d, Y'),
+            'place_of_death' => $deceased->place_of_death,
+            'cause_of_death' => $deceased->cause_of_death,
+            'kind_of_burial' => $deceased->kind_of_burial,
+            'phone_number'   => $deceased->phone_number,
+            'permit'         => $permit ? [
+                'permit_number'   => $permit->permit_number,
+                'status'          => $permit->status,
+                'permit_type'     => $permit->permit_type,
+                'applicant_name'  => $permit->applicant_name,
+                'expiry_date'     => optional($permit->expiry_date)->format('M d, Y'),
+                'or_number'       => $permit->or_number,
+            ] : null,
+        ]);
+    }
+
     public function update(Request $request, DeceasedPerson $deceased)
     {
         $request->validate([

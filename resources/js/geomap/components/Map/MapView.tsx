@@ -6,12 +6,12 @@ import { useMapStore } from '../../store/useMapStore'
 export const MapView = () => {
   const mapContainer = useRef<HTMLDivElement>(null)
   const { setMap, setIsLoaded, setZoom, setCenter, mapStyle } = useMapStore()
-  const mapRef = useRef<maplibregl.Map | null>(null)
+  const mapRef = useRef<any>(null)
 
   useEffect(() => {
     if (!mapContainer.current) return
 
-    const map = new maplibregl.Map({
+    const map = new (maplibregl as any).Map({
       container: mapContainer.current,
       style: 'https://tiles.openfreemap.org/styles/liberty', 
       center: [125.714882, 7.370672],

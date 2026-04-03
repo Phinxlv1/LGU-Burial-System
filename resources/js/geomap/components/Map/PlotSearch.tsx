@@ -27,30 +27,19 @@ export const PlotSearch: React.FC<PlotSearchProps> = ({ onSelect, pointsData }) 
       return
     }
 
-    const q = query.toLowerCase()
-    const found: SearchResult[] = []
+    const q = query.trim()
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/cemetery/search-permits?q=${encodeURIComponent(q)}`)
+        const data = await res.json()
+        setResults(data)
+      } catch (err) {
+        console.error('Failed to search permits', err)
+      }
+    }, 300)
 
-    if (pointsData?.features) {
-      pointsData.features.forEach((f: any) => {
-        const p = f.properties
-        const name = (p.deceased_name || '').toLowerCase()
-        const code = (p.plot_code || '').toLowerCase()
-
-        if (name.includes(q) || code.includes(q)) {
-          found.push({
-            id: p.id,
-            plot_code: p.plot_code,
-            deceased_name: p.deceased_name,
-            permit_status: p.permit_status,
-            latitude: f.geometry.coordinates[1],
-            longitude: f.geometry.coordinates[0]
-          })
-        }
-      })
-    }
-
-    setResults(found.slice(0, 8))
-  }, [query, pointsData])
+    return () => clearTimeout(timer)
+  }, [query])
 
   const handleSelect = (res: SearchResult) => {
     onSelect(res)
@@ -81,7 +70,7 @@ export const PlotSearch: React.FC<PlotSearchProps> = ({ onSelect, pointsData }) 
             setIsOpen(true)
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Search Deceased or Plot..."
+          placeholder="Search by Deceased Name..."
           style={{
             background: 'none',
             border: 'none',

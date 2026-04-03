@@ -68,6 +68,9 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/cemetery/plots/{plot}',  [CemeteryMapController::class, 'update'])->name('cemetery.update');
         Route::delete('/cemetery/plots/{plot}', [CemeteryMapController::class, 'destroy'])->name('cemetery.destroy');
         Route::get('/cemetery/search-deceased', [CemeteryMapController::class, 'searchDeceased'])->name('cemetery.search-deceased');
+        Route::get('/cemetery/search-permits',  [CemeteryMapController::class, 'searchPermits'])->name('cemetery.search-permits');
+        Route::get('/cemetery/deceased/{deceased}/info', [DeceasedPersonController::class, 'infoJson'])->name('cemetery.deceased.info');
+
 
         // Import
         Route::get('/import/excel',        [ImportController::class, 'showImport'])->name('import.show');

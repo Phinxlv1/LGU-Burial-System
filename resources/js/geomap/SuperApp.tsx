@@ -335,10 +335,11 @@ function SuperApp() {
     map.getCanvas().style.cursor = editMode === 'create-grid' ? 'crosshair' : ''
   }, [map, editMode])
 
-  // ─── Fly-to from search ────────────────────────────────────────────────────────
   const handleFlyTo = (res: any) => {
     if (!map) return
-    map.flyTo({ center: [res.longitude, res.latitude], zoom: 20, speed: 1.2, essential: true })
+    if (res.longitude && res.latitude) {
+      map.flyTo({ center: [res.longitude, res.latitude], zoom: 20, speed: 1.2, essential: true })
+    }
     setSelectedFeature({ ...res })
   }
 
