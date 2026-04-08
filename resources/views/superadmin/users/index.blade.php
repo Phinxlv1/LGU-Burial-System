@@ -44,7 +44,7 @@
             scrollbar-gutter: stable;
         }
 
-        .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--surface-2); }   
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--surface-2); }   
         /* ── TOPBAR ── */
         .topbar {
             background: var(--surface);

@@ -269,19 +269,22 @@ body::after {
 <body>
 
     <div class="top-bar">
-       <img src="{{ asset('images/carmen-seal.png') }}" alt="Municipality of Carmen Seal" class="gov-seal" style="border-radius:50%;object-fit:cover;">
-            <circle cx="24" cy="24" r="22" stroke="#1a2744" stroke-width="1.5"/>
-            <circle cx="24" cy="24" r="15" stroke="#1a2744" stroke-width="1"/>
-            <circle cx="24" cy="24" r="4" fill="#1a2744"/>
-            <line x1="24" y1="9" x2="24" y2="15" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="24" y1="33" x2="24" y2="39" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="9"  y1="24" x2="15" y2="24" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="33" y1="24" x2="39" y2="24" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="13" y1="13" x2="17.5" y2="17.5" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
-            <line x1="30.5" y1="30.5" x2="35" y2="35" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
-            <line x1="35" y1="13" x2="30.5" y2="17.5" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
-            <line x1="17.5" y1="30.5" x2="13" y2="35" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
+        <div style="position: relative; width: 46px; height: 46px; flex-shrink: 0;">
+            <img src="{{ asset('images/carmen-seal.png') }}" alt="Municipality of Carmen Seal" class="gov-seal" style="border-radius:50%;object-fit:cover; position: absolute; inset: 0;">
+            <svg width="46" height="46" viewBox="0 0 48 48" fill="none" style="position: absolute; inset: 0;">
+                <circle cx="24" cy="24" r="22" stroke="#1a2744" stroke-width="1.5"/>
+                <circle cx="24" cy="24" r="15" stroke="#1a2744" stroke-width="1"/>
+                <circle cx="24" cy="24" r="4" fill="#1a2744"/>
+                <line x1="24" y1="9" x2="24" y2="15" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="24" y1="33" x2="24" y2="39" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="9"  y1="24" x2="15" y2="24" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="33" y1="24" x2="39" y2="24" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="13" y1="13" x2="17.5" y2="17.5" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="30.5" y1="30.5" x2="35" y2="35" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="35" y1="13" x2="30.5" y2="17.5" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="17.5" y1="30.5" x2="13" y2="35" stroke="#1a2744" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
         <div class="gov-text">
             <h1>Municipality of Carmen — Civil Registrar</h1>
             <p>Republic of the Philippines &nbsp;·&nbsp; Burial Permit Processing System</p>
@@ -389,11 +392,42 @@ body::after {
                 : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
         }
 
-        document.getElementById('loginForm').addEventListener('submit', function () {
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            document.getElementById('spinner').style.display = 'block';
-            document.getElementById('btnText').textContent = 'Signing in...';
+        document.addEventListener('DOMContentLoaded', function () {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const rememberCheckbox = document.getElementById('remember');
+            const loginForm = document.getElementById('loginForm');
+
+            // 1. Auto-populate from localStorage on load
+            const savedEmail = localStorage.getItem('r_email');
+            const savedPassword = localStorage.getItem('r_password');
+
+            if (savedEmail) {
+                emailInput.value = savedEmail;
+            }
+            if (savedPassword) {
+                passwordInput.value = savedPassword;
+                rememberCheckbox.checked = true;
+            }
+
+            // 2. Form submission handler
+            loginForm.addEventListener('submit', function () {
+                // Save the email regardless of checkbox
+                localStorage.setItem('r_email', emailInput.value);
+
+                // Conditionally save password
+                if (rememberCheckbox.checked) {
+                    localStorage.setItem('r_password', passwordInput.value);
+                } else {
+                    localStorage.removeItem('r_password');
+                }
+
+                // Show spinner
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                document.getElementById('spinner').style.display = 'block';
+                document.getElementById('btnText').textContent = 'Signing in...';
+            });
         });
     </script>
 </body>

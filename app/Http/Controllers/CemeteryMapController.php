@@ -161,18 +161,30 @@ class CemeteryMapController extends Controller
             return response()->json([]);
         }
 
-        $query = \App\Models\BurialPermit::with(['deceased']);
+        $q = $request->query('q');
+        $unassignedOnly = $request->has('unassigned_only');
 
-        if (!empty($q)) {
-            $query->whereHas('deceased', function ($query) use ($q) {
-                $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$q}%"])
-                      ->orWhereRaw("CONCAT(last_name, ', ', first_name) LIKE ?", ["%{$q}%"])
-                      ->orWhere('first_name', 'like', "%{$q}%")
-                      ->orWhere('last_name', 'like', "%{$q}%");
+        $query = \App\Models\BurialPermit::query();
+
+        if ($q) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('permit_number', 'like', "{$q}%")
+                      ->orWhereHas('deceased', function ($q1) use ($q) {
+                          $q1->whereRaw("CONCAT(first_name, ' ', last_name) like ?", ["{$q}%"])
+                             ->orWhere('first_name', 'like', "{$q}%")
+                             ->orWhere('last_name', 'like', "{$q}%");
+                      });
             });
         }
 
-        $permits = $query->latest()->limit(50)->get();
+        // Eager load deceased reference
+        $permits = $query->with('deceased')->latest()->limit(50)->get();
+
+        // Pre-fetch plots to avoid N+1 inside map()
+        $deceasedIds = $permits->pluck('deceased_id')->filter()->unique()->toArray();
+        $plotsMap = \App\Models\CemeteryPlot::whereIn('deceased_id', $deceasedIds)
+                    ->get()
+                    ->keyBy('deceased_id');
 
         $nicheAssignedIds = [];
         if ($unassignedOnly) {
@@ -186,13 +198,15 @@ class CemeteryMapController extends Controller
                 ->toArray();
         }
 
-        $results = $permits->map(function ($permit) {
-            // Check legacy plot first
-            $plot = \App\Models\CemeteryPlot::where('deceased_id', $permit->deceased_id)->first();
+        // Cache all grids to avoid fetching them inside the loop
+        $allGrids = \App\Models\CemeteryGrid::all();
+
+        $results = $permits->map(function ($permit) use ($allGrids, $plotsMap) {
+            // Check pre-fetched plot map
+            $plot = $plotsMap->get($permit->deceased_id);
             
-            // NEW: Check Niche Grids
+            // Check Niche Grids
             $gridMatch = null;
-            $allGrids = \App\Models\CemeteryGrid::all();
             foreach ($allGrids as $grid) {
                 if ($grid->cells && (is_array($grid->cells) || is_object($grid->cells))) {
                     foreach ($grid->cells as $cell) {

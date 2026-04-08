@@ -289,25 +289,23 @@ html.dark .em-body::-webkit-scrollbar-thumb:hover { background: #374151; }
 
 <div class="main">
     <div class="topbar">
-        <div style="display:flex;align-items:center;gap:.6rem">
+        <div class="topbar-left">
             <a href="{{ route('permits.index') }}" class="topbar-back">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                 Permits
             </a>
             <span class="topbar-sep">/</span>
-            <span class="topbar-title">{{ $permit->permit_number }}</span>
+            <div class="topbar-title">{{ $permit->permit_number }}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:.5rem">
+        <div class="topbar-right">
             <span class="role-pill">Admin</span>
-            <button type="button" onclick="openEditModal()"
-                style="display:inline-flex;align-items:center;gap:5px;padding:.35rem .85rem;background:#fff;color:#1a2744;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;"
-                onmouseover="this.style.transform='scale(1.06)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.1)'"
-                onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none'">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1a2744" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <button type="button" class="btn btn-secondary" onclick="openEditModal()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 Edit
             </button>
         </div>
     </div>
+
 
     <div class="content">
 
@@ -396,6 +394,9 @@ html.dark .em-body::-webkit-scrollbar-thumb:hover { background: #374151; }
                     <span class="info-card-title">Deceased</span>
                 </div>
                 <div class="info-card-body">
+                    @php
+                        $assigned = optional($permit->deceased)->getAssignedLocation();
+                    @endphp
                     <div class="field">
                         <div class="fl">Full Name</div>
                         <div class="fv-lg">{{ optional($permit->deceased)->first_name }} {{ optional($permit->deceased)->last_name }}</div>
@@ -418,6 +419,54 @@ html.dark .em-body::-webkit-scrollbar-thumb:hover { background: #374151; }
                                 <div class="fv">{{ optional($permit->deceased)->address ?: '—' }}</div>
                             </div>
                         </div>
+                    </div>
+
+                    {{-- Map Assignment Button --}}
+                    <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed var(--border-2);">
+                        @if($assigned)
+                            <a href="{{ route('cemetery.map') }}?search={{ urlencode($permit->permit_number) }}"
+                               id="view-on-map-btn"
+                               style="
+                                   display: flex; align-items: center; justify-content: center; gap: 8px;
+                                   width: 100%; box-sizing: border-box;
+                                   padding: 0.8rem 1rem;
+                                   background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+                                   color: #fff;
+                                   border: none;
+                                   border-radius: 12px;
+                                   font-family: 'DM Sans', sans-serif;
+                                   font-size: 13px;
+                                   font-weight: 700;
+                                   letter-spacing: 0.02em;
+                                   text-decoration: none;
+                                   cursor: pointer;
+                                   box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35), 0 1px 3px rgba(0,0,0,0.12);
+                                   transition: transform .15s ease, box-shadow .15s ease;
+                               "
+                               onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(37,99,235,0.45), 0 1px 3px rgba(0,0,0,0.12)'"
+                               onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(37,99,235,0.35), 0 1px 3px rgba(0,0,0,0.12)'"
+                            >
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <span>View on Map</span>
+                                <span style="opacity:0.7; font-size:11px; font-family:'DM Mono',monospace; margin-left: 2px;">— {{ $assigned['label'] }}</span>
+                            </a>
+                        @else
+                            <div style="
+                                display: flex; align-items: center; justify-content: center; gap: 8px;
+                                width: 100%; box-sizing: border-box;
+                                padding: 0.75rem 1rem;
+                                border-radius: 12px;
+                                border: 1.5px dashed var(--border);
+                                color: var(--text-3);
+                                font-size: 12px;
+                                font-weight: 600;
+                                font-family: 'DM Sans', sans-serif;
+                                background: var(--surface-2);
+                            ">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                Not Assigned to Cemetery Map
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

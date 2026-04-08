@@ -12,7 +12,7 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
-        .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+        .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
         .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
         .topbar-title { font-size: 15px; font-weight: 600; color: #111827; }
         .topbar-date  { font-size: 12px; color: #9ca3af; }
@@ -131,7 +131,7 @@
         .empty-opt.sel { border-color: #9ca3af; }
 
         /* Toast */
-        .toast { position: fixed; bottom: 1.5rem; left: calc(220px + 1.5rem); z-index: 9999; background: #1a2744; color: #fff; font-size: 13px; font-weight: 500; padding: .7rem 1.1rem; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,.25); transform: translateY(20px); opacity: 0; transition: all .3s; pointer-events: none; }
+        .toast { position: fixed; bottom: 1.5rem; left: calc(var(--sb-width, 220px) + 1.5rem); z-index: 9999; background: #1a2744; color: #fff; font-size: 13px; font-weight: 500; padding: .7rem 1.1rem; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,.25); transform: translateY(20px); opacity: 0; transition: all .3s; pointer-events: none; }
         .toast.show { transform: translateY(0); opacity: 1; }
 
         /* ── DARK MODE ── */

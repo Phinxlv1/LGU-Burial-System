@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { MapView } from './components/Map/MapView'
 import { NicheGrid } from './components/Map/NicheGrid'
 import { PlotSearch } from './components/Map/PlotSearch'
@@ -34,6 +34,7 @@ function App() {
   } = useMapStore()
 
   const [pointsData, setPointsData] = useState<any>(null)
+  const urlSearchHandledRef = useRef(false)
 
   // Real-time Data Sync
   useEffect(() => {
@@ -179,6 +180,34 @@ function App() {
     ])
   }, [map, isLoaded, hoveredGridId, selectedGridId])
 
+  // ─── URL Search Trigger ────────────────────────────────────────────────────────
+  // Fires on initial load, AND again whenever grids arrive (retry logic)
+  useEffect(() => {
+    if (!isLoaded || !map) return
+    const params = new URLSearchParams(window.location.search)
+    const q = params.get('search')
+    if (!q) return
+
+    // If grids are already there, handle immediately; otherwise wait for them
+    const hasGrids = gridOverlays.length > 0
+    if (!hasGrids) return // Will re-run when gridOverlays changes
+
+    if (urlSearchHandledRef.current) return // Don't re-run if already handled
+    urlSearchHandledRef.current = true
+
+    const fetchAndFly = async () => {
+      try {
+        const res = await fetch(`/cemetery/search-permits?q=${encodeURIComponent(q)}`)
+        const results = await res.json()
+        if (results && results.length > 0) {
+          handleFlyTo(results[0])
+        }
+      } catch (err) { /* silent */ }
+    }
+    // Small delay to ensure map has settled after grid load
+    setTimeout(fetchAndFly, 600)
+  }, [isLoaded, map, gridOverlays])
+
   // ─── Fly-to from search ────────────────────────────────────────────────────────
   const handleFlyTo = (res: any) => {
     if (!map) return
@@ -216,10 +245,41 @@ function App() {
         </div>
       </div>
 
-      {/* 🔍 ZOOM CONTROLS (TUCKED AWAY) */}
-      <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <button onClick={() => map?.zoomIn()} style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '12px', borderRadius: '12px', cursor: 'pointer' }}><ZoomIn size={18} /></button>
-        <button onClick={() => map?.zoomOut()} style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '12px', borderRadius: '12px', cursor: 'pointer' }}><ZoomOut size={18} /></button>
+
+      {/* 🔍 MAP CONTROLS (STYLE + ZOOM) */}
+      <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000, display: 'flex', alignItems: 'flex-end', gap: '12px' }}>
+        {/* Map Style Toggle */}
+        <div style={{ ...island, display: 'flex', gap: '8px', padding: '8px 12px' }}>
+          {(['vector', 'satellite'] as const).map(s => {
+            const currentStyle = useMapStore(state => state.mapStyle)
+            return (
+              <button
+                key={s}
+                onClick={() => useMapStore.getState().setMapStyle(s)}
+                style={{
+                  background: currentStyle === s ? '#3b82f6' : 'rgba(255,255,255,0.05)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  minWidth: '80px'
+                }}
+              >
+                {s === 'vector' ? 'Roads' : 'Satellite'}
+              </button>
+            )
+          })}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <button onClick={() => useMapStore.getState().map?.zoomIn()} style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '12px', borderRadius: '12px', cursor: 'pointer', display: 'flex' }}><ZoomIn size={18} /></button>
+          <button onClick={() => useMapStore.getState().map?.zoomOut()} style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '12px', borderRadius: '12px', cursor: 'pointer', display: 'flex' }}><ZoomOut size={18} /></button>
+        </div>
       </div>
 
       {/* 🪟 NICHE GRID LAYER (Z-10) */}

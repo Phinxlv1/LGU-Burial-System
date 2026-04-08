@@ -6,6 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>High-Performance Cemetery Map — LGU Burial System</title>
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <!-- React & MapLibre Native Integration -->
     @viteReactRefresh
     @vite(['resources/js/geomap/main.tsx'])
@@ -14,12 +17,14 @@
         body, html { 
             margin: 0; padding: 0; height: 100%; width: 100%; 
             overflow: hidden; background: #0f172a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
     #geomap-root { width: 100%; height: 100vh; display: flex; flex-direction: column; }
         
         /* ── Sidebar Adjustment (Since we're inside the layout) ── */
         .main-wrapper { display: flex; height: 100vh; overflow: hidden; }
-        .map-content { flex: 1; position: relative; margin-left: 220px; }
+        .map-content { flex: 1; position: relative; margin-left: var(--sb-width, 220px); transition: margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body>

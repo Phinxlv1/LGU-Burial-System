@@ -22,7 +22,7 @@ export const PlotSearch: React.FC<PlotSearchProps> = ({ onSelect, pointsData }) 
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (query.trim().length < 2) {
+    if (query.trim().length < 1) {
       setResults([])
       return
     }
@@ -40,6 +40,27 @@ export const PlotSearch: React.FC<PlotSearchProps> = ({ onSelect, pointsData }) 
 
     return () => clearTimeout(timer)
   }, [query])
+
+  useEffect(() => {
+    // Auto-focus on mount
+    inputRef.current?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+        const activeEl = document.activeElement;
+        const isInput = activeEl instanceof HTMLInputElement || activeEl instanceof HTMLTextAreaElement;
+        
+        // Only override if not already in an input
+        if (!isInput && !e.shiftKey && !e.altKey) {
+          e.preventDefault();
+          inputRef.current?.focus();
+          inputRef.current?.select();
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSelect = (res: SearchResult) => {
     onSelect(res)

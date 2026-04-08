@@ -7,7 +7,8 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Burial Permits — LGU Carmen</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
 
         .permit-row td .actions-cell a,
@@ -31,21 +32,32 @@
         html.dark tr.row-expiring td { background: #2a1f00 !important; border-top-color: #854d0e !important; }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
-        .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
-        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
-        .topbar-title { font-size: 15px; font-weight: 600; color: #111827; }
-        .topbar-date { font-size: 12px; color: #9ca3af; }
-        .role-tag { background: #1a2744; color: #fff; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: .04em; text-transform: uppercase; }
-        .content { padding: 1.5rem; }
-        .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-        .panel-header { padding: .85rem 1.25rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; }
-        .panel-header h3 { font-size: 13px; font-weight: 600; color: #111827; }
+        body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.75rem; position: sticky; top: 0; z-index: 40; }
+        .topbar-title { font-size: 15px; font-weight: 600; color: #0f172a; letter-spacing: -.01em; }
+        .topbar-date { font-size: 11px; color: #94a3b8; font-weight: 400; }
+        .role-tag { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 20px; letter-spacing: .06em; text-transform: uppercase; }
+        .content { padding: 1.75rem; }
+        .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; min-width: min-content; }
+        .panel-header { position: relative; padding: .9rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; } /* removed space-between so search bar can break flow */
+        .panel-header h3 { font-size: 13px; font-weight: 600; color: #0f172a; letter-spacing: -.01em; }
 
-        .empty-row td { text-align: center; color: var(--text-3); padding: 2.5rem; font-size: 13px; }
+        /* ── Search Bar ── */
+        .search-group { position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); display: flex; align-items: center; width: 320px; max-width: 100%; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; transition: color .2s; display: flex; align-items: center; }
+        .search-input { flex: 1 !important; width: 100% !important; font-family: 'DM Sans', sans-serif !important; font-size: 13px !important; color: #0f172a !important; padding: .55rem 1rem .55rem 2.5rem !important; background: #f8fafc !important; border: 1.5px solid #e2e8f0 !important; border-radius: 10px !important; outline: none !important; transition: all .2s cubic-bezier(.4,0,.2,1) !important; }
+        .search-input::placeholder { color: #94a3b8; opacity: .7; }
+        .search-input:hover { border-color: #cbd5e1; background: #ffffff; }
+        .search-input:focus { background: #ffffff !important; border-color: #3b82f6 !important; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12) !important; }
+        .search-group:focus-within .search-icon { color: #3b82f6; }
+
+
+        .empty-row td { text-align: center; color: #94a3b8; padding: 2.5rem; font-size: 13px; font-family: 'DM Mono', monospace; }
+
 
         /* ── Scrollable table ── */
-        .table-scroll { max-height: 75vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d1d5db transparent; }
+        .table-scroll { max-height: 75vh; overflow-x: auto; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d1d5db transparent; }
         .table-scroll::-webkit-scrollbar { width: 6px; }
         .table-scroll::-webkit-scrollbar-track { background: transparent; }
         .table-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
@@ -61,8 +73,9 @@
         table colgroup col:nth-child(6) { width: 145px; }
         table colgroup col:nth-child(7) { width: 185px; }
         td, th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        th { font-size: 11px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; padding: .5rem .75rem; text-align: left; background: #fafafa; }
-        td { font-size: 13px; color: #374151; padding: .65rem .75rem; border-top: 1px solid #f3f4f6; vertical-align: middle; transition: background-color .15s ease; }
+        th { font-size: 10px; font-weight: 500; color: #94a3b8; text-transform: uppercase; letter-spacing: .07em; padding: .5rem 1rem; text-align: left; background: #f8fafc; font-family: 'DM Mono', monospace; }
+        td { font-size: 13px; color: #475569; padding: .7rem 1rem; border-top: 1px solid #f1f5f9; vertical-align: middle; transition: background-color .15s ease; }
+
 
         tr.row-expired td { background: #fff5f5; border-top-color: #fecaca; }
         tr.row-expired td:first-child { border-left: 3px solid #ef4444; }
@@ -74,8 +87,9 @@
         .badge-red    { background: #fee2e2; color: #991b1b; }
         .permit-no { font-weight: 600; color: #1a2744; font-size: 12px; }
 
-        .btn-action { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 5px; border: 1px solid #e5e7eb; font-family: 'Inter', sans-serif; font-size: 11px; color: #374151; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; white-space: nowrap; }
-        .btn-action:hover { background: #f9fafb; border-color: #1a2744; color: #1a2744; }
+        .btn-action { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 6px; border: 1px solid #e2e8f0; font-family: 'DM Sans', sans-serif; font-size: 11px; color: #475569; background: #fff; cursor: pointer; text-decoration: none; transition: all .15s; white-space: nowrap; }
+        .btn-action:hover { background: #f8fafc; border-color: #0f1e3d; color: #0f1e3d; }
+
         .btn-renew { background: #fff1f2; border-color: #fca5a5; color: #b91c1c; font-weight: 600; }
         .btn-renew:hover { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
         .btn-print { background: #f0f9ff; border-color: #7dd3fc; color: #0369a1; font-weight: 500; }
@@ -162,6 +176,13 @@
     html.dark .topbar { background: #1a1d27 !important; border-bottom-color: #2d3148 !important; }
     html.dark .topbar-title, html.dark .topbar-sub, html.dark .topbar-date { color: #e2e8f0 !important; }
     html.dark .topbar-date { color: #64748b !important; }
+    
+    html.dark .search-input { background: #1a1d27 !important; border-color: #2d3148 !important; color: #e2e8f0 !important; }
+    html.dark .search-input::placeholder { color: #4b5563 !important; }
+    html.dark .search-input:hover { background: #1f2231 !important; border-color: #374151 !important; }
+    html.dark .search-input:focus { background: #111420 !important; border-color: #6366f1 !important; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15) !important; }
+    html.dark .search-group:focus-within .search-icon { color: #818cf8 !important; }
+
     html.dark .role-tag { background: #6366f1 !important; }
     html.dark .panel, html.dark .card { background: #1e2130 !important; border-color: #2d3148 !important; }
     html.dark .panel-head, html.dark .panel-header { background: #181b29 !important; border-bottom-color: #2d3148 !important; }
@@ -247,7 +268,13 @@
                 <h3>All Burial Permits
                     <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:.5rem">{{ $permits->count() }} records</span>
                 </h3>
-                <input type="text" class="search-input" placeholder="Search by name or permit no…" oninput="filterTable(this.value)">
+                <div class="search-group" style="position: absolute !important; right: 1.25rem !important; top: 50% !important; transform: translateY(-50%) !important;">
+                    <div class="search-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+                    <input type="text" class="search-input" placeholder="Search by name or permit no…" oninput="filterTable(this.value)">
+                </div>
+
             </div>
             <div class="table-scroll">
             <table>
@@ -510,6 +537,12 @@ function handlePrint(e, link, permitNo) {
     link.classList.add('loading');
     setTimeout(() => link.classList.remove('loading'), 2000);
 }
+
+// ── AUTO-FOCUS SEARCH ──
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) searchInput.focus();
+});
 </script>
 
 </body>

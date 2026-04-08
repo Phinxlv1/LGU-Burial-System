@@ -4,37 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports — LGU Carmen</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    @include('admin.partials.design-system')
     <link rel="stylesheet" href="{{ asset('css/sa-sidebar.css') }}">
     <style>
+        /* ── REPORT SPECIFIC OVERRIDES ── */
         :root {
-            --bg:        #f0f2f5;
-            --surface:   #ffffff;
-            --surface2:  #f8fafc;
-            --border:    #e5e7eb;
-            --border2:   #d1d5db;
-            --text:      #111827;
-            --muted:     #6b7280;
-            --subtle:    #9ca3af;
-            --blue:      #2563eb;
-            --blue-bg:   rgba(37,99,235,.07);
-            --blue-bd:   rgba(37,99,235,.18);
-            --green:     #16a34a;
-            --green-bg:  rgba(22,163,74,.07);
-            --green-bd:  rgba(22,163,74,.2);
+            /* Inherit from design-system, add specific multi-color tokens */
             --purple:    #7c3aed;
             --purple-bg: rgba(124,58,237,.07);
             --purple-bd: rgba(124,58,237,.18);
-            --amber:     #d97706;
-            --amber-bg:  rgba(217,119,6,.07);
-            --amber-bd:  rgba(217,119,6,.2);
-            --red:       #dc2626;
-            --red-bg:    rgba(220,38,38,.07);
-            --red-bd:    rgba(220,38,38,.18);
             --teal:      #0d9488;
             --teal-bg:   rgba(13,148,136,.07);
             --teal-bd:   rgba(13,148,136,.18);
         }
+        .dark {
+            --purple:    #bc8cff;
+            --purple-bg: rgba(188,140,255,.1);
+            --purple-bd: rgba(188,140,255,.22);
+            --teal:      #2dd4bf;
+            --teal-bg:   rgba(45,212,191,.1);
+            --teal-bd:   rgba(45,212,191,.2);
+        }
+
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -45,7 +37,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
+        .main { flex: 1; display: flex; flex-direction: column; }
 
         /* ── TOPBAR ── */
         .topbar {
@@ -271,18 +263,19 @@
 
 <div class="main">
     <div class="topbar">
-        <div>
+        <div class="topbar-left">
             <div class="topbar-title">Burial Permit Reports</div>
-            <div class="topbar-meta">Municipality of Carmen &nbsp;·&nbsp; {{ now()->year }} &nbsp;·&nbsp; Generated {{ now()->format('M d, Y g:i A') }} by {{ auth()->user()->name }}</div>
+            <div class="topbar-date">{{ now()->format('M d, Y · g:i A') }}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:.75rem">
+        <div class="topbar-right">
             <span class="role-pill">⚡ Super Admin</span>
-            <a href="{{ route('superadmin.export') }}" class="btn-export">
+            <a href="{{ route('superadmin.export') }}" class="btn btn-primary">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export PDF
             </a>
         </div>
     </div>
+
 
     <div class="content">
 

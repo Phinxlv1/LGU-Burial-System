@@ -16,12 +16,13 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Data Quality — LGU Carmen</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    @include('admin.partials.design-system')
     <style>
+        /* ── DATA QUALITY SPECIFIC OVERRIDES ── */
+        .main { background: var(--bg); color: var(--text); }
+        .topbar { background: var(--surface); border-bottom: 1px solid var(--border); height: 56px; }
+
         *,
         *::before,
         *::after {
@@ -41,7 +42,6 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
 
         /* ── LAYOUT ─────────────────────────────────────────────── */
         .main {
-            margin-left: 220px;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -1086,9 +1086,9 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
                     <div class="topbar-title">Data Quality Scanner</div>
                     <div class="topbar-date">{{ now()->format('l, F d, Y') }}</div>
                 </div>
-            </div>
-            <span class="role-tag">{{ ucfirst(str_replace('_', ' ', auth()->user()->role ?? 'admin')) }}</span>
         </div>
+    </div>
+
 
         {{-- Main Content --}}
         <div class="content">

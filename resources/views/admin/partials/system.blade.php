@@ -29,7 +29,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
  
-.main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
  
 /* ── TOPBAR ── */
 .topbar {

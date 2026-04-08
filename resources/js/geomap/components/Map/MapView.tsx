@@ -18,7 +18,8 @@ export const MapView = () => {
       zoom: 17, // Better default overview
       pitch: 0,
       bearing: 0,
-      antialias: true
+      antialias: true,
+      attributionControl: false
     })
 
     mapRef.current = map
@@ -43,7 +44,10 @@ export const MapView = () => {
         id: 'satellite-layer',
         type: 'raster',
         source: 'google-satellite',
-        paint: { 'raster-opacity': mapStyle === 'satellite' ? 1 : 0 }
+        paint: { 
+          'raster-opacity': mapStyle === 'satellite' ? 1 : 0,
+          'raster-opacity-transition': { duration: 500 }
+        }
       }) 
 
       setIsLoaded(true)

@@ -14,7 +14,7 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'DM Sans', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
-        .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
+        .main { flex: 1; display: flex; flex-direction: column; }
         .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
         .topbar-title { font-size: 15px; font-weight: 600; color: #111827; }
         .topbar-date  { font-size: 12px; color: #9ca3af; }

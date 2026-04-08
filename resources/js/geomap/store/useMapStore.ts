@@ -59,6 +59,8 @@ interface MapState {
   setHoveredGridId: (id: string | null) => void
   setSelectedGridId: (id: string | null) => void
   setSelectedFeature: (feature: any | null) => void
+  filterStatus: 'all' | 'occupied' | 'available'
+  setFilterStatus: (status: 'all' | 'occupied' | 'available') => void
 
   // Niche Grid Overlay State
   gridOverlays: GridSection[]
@@ -99,6 +101,8 @@ export const useMapStore = create<MapState>((set, get) => ({
   setHoveredGridId: (id) => set({ hoveredGridId: id }),
   setSelectedGridId: (id) => set({ selectedGridId: id }),
   setSelectedFeature: (feature) => set({ selectedFeature: feature }),
+  filterStatus: 'all',
+  setFilterStatus: (filterStatus) => set({ filterStatus }),
 
   gridOverlays: [],
   isGridConfigOpen: false,

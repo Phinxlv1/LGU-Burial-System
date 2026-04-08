@@ -302,13 +302,13 @@ class BurialPermitController extends Controller
             'app' => number_format((float) ($rawFees['app'] ?? 0), 2),
             'total' => number_format((float) $totalFee, 2),
         ];
-        $isNew = in_array($permit->status, ['active', 'expiring']);
-        $isRenewal = ($permit->renewal_count ?? 0) > 0;
+        $isNewActual = !($permit->renewal_count > 0);
+        $isRenewalActual = ($permit->renewal_count > 0);
 
-        $permitType = $permit->permit_type ?? '';
-        $isCemented = str_contains($permitType, 'cemented') ? '✓' : ' ';
-        $isNiche = str_contains($permitType, 'niche') ? '✓' : ' ';
-        $isBone = str_contains($permitType, 'bone') ? '✓' : ' ';
+        $permitTypeStr = $permit->permit_type ?? '';
+        $isCemented = str_contains($permitTypeStr, 'cemented') ? '✓' : ' ';
+        $isNiche = str_contains($permitTypeStr, 'niche') ? '✓' : ' ';
+        $isBone = str_contains($permitTypeStr, 'bone') ? '✓' : ' ';
 
         $deceased = $permit->deceased;
         $deceasedName = $deceased ? trim($deceased->first_name . ' ' . $deceased->last_name) : '—';
@@ -319,9 +319,6 @@ class BurialPermitController extends Controller
 
         // Clean up symbols like "=" from strings
         $clean = fn($val) => (trim($val) === '=' || empty($val)) ? '—' : $val;
-
-        $isRenewalActual = ($permit->renewal_count ?? 0) > 0;
-        $isNewActual = !$isRenewalActual;
 
         $replacements = [
             '${renewal_check}' => $isRenewalActual ? '✓' : ' ',
@@ -355,7 +352,6 @@ class BurialPermitController extends Controller
                 ? Carbon::parse($permit->expiry_date)->format('F d, Y')
                 : now()->addYear()->format('F d, Y'),
         ];
-        // Note: Docx styling for red color should be in the template itself.
 
         $tmpDocx = sys_get_temp_dir() . '/permit_' . $permit->id . '_' . time() . '.docx';
         copy($templatePath, $tmpDocx);

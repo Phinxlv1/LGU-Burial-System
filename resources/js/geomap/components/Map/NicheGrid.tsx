@@ -150,7 +150,7 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
   const {
     map, removeGridSection, updateGridCell, updateGridStatus,
     editMode, hoveredGridId, selectedGridId, setSelectedGridId,
-    setSelectedFeature
+    setSelectedFeature, filterStatus
   } = useMapStore()
   const selectedFeature = useMapStore(s => s.selectedFeature)
 
@@ -160,6 +160,8 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
   const [showConfig, setShowConfig]             = useState(false)
   const [isMouseOverPanel, setIsMouseOverPanel] = useState(false)
   const [nicheModal, setNicheModal]             = useState<any | null>(null)
+  const [pulseActive, setPulseActive]           = useState(false)
+  const pulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const isSelected   = selectedGridId === String(section.id)
   const isHovered    = hoveredGridId  === String(section.id)
@@ -185,6 +187,22 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
     map.on('zoom', update)
     return () => { map.off('move', update); map.off('zoom', update) }
   }, [map, section.lineStart, section.lineEnd, section.position])
+
+  // Start pulse timer whenever selectedFeature (fromSearch) changes
+  useEffect(() => {
+    if (selectedFeature?.fromSearch && selectedFeature?.deceased_id) {
+      setPulseActive(true)
+      if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current)
+      pulseTimerRef.current = setTimeout(() => {
+        setPulseActive(false)
+      }, 12000) // auto-stop after 12 seconds
+    } else {
+      setPulseActive(false)
+    }
+    return () => {
+      if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current)
+    }
+  }, [selectedFeature])
 
   const rows = useMemo(() => Array.from({ length: section.rows || 4  }, (_, i) => i + 1), [section.rows])
   const cols = useMemo(() => Array.from({ length: section.cols || 10 }, (_, i) => i + 1), [section.cols])
@@ -275,14 +293,17 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
                                 transition: 'transform 0.1s ease, box-shadow 0.1s ease',
                                 transform: isHov ? 'scale(1.18)' : 'scale(1)',
                                 zIndex: isHov ? 10 : 'auto',
-                                // SEARCH HEARTBEAT: Only pulse during active search (identifiable by fromSearch flag)
-                                animation: (selectedFeature?.fromSearch && selectedFeature?.deceased_id && cell?.deceased_id && String(cell.deceased_id) === String(selectedFeature.deceased_id))
-                                  ? 'heartbeat 0.8s ease-in-out infinite' 
+                                opacity: (filterStatus === 'all' || (filterStatus === 'occupied' && status === 'occupied') || (filterStatus === 'available' && status === 'available')) ? 1 : 0.15,
+                                pointerEvents: (filterStatus === 'all' || (filterStatus === 'occupied' && status === 'occupied') || (filterStatus === 'available' && status === 'available')) ? 'auto' : 'none',
+                                // SEARCH HEARTBEAT: pulse during active search (fromSearch flag + deceased_id match)
+                                animation: (pulseActive && selectedFeature?.deceased_id && cell?.deceased_id && String(cell.deceased_id) === String(selectedFeature.deceased_id))
+                                  ? 'heartbeat 1s ease-in-out infinite'
                                   : 'none',
                               }}
                               onClick={(e: any) => {
                                 e.stopPropagation()
                                 setSelectedFeature(null) // Stop pulsing when clicked
+                                setPulseActive(false)
                                 if (!isSelected) setSelectedGridId(String(section.id))
                                 setHoveredCell(null)
                                 if (isManageMode) {
@@ -311,11 +332,14 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
                                 // CSS animation — much cheaper
                                 animation: 'fadeUp 0.1s ease forwards',
                               }}>
-                                <span style={{ color: 'white', fontSize: '9px', fontWeight: 800 }}>
+                                <span style={{ color: 'white', fontSize: '10px', fontWeight: 800 }}>
                                   {status === 'occupied' && cell.deceased_name ? cell.deceased_name : `${label} – ${status.toUpperCase()}`}
                                 </span>
+                                {status === 'occupied' && (
+                                  <span style={{ color: COLOR, fontSize: '8px', fontWeight: 700, textTransform: 'uppercase' }}>Occupied</span>
+                                )}
                                 {cell.permit_number && (
-                                  <span style={{ color: '#22c55e', fontSize: '7px', fontWeight: 700 }}>BP: {cell.permit_number}</span>
+                                  <span style={{ color: '#22c55e', fontSize: '8px', fontWeight: 700 }}>BP: {cell.permit_number}</span>
                                 )}
                                 <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', borderLeft: '4px solid transparent', borderRight: '4px solid transparent', borderTop: `4px solid ${COLOR}45` }} />
                               </div>
@@ -381,9 +405,42 @@ export const NicheGrid = memo(({ section }: NicheGridProps) => {
           to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
         @keyframes heartbeat {
-          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.9); border: 2px solid #3b82f6; }
-          50% { transform: scale(1.5); box-shadow: 0 0 40px 25px rgba(59, 130, 246, 0); border: 3px solid #fff; }
-          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); border: 2px solid #3b82f6; }
+          0% {
+            transform: scale(1);
+            box-shadow:
+              0 0 0 0 rgba(59, 130, 246, 0.9),
+              0 0 0 0 rgba(59, 130, 246, 0.5),
+              0 0 0 0 rgba(255, 255, 255, 0.4);
+            outline: 2.5px solid #60a5fa;
+            outline-offset: 1px;
+          }
+          30% {
+            transform: scale(1.55);
+            box-shadow:
+              0 0 0 6px  rgba(59, 130, 246, 0.25),
+              0 0 0 14px rgba(59, 130, 246, 0.1),
+              0 0 0 24px rgba(59, 130, 246, 0.04);
+            outline: 3px solid #fff;
+            outline-offset: 2px;
+          }
+          60% {
+            transform: scale(1.2);
+            box-shadow:
+              0 0 0 10px rgba(59, 130, 246, 0.1),
+              0 0 0 22px rgba(59, 130, 246, 0.04),
+              0 0 0 36px rgba(59, 130, 246, 0);
+            outline: 2px solid rgba(255,255,255,0.6);
+            outline-offset: 1px;
+          }
+          100% {
+            transform: scale(1);
+            box-shadow:
+              0 0 0 0 rgba(59, 130, 246, 0),
+              0 0 0 0 rgba(59, 130, 246, 0),
+              0 0 0 0 rgba(255, 255, 255, 0);
+            outline: 2.5px solid #60a5fa;
+            outline-offset: 1px;
+          }
         }
       `}</style>
 

@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Import Excel — LGU Carmen</title>
     <script>if(localStorage.getItem('lgu_dark')==='1')document.documentElement.classList.add('dark');</script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    @include('admin.partials.design-system')
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
-        .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
-        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; }
-        .topbar-title { font-size: 15px; font-weight: 600; color: #111827; }
-        .topbar-date  { font-size: 12px; color: #9ca3af; }
-        .role-tag { background: #1a2744; color: #fff; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: .04em; text-transform: uppercase; }
+        /* Component specific overrides if any */
+        .dropzone { border: 2px dashed var(--border); border-radius: 12px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; transition: all .15s; position: relative; background: var(--surface); }
+        .dropzone:hover, .dropzone.drag-over { border-color: var(--navy); background: var(--surface-2); }
+
         .content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
 
 
@@ -89,12 +87,15 @@
 
 <div class="main">
     <div class="topbar">
-        <div>
+        <div class="topbar-left">
             <div class="topbar-title">Import Excel</div>
             <div class="topbar-date">{{ now()->format('l, F d, Y') }}</div>
         </div>
-        <span class="role-tag">Admin</span>
+        <div class="topbar-right">
+            <span class="role-pill">Admin</span>
+        </div>
     </div>
+
 
     <div class="content">
 

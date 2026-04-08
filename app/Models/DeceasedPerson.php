@@ -52,4 +52,41 @@ class DeceasedPerson extends Model
     {
         return $this->hasMany(BurialPermit::class, 'deceased_id');
     }
+
+    /**
+     * Determine if and where the deceased is assigned on the map.
+     */
+    public function getAssignedLocation()
+    {
+        // 1. Check Legacy Plots
+        $plot = CemeteryPlot::where('deceased_id', $this->id)->first();
+        if ($plot) {
+            return [
+                'type'  => 'plot',
+                'label' => $plot->plot_code,
+                'lat'   => (float)$plot->latitude,
+                'lng'   => (float)$plot->longitude,
+            ];
+        }
+
+        // 2. Check Niche Grids
+        $grids = CemeteryGrid::all();
+        foreach ($grids as $grid) {
+            if ($grid->cells && (is_array($grid->cells) || is_object($grid->cells))) {
+                foreach ($grid->cells as $cell) {
+                    if (isset($cell['deceased_id']) && $cell['deceased_id'] == $this->id) {
+                        return [
+                            'type'  => 'grid',
+                            'label' => $grid->name . ' (' . ($cell['label'] ?? 'Niche') . ')',
+                            'lat'   => (float)$grid->latitude,
+                            'lng'   => (float)$grid->longitude,
+                            'grid_id' => $grid->id,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
 }
