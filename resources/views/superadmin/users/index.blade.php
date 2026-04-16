@@ -347,6 +347,13 @@
         html.dark .prog-count { color: #64748b !important; }
         html.dark .prog-track { background: #252840 !important; }
         html.dark .empty-activity { color: #4b5563 !important; }
+
+        /* ── Floating Action Button (FAB) ── */
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; background: #1a2744; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 1000; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; border: none; outline: none; }
+        .fab:hover { transform: scale(1.1) rotate(90deg); background: #2563eb; box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+        .fab svg { width: 24px; height: 24px; }
+        html.dark .fab { background: #3b82f6; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        html.dark .fab:hover { background: #60a5fa; }
         html.dark .btn-export { background: rgba(255,255,255,.07) !important; border-color: rgba(255,255,255,.12) !important; }
         html.dark .btn-export.primary { background: #3b82f6 !important; border-color: #3b82f6 !important; }
 
@@ -442,11 +449,11 @@ html.dark .empty-activity { color: #4b5563 !important; }
                 <p>MUNICIPALITY OF CARMEN · DAVAO DEL NORTE · MUNICIPAL CIVIL REGISTRAR · {{ strtoupper(now()->format('F Y')) }}</p>
             </div>
             <div class="hero-actions">
-                <a href="{{ route('superadmin.export-excel') }}" class="btn-export">
+                <a href="{{ route('superadmin.reports.excel') }}" class="btn-export" style="background: var(--green); border-color: #059669;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                    Export Excel (Raw Data)
+                    Export Excel Report
                 </a>
-                <a href="{{ route('superadmin.export') }}" class="btn-export primary">
+                <a href="{{ route('superadmin.reports.pdf') }}" class="btn-export primary">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Export Premium PDF
                 </a>
@@ -820,6 +827,22 @@ new Chart(document.getElementById('feeChart').getContext('2d'), {
     }
 });
 </script>
+
+    <!-- FAB: New Permit -->
+    <a href="{{ route('permits.index') }}#new" class="fab" title="New Burial Permit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </a>
+
+    <!-- FAB: New Permit -->
+    <a href="{{ route('permits.index') }}#new" class="fab" title="New Burial Permit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </a>
 
 </body>
 </html>

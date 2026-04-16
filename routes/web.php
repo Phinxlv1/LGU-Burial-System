@@ -13,6 +13,7 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('login'));
@@ -33,13 +34,29 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/superadmin/export-excel', [SuperAdminDashboardController::class, 'exportExcel'])->name('superadmin.export-excel');
         Route::get('/superadmin/activity', [SuperAdminDashboardController::class, 'activityLog'])->name('superadmin.activity');
         Route::get('/superadmin/reports', [ReportController::class, 'superAdminIndex'])->name('superadmin.reports');
+        Route::get('/superadmin/reports/excel', [ReportController::class, 'exportExcel'])->name('superadmin.reports.excel');
+        Route::get('/superadmin/reports/pdf', [ReportController::class, 'export'])->name('superadmin.reports.pdf');
         Route::get('/reports', fn() => redirect()->route('superadmin.reports'));
         Route::resource('users', UserController::class)->names('admin.users');
-        Route::get('/superadmin/data-quality', [SettingsController::class, 'dataQualityPage'])
-            ->name('superadmin.dataquality');
         Route::get('/superadmin/geomap', [SuperAdminDashboardController::class, 'geomap'])
             ->name('superadmin.geomap');
         Route::apiResource('/niche-grids', CemeteryGridController::class)->except(['index'])->names('superadmin.nichegrids');
+    });
+
+    // ── Admin Only ──
+    Route::middleware(['role:admin'])->group(function () {
+        // Data Quality
+        Route::get('/admin/data-quality', [SettingsController::class, 'dataQualityPage'])
+            ->name('admin.dataquality');
+
+        // Settings
+        Route::get('/settings',                   [SettingsController::class, 'index'])->name('settings.index');
+        Route::put('/settings/{section}',         [SettingsController::class, 'update'])->name('settings.update');
+        Route::post('/settings/reset/{target}',   [SettingsController::class, 'reset'])->name('settings.reset');
+        Route::post('/settings/users',            [SettingsController::class, 'storeUser'])->name('settings.users.store');
+        Route::delete('/settings/users/{user}',   [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
+        Route::get('/settings/dataquality/scan',  [SettingsController::class, 'dataQualityScan'])->name('settings.dataquality.scan');
+        Route::post('/settings/dataquality/update', [SettingsController::class, 'updateRecord'])->name('settings.dataquality.update');
     });
 
     // ── Admin + Super Admin ──
@@ -78,19 +95,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/import/history-json', [ImportController::class, 'historyJson'])->name('import.history-json');
 
         // Reports (admin only — superadmin is redirected above)
-        Route::get('/reports',        [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+        Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
 
-        // Settings
-        Route::get('/settings',                   [SettingsController::class, 'index'])->name('settings.index');
-        Route::put('/settings/{section}',         [SettingsController::class, 'update'])->name('settings.update');
-        Route::post('/settings/reset/{target}',   [SettingsController::class, 'reset'])->name('settings.reset');
-        Route::post('/settings/users',            [SettingsController::class, 'storeUser'])->name('settings.users.store');
-        Route::delete('/settings/users/{user}',   [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
-        Route::get('/settings/dataquality/scan',  [SettingsController::class, 'dataQualityScan'])->name('settings.dataquality.scan');
-        Route::post('/settings/dataquality/update', [SettingsController::class, 'updateRecord'])->name('settings.dataquality.update');
 
         // SMS
         Route::post('permits/{permit}/sms', [SmsController::class, 'send'])->name('sms.send');
+
+        // Support
+        Route::get('/support/manual', [SupportController::class, 'manual'])->name('support.manual');
     });
 });

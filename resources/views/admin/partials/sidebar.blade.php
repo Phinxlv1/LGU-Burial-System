@@ -42,9 +42,9 @@
     }
 
     .sidebar-brand {
-        padding: 1.25rem 1rem 1rem;
+        padding: 1.25rem 17px 1rem;
         border-bottom: 1px solid rgba(255, 255, 255, .08);
-        height: 88px; /* Increased from 68px for better breathing room */
+        height: 88px; /* Fixed height */
         box-sizing: border-box !important;
         overflow: hidden;
         white-space: nowrap;
@@ -60,8 +60,8 @@
     .sidebar-brand-top {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 8px;
+        justify-content: flex-start; /* Strictly left-aligned */
+        gap: 10px;
         margin-bottom: .3rem;
     }
 
@@ -112,42 +112,28 @@
         transition: opacity 0.2s;
     }
 
-    /* Collapse behavior for brand info */
     html.collapsed .sidebar-brand-left h1,
     html.collapsed .sidebar-brand p {
         opacity: 0;
-        width: 0;
-        display: none !important;
         pointer-events: none;
+        transition: opacity 0.1s;
     }
 
     html.collapsed .sidebar-brand {
-        padding: 1.25rem 0.75rem;
+        padding: 1.25rem 17px;
     }
 
     html.collapsed .sidebar-brand-top {
-        justify-content: center;
+        justify-content: flex-start;
     }
 
-    /* Force the inner flex container to center its child when collapsed */
+    /* Force the inner flex container to stay left-aligned when collapsed to keep the logo fixed */
     html.collapsed .sidebar-brand-left {
-        justify-content: center;
+        justify-content: flex-start;
     }
 
     html.collapsed .sb-toggle {
-        position: absolute;
-        right: -40px; /* Hide on collapsed except if we want it stayed? Let's keep it visible but centered */
-    }
-    
-    /* Better toggle position when collapsed */
-    html.collapsed .sidebar-brand-top {
-        flex-direction: column;
-        gap: 15px;
-    }
-    html.collapsed .sb-toggle {
-        position: static;
-        width: 34px;
-        height: 34px;
+        display: none !important;
     }
 
     .sidebar-nav {
@@ -168,14 +154,45 @@
         letter-spacing: .1em;
         text-transform: uppercase;
         color: rgba(255, 255, 255, .3);
-        padding: .5rem 1rem .2rem; /* Tightened padding */
-        transition: opacity 0.2s;
+        padding: .5rem 14px .2rem 1rem; /* Matched to nav items */
+        transition: all 0.2s;
         white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
     }
 
+    .nav-section:hover {
+        color: rgba(255, 255, 255, .6);
+    }
 
     html.collapsed .nav-section {
         opacity: 0;
+        pointer-events: none;
+    }
+
+    .section-chevron {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0.5;
+        flex-shrink: 0;
+    }
+
+    .nav-group.is-collapsed .section-chevron {
+        transform: rotate(180deg);
+    }
+
+    .nav-section-content {
+        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+        max-height: 1000px;
+        overflow: hidden;
+    }
+
+    .nav-group.is-collapsed .nav-section-content {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
     }
 
     /* Pre-spaced Nav Items (Constant Weight) */
@@ -183,7 +200,7 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: .65rem 1rem;
+        padding: .65rem 14px; /* Centered in 68px bar: 12px margin + 14px padding = 26px offset (Center for ~16px icons) */
         font-family: 'DM Sans', sans-serif;
         font-size: 13px;
         color: rgba(255, 255, 255, .65);
@@ -196,9 +213,9 @@
     }
 
     html.collapsed .nav-item {
-        margin: 2px 0.75rem; /* Matched to expanded state to prevent vertical shift */
-        padding: 0.65rem 0;
-        justify-content: center;
+        margin: 2px 0.75rem;
+        padding: 0.65rem 14px;
+        justify-content: flex-start;
         gap: 0;
     }
 
@@ -288,8 +305,8 @@
     }
 
     html.collapsed .user-info {
-        padding: 0.6rem 0;
-        justify-content: center;
+        padding: 0.6rem 6px; /* Centered 32px avatar: 12px footer padding + 6px = 18px offset */
+        justify-content: flex-start;
         background: transparent;
     }
 
@@ -328,25 +345,56 @@
         color: rgba(255, 255, 255, .4);
     }
 
+    .user-actions {
+        display: flex;
+        gap: 10px;
+        margin-left: auto;
+        opacity: 1;
+        transition: opacity 0.2s;
+    }
+
+    .action-btn {
+        color: rgba(255, 255, 255, 0.35);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    html.collapsed .user-actions {
+        opacity: 0;
+        pointer-events: none;
+    }
+
     .btn-logout {
         width: 100%;
-        background: none;
-        border: 1px solid rgba(255, 255, 255, .1);
-        border-radius: 8px;
-        padding: .55rem;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 12px;
-        color: rgba(255, 255, 255, .5);
-        cursor: pointer;
-        transition: all .15s;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
+        padding: .65rem;
+        background: rgba(239, 68, 68, .1);
+        border: 1px solid rgba(239, 68, 68, .2);
+        color: #ef4444;
+        border-radius: 8px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all .2s;
+    }
+
+    html.collapsed .btn-logout {
+        justify-content: flex-start;
+        padding: 0.65rem 15.5px; /* Center 13px icon: 12px padding + 15.5px = 27.5px offset */
     }
 
     html.collapsed .btn-logout span { display: none; }
-    html.collapsed .btn-logout { border: none; background: rgba(255,255,255,0.05); }
 
     .btn-logout:hover {
         border-color: #ef4444;
@@ -373,7 +421,10 @@
     }
 
     html.collapsed .dark-toggle #darkToggleLabel { display: none; }
-    html.collapsed .dark-toggle { justify-content: center; border: none; }
+    html.collapsed .dark-toggle {
+        justify-content: flex-start;
+        padding: 8px 6px; /* Center 32px pill: 12px padding + 6px = 18px offset */
+    }
 
     .dark-toggle:hover {
         border-color: rgba(255, 255, 255, .2);
@@ -540,88 +591,143 @@
 
 
     <nav class="sidebar-nav">
-        <div class="nav-section">OVERVIEW</div>
-        <a href="{{ auth()->user()->role === 'super_admin' ? route('superadmin.dashboard') : route('dashboard') }}"
-            class="nav-item {{ request()->routeIs('dashboard') || request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-            </svg>
-            <span>Dashboard</span>
-        </a>
+        <div class="nav-group" id="group-overview">
+            <div class="nav-section" onclick="toggleSection(this)">
+                OVERVIEW
+                <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+            </div>
+            <div class="nav-section-content">
+                    <a href="{{ auth()->user()->role === 'super_admin' ? route('superadmin.dashboard') : route('dashboard') }}"
+                        class="nav-item {{ request()->routeIs('dashboard') || request()->routeIs('superadmin.dashboard') ? 'active' : '' }}"
+                        title="Dashboard (Alt + 1)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+        </div>
 
         @if(auth()->user()->role === 'super_admin')
-            <div class="nav-section">ANALYTICS</div>
-            <a href="{{ route('superadmin.reports') }}"
-                class="nav-item {{ request()->routeIs('superadmin.reports') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                </svg>
-                <span>Reports</span>
-            </a>
-            <a href="{{ route('superadmin.activity') }}"
-                class="nav-item {{ request()->routeIs('superadmin.activity') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                </svg>
-                <span>Activity Log</span>
-            </a>
-
-            <div class="nav-section">SYSTEM</div>
-            <a href="{{ route('settings.index') }}" class="nav-item {{ request()->routeIs('settings.*') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <circle cx="12" cy="12" r="3" />
-                    <path
-                        d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83 2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-                </svg>
-                <span>Settings</span>
-            </a>
-            <a href="{{ route('superadmin.dataquality') }}"
-                class="nav-item {{ request()->routeIs('superadmin.dataquality') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M9 11l3 3L22 4" />
-                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-                </svg>
-                <span>Data Quality</span>
-            </a>
+            <div class="nav-group" id="group-analytics">
+                <div class="nav-section" onclick="toggleSection(this)">
+                    ANALYTICS
+                    <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </div>
+                <div class="nav-section-content">
+                    <a href="{{ route('superadmin.reports') }}"
+                        class="nav-item {{ request()->routeIs('superadmin.reports') ? 'active' : '' }}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                        </svg>
+                        <span>Reports</span>
+                    </a>
+                    <a href="{{ route('superadmin.activity') }}"
+                        class="nav-item {{ request()->routeIs('superadmin.activity') ? 'active' : '' }}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                        </svg>
+                        <span>Activity Log</span>
+                    </a>
+                </div>
+            </div>
         @else
-            <div class="nav-section">PERMITS</div>
-            <a href="{{ route('permits.index') }}" class="nav-item {{ request()->routeIs('permits.*') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                </svg>
-                <span>Burial Permits</span>
-            </a>
-            <div class="nav-section">CEMETERY</div>
-            <a href="{{ route('cemetery.map') }}" class="nav-item {{ request()->routeIs('cemetery.*') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span>Cemetery Map</span>
-            </a>
-            <div class="nav-section">TOOLS</div>
-            <a href="{{ route('reports.index') }}" class="nav-item {{ request()->routeIs('reports.*') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                </svg>
-                <span>Reports</span>
-            </a>
-            <a href="{{ route('import.show') }}" class="nav-item {{ request()->routeIs('import.*') ? 'active' : '' }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
-                <span>Import Excel</span>
-            </a>
+            <div class="nav-group" id="group-permits">
+                <div class="nav-section" onclick="toggleSection(this)">
+                    PERMITS
+                    <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </div>
+                <div class="nav-section-content">
+                    <a href="{{ route('permits.index') }}" class="nav-item {{ request()->routeIs('permits.*') ? 'active' : '' }}"
+                        title="Burial Permits (Alt + 2)">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <span>Burial Permits</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-group" id="group-cemetery">
+                <div class="nav-section" onclick="toggleSection(this)">
+                    CEMETERY
+                    <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </div>
+                <div class="nav-section-content">
+                    <a href="{{ route('cemetery.map') }}" class="nav-item {{ request()->routeIs('cemetery.*') ? 'active' : '' }}"
+                        title="Cemetery Map (Alt + 3)">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <span>Cemetery Map</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-group" id="group-tools">
+                <div class="nav-section" onclick="toggleSection(this)">
+                    TOOLS
+                    <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </div>
+                <div class="nav-section-content">
+                    <a href="{{ route('reports.index') }}" class="nav-item {{ request()->routeIs('reports.*') ? 'active' : '' }}"
+                        title="Reports (Alt + 4)">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                        </svg>
+                        <span>Reports</span>
+                    </a>
+                    <a href="{{ route('import.show') }}" class="nav-item {{ request()->routeIs('import.*') ? 'active' : '' }}"
+                        title="Import Excel (Alt + 5)">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        <span>Import Excel</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-group" id="group-system">
+                <div class="nav-section" onclick="toggleSection(this)">
+                    SYSTEM
+                    <svg class="section-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </div>
+                <div class="nav-section-content">
+                    <a href="{{ route('admin.dataquality') }}"
+                        class="nav-item {{ request()->routeIs('admin.dataquality') ? 'active' : '' }}"
+                        title="Data Quality (Alt + 6)">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                        </svg>
+                        <span>Data Quality</span>
+                    </a>
+                </div>
+            </div>
         @endif
+
     </nav>
 
     <div class="sidebar-footer">
@@ -636,6 +742,24 @@
             <div>
                 <div class="user-name">{{ auth()->user()->name }}</div>
                 <div class="user-role">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</div>
+            </div>
+
+            <div class="user-actions">
+                @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('settings.index') }}" class="action-btn" title="Settings">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <circle cx="12" cy="12" r="3" />
+                            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+                        </svg>
+                    </a>
+                @endif
+                <a href="{{ route('support.manual') }}" class="action-btn" title="User Manual">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                </a>
             </div>
         </div>
         <form method="POST" action="{{ route('logout') }}">
@@ -679,6 +803,10 @@
         localStorage.setItem('lgu_sidebar_collapsed', isCollapsed ? '1' : '0');
     }
 
+    function toggleSection(header) {
+        header.parentElement.classList.toggle('is-collapsed');
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         updateDarkLabel(document.documentElement.classList.contains('dark'));
     });
@@ -707,6 +835,19 @@
         if (e.altKey && e.key.toLowerCase() === 'b') {
             e.preventDefault();
             toggleSidebar();
+        }
+        // Alt + 1-9: Navigate sidebar
+        const isDigit = e.key >= '1' && e.key <= '9';
+        const isNumpad = e.code && e.code.startsWith('Numpad') && ['1','2','3','4','5','6','7','8','9'].includes(e.code.slice(-1));
+
+        if (e.altKey && (isDigit || isNumpad)) {
+            const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+            const num = isDigit ? parseInt(e.key) : parseInt(e.code.slice(-1));
+            const index = num - 1;
+            if (navItems[index]) {
+                e.preventDefault();
+                navItems[index].click();
+            }
         }
     });
 

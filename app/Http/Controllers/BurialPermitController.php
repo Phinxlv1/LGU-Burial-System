@@ -35,8 +35,20 @@ class BurialPermitController extends Controller
 
         $query = BurialPermit::with('deceased');
 
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function($qq) use ($q) {
+                $qq->where('permit_number', 'like', "%{$q}%")
+                   ->orWhereHas('deceased', function($dq) use ($q) {
+                       $dq->where('first_name', 'like', "%{$q}%")
+                          ->orWhere('last_name', 'like', "%{$q}%")
+                          ->orWhere('middle_name', 'like', "%{$q}%");
+                   });
+            });
         }
 
         if ($sort === 'last_name') {
@@ -101,7 +113,7 @@ class BurialPermitController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $permits = $query->get();
+        $permits = $query->paginate(10)->withQueryString();
 
         $sortUrl = function (string $col) {
             if ($col === 'status') {
@@ -160,6 +172,12 @@ class BurialPermitController extends Controller
         $sortIcon = fn(string $col) => request()->get('sort', 'status') === $col
             ? '<span class="sort-icon ' . request()->get('direction', 'desc') . '"></span>'
             : '<span class="sort-icon none"></span>';
+
+        if ($request->ajax()) {
+            return response()
+                ->view('admin.permits.partials.table', compact('permits', 'sortUrl', 'sortIcon'))
+                ->header('X-Total-Records', $permits->total());
+        }
 
         return view('admin.permits.index', compact('permits', 'sortUrl', 'sortIcon'));
     }

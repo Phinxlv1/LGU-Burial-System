@@ -42,7 +42,7 @@ class SettingsController extends Controller
         $settings = $this->load();
         $users = User::orderBy('created_at')->get();
 
-        return view('superadmin.settings.index', compact('settings', 'users'));
+        return view('admin.settings.index', compact('settings', 'users'));
     }
 
     // ──────────────────────────────────────────────────
@@ -494,7 +494,7 @@ class SettingsController extends Controller
 
     public function dataQualityPage()
     {
-        return view('superadmin.data-quality');
+        return view('admin.data-quality');
     }
 
     /**

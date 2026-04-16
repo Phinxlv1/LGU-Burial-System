@@ -8,252 +8,107 @@
     @include('admin.partials.design-system')
     <link rel="stylesheet" href="{{ asset('css/sa-sidebar.css') }}">
     <style>
-        /* ── REPORT SPECIFIC OVERRIDES ── */
+        /* ── SUPERADMIN AUDIT-STYLE REPORT THEME ── */
         :root {
-            /* Inherit from design-system, add specific multi-color tokens */
-            --purple:    #7c3aed;
-            --purple-bg: rgba(124,58,237,.07);
-            --purple-bd: rgba(124,58,237,.18);
-            --teal:      #0d9488;
-            --teal-bg:   rgba(13,148,136,.07);
-            --teal-bd:   rgba(13,148,136,.18);
+            --report-bg: #f8fafc;
+            --section-title: #0f172a;
+            --data-label: #64748b;
+            --accent-soft: rgba(59, 130, 246, 0.08);
         }
         .dark {
-            --purple:    #bc8cff;
-            --purple-bg: rgba(188,140,255,.1);
-            --purple-bd: rgba(188,140,255,.22);
-            --teal:      #2dd4bf;
-            --teal-bg:   rgba(45,212,191,.1);
-            --teal-bd:   rgba(45,212,191,.2);
+            --report-bg: #0b0d11;
+            --section-title: #f8fafc;
+            --data-label: #94a3b8;
+            --accent-soft: rgba(59, 130, 246, 0.15);
         }
 
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            display: flex; min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
+        .audit-header {
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 2rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        .audit-title h1 { font-size: 28px; font-weight: 800; color: var(--section-title); letter-spacing: -0.03em; }
+        .audit-title p { font-size: 13px; color: var(--data-label); font-weight: 500; font-family: var(--mono); margin-top: 4px; }
 
-        .main { flex: 1; display: flex; flex-direction: column; }
-
-        /* ── TOPBAR ── */
-        .topbar {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            height: 56px;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 1.75rem;
-            position: sticky; top: 0; z-index: 40;
+        /* Performance KPI Hub */
+        .kpi-hub {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
         }
-        .topbar-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
-        .topbar-meta  { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
-
-        .btn-export {
-            display: inline-flex; align-items: center; gap: 7px;
-            padding: .45rem 1.1rem;
-            background: var(--blue); color: #fff;
-            border: none; border-radius: 8px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 12px; font-weight: 600;
-            cursor: pointer; text-decoration: none;
-            transition: opacity .15s, transform .15s;
-        }
-        .btn-export:hover { opacity: .88; transform: translateY(-1px); }
-
-        .role-pill {
-            font-size: 10px; font-weight: 700;
-            padding: 3px 10px; border-radius: 20px;
-            letter-spacing: .06em; text-transform: uppercase;
-            background: #0f172a; color: #fff;
-        }
-
-        /* ── CONTENT ── */
-        .content { padding: 1.75rem; display: flex; flex-direction: column; gap: 1.5rem; }
-
-        .section-label {
-            font-size: 10px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: .1em; color: var(--subtle);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
-
-        /* ── BANNER ── */
-        .banner {
+        .kpi-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 20px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .kpi-label { font-size: 12px; font-weight: 700; color: var(--data-label); text-transform: uppercase; letter-spacing: 0.1em; }
+        .kpi-value { font-size: 42px; font-weight: 800; color: var(--section-title); letter-spacing: -0.04em; line-height: 1; }
+        .kpi-trend { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; width: fit-content; }
+
+        /* Report Sections */
+        .report-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        
+        .panel-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+        .panel-title { font-size: 14px; font-weight: 800; color: var(--section-title); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; }
+        
+        /* Financial Table */
+        .summary-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .summary-table th {
+            text-align: left;
+            padding: 1.15rem 1.5rem;
+            background: var(--surface-2);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--data-label);
+            text-transform: uppercase;
+        }
+        .summary-table td {
             padding: 1.25rem 1.5rem;
-            display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; gap: 1rem;
-            position: relative; overflow: hidden;
+            border-top: 1px solid var(--border-2);
+            font-size: 14px;
         }
-        .banner::before {
-            content: ''; position: absolute;
-            top: 0; left: 0; right: 0; height: 3px;
-            background: linear-gradient(90deg, var(--green), var(--blue), var(--purple));
+        .summary-table .total-row td {
+            background: var(--surface-2);
+            font-weight: 800;
+            color: var(--accent);
+            font-size: 17px;
         }
-        .banner-title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -.02em; }
-        .banner-sub   { font-size: 12px; color: var(--muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
-        .chip {
-            font-size: 11px; font-weight: 500;
-            padding: 4px 11px; border-radius: 20px;
-            display: inline-flex; align-items: center; gap: 5px;
-        }
-        .chip-g { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
-        .chip-b { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-bd); }
 
-        /* ── STAT GRID ── */
-        .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
-
-        .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
+        .status-pill-lg {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface-2);
+            padding: 1rem 1.5rem;
             border-radius: 14px;
-            padding: 1.2rem 1.25rem 1.5rem;
-            position: relative; overflow: hidden;
-            transition: box-shadow .2s, transform .2s, border-color .2s;
-            cursor: default;
+            margin-bottom: 10px;
         }
-        .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.06); }
-        .stat-card::after {
-            content:''; position:absolute;
-            bottom:0; left:0; right:0; height:3px;
-            border-radius: 0 0 14px 14px;
-        }
-        .s-blue::after   { background: var(--blue); }
-        .s-green::after  { background: var(--green); }
-        .s-purple::after { background: var(--purple); }
-        .s-red::after    { background: var(--red); }
-        .s-teal::after   { background: var(--teal); }
-        .s-grad::after   { background: linear-gradient(90deg, var(--green), var(--blue)); }
 
-        .stat-eyebrow {
-            font-size: 10px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: .08em; color: var(--subtle); margin-bottom: .55rem;
-        }
-        .stat-val { font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
-        .stat-val.sm { font-size: 24px; }
-        .stat-lbl { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 5px; }
-        .stat-sub { font-size: 11px; color: var(--muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
-
-        .stat-ico {
-            position: absolute; top: 1.1rem; right: 1.1rem;
-            width: 34px; height: 34px; border-radius: 9px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .ico-blue   { background: var(--blue-bg); }
-        .ico-green  { background: var(--green-bg); }
-        .ico-purple { background: var(--purple-bg); }
-        .ico-red    { background: var(--red-bg); }
-        .ico-teal   { background: var(--teal-bg); }
-
-        /* ── ALERTS ── */
-        .alerts-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; }
-
-        .panel {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px; overflow: hidden;
-        }
-        .panel-hd {
-            padding: .9rem 1.25rem; border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .panel-hd-t { font-size: 13px; font-weight: 700; color: var(--text); display:flex; align-items:center; gap:6px; }
-        .panel-hd-s { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
-        .renew-cells { display: grid; grid-template-columns: repeat(3,1fr); }
-        .renew-cell  { padding: 1.25rem; border-right: 1px solid var(--border); }
-        .renew-cell:last-child { border-right: none; }
-        .renew-num   { font-size: 30px; font-weight: 700; color: var(--text); line-height: 1; letter-spacing: -.03em; }
-        .renew-lbl   { font-size: 12px; font-weight: 600; color: var(--text); margin-top: 5px; }
-        .renew-sub   { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
-
-        .alert-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 1.1rem 1.25rem;
-            display: flex; align-items: center; gap: 1rem;
-        }
-        .alert-ico {
-            width: 46px; height: 46px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .alert-tag  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 3px; }
-        .alert-num  { font-size: 28px; font-weight: 700; line-height: 1; letter-spacing: -.02em; }
-        .alert-lbl  { font-size: 12px; font-weight: 600; color: var(--text); margin-top: 4px; }
-        .alert-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
-
-        /* ── CHARTS ── */
-        .chart-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; }
-
-        .monthly-grid {
-            display: grid; grid-template-columns: repeat(12,1fr);
-            gap: 6px; align-items: end;
-            padding: 1.25rem;
-        }
-        .mo-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .mo-bar-wrap { width: 100%; height: 80px; display: flex; align-items: flex-end; }
-        .mo-bar {
-            width: 100%; min-height: 3px;
-            border-radius: 5px 5px 0 0;
-            background: var(--blue-bg);
-            border: 1px solid var(--blue-bd);
-            position: relative; overflow: hidden;
-            transition: opacity .15s; cursor: pointer;
-        }
-        .mo-bar::after {
-            content: ''; position: absolute;
-            top: 0; left: 0; right: 0; height: 35%;
-            background: var(--blue); border-radius: 4px 4px 0 0;
-        }
-        .mo-bar.peak { background: var(--green-bg); border-color: var(--green-bd); }
-        .mo-bar.peak::after { background: var(--green); }
-        .mo-bar:hover { opacity: .7; }
-        .mo-lbl   { font-size: 9px; color: var(--subtle); font-family: 'DM Mono', monospace; text-transform: uppercase; }
-        .mo-count { font-size: 11px; font-weight: 700; color: var(--text); }
-
-        .fee-tbl { width: 100%; border-collapse: collapse; }
-        .fee-tbl th {
-            font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em;
-            color: var(--subtle); padding: .5rem .75rem; text-align: left;
-            background: var(--surface2); border-bottom: 1px solid var(--border);
-        }
-        .fee-tbl td { font-size: 13px; color: var(--text); padding: .6rem .75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        .fee-tbl td.r { text-align: right; font-weight: 600; color: var(--green); font-family: 'DM Mono', monospace; }
-        .fee-tbl td.c { text-align: center; font-weight: 700; }
-        .fee-tbl tr:last-child td { border: none; }
-        .fee-tbl .tot td { font-weight: 700; background: var(--surface2); border-top: 1px solid var(--border2); border-bottom: none; }
-        .fee-tbl .tot td.r { color: var(--blue); font-size: 14px; }
-        .fee-bar { height: 5px; border-radius: 3px; background: var(--blue); opacity: .45; display:inline-block; vertical-align: middle; margin-right: 7px; }
-
-        .rec-tbl { width: 100%; border-collapse: collapse; }
-        .rec-tbl th {
-            font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em;
-            color: var(--subtle); padding: .5rem .75rem; text-align: left;
-            background: var(--surface2); border-bottom: 1px solid var(--border);
-        }
-        .rec-tbl td { font-size: 12px; color: var(--muted); padding: .6rem .75rem; border-bottom: 1px solid var(--border); }
-        .rec-tbl td.pno { color: var(--text); font-weight: 700; font-family: 'DM Mono', monospace; font-size: 11px; }
-        .rec-tbl td.nm  { color: var(--text); font-weight: 500; }
-        .rec-tbl tr:last-child td { border: none; }
-
-        .badge {
-            display: inline-flex; font-size: 10px; font-weight: 600;
-            padding: 2px 9px; border-radius: 20px;
-        }
-        .b-active  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
-        .b-expiring { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-bd); }
-        .b-expired { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-bd); }
-
-        @media (max-width: 1100px) {
-            .stat-grid  { grid-template-columns: repeat(2,1fr); }
-            .chart-row  { grid-template-columns: 1fr; }
-            .alerts-row { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 1024px) {
+            .kpi-hub, .report-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -264,12 +119,21 @@
 <div class="main">
     <div class="topbar">
         <div class="topbar-left">
-            <div class="topbar-title">Burial Permit Reports</div>
+            <div class="topbar-title">
+                SuperAdmin Intelligence Audit
+                <a href="{{ route('support.manual') }}#reports" class="help-link-trigger" title="How to use this report" style="display:inline-flex; vertical-align:middle; margin-left:8px; color:var(--accent); opacity:0.6; transition:opacity .15s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </a>
+            </div>
             <div class="topbar-date">{{ now()->format('M d, Y · g:i A') }}</div>
         </div>
-        <div class="topbar-right">
+        <div class="topbar-right" style="display:flex; gap:10px; align-items:center;">
             <span class="role-pill">⚡ Super Admin</span>
-            <a href="{{ route('superadmin.export') }}" class="btn btn-primary">
+            <a href="{{ route('superadmin.reports.excel') }}" class="btn-export" style="background: var(--green);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                Export Excel
+            </a>
+            <a href="{{ route('superadmin.reports.pdf') }}" class="btn-export">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export PDF
             </a>
@@ -277,262 +141,159 @@
     </div>
 
 
-    <div class="content">
+    <div class="content" style="padding: 3rem;">
 
-        {{-- BANNER --}}
-        <div class="banner">
-            <div>
-                <div class="banner-title">Annual Summary &mdash; {{ now()->year }}</div>
-                <div class="banner-sub">Carmen Public Cemetery &nbsp;·&nbsp; Davao del Norte &nbsp;·&nbsp; Civil Registrar Office</div>
+        <!-- AUDIT HEADER -->
+        <div class="audit-header fade-up">
+            <div class="audit-title">
+                <h1>{{ now()->year }} Operational Audit Report</h1>
+                <p>INTERNAL REVENUE & COMPLIANCE MONITORING · CARMEN LGU</p>
             </div>
-            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-                <span class="chip chip-g">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    Live Data
-                </span>
-                <span class="chip chip-b">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    {{ now()->format('D, M d · g:i A') }}
-                </span>
+            <div style="text-align: right;">
+                <div style="font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Generated By</div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--text);">{{ auth()->user()->name }}</div>
             </div>
         </div>
 
-        {{-- SYSTEM OVERVIEW --}}
-        <div class="section-label">System Overview</div>
-        <div class="stat-grid">
-
-            <div class="stat-card s-blue">
-                <div class="stat-ico ico-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-                <div class="stat-eyebrow">All Time</div>
-                <div class="stat-val" style="color:var(--blue)">{{ $totalPermits }}</div>
-                <div class="stat-lbl">Total Permits</div>
-                <div class="stat-sub">Since system began</div>
+        <!-- KPI HUB -->
+        <div class="kpi-hub fade-up d1">
+            <div class="kpi-card">
+                <span class="kpi-label">Yearly Permits ({{ $year }})</span>
+                <span class="kpi-value">{{ $totalYearlyPermits }}</span>
+                <span class="kpi-trend" style="background: var(--blue-bg); color: var(--blue);">SYSTEM WIDE PERFORMANCE</span>
             </div>
-
-            <div class="stat-card s-green">
-                <div class="stat-ico ico-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-                <div class="stat-eyebrow">Valid</div>
-                <div class="stat-val" style="color:var(--green)">{{ $activePermits }}</div>
-                <div class="stat-lbl">Active Permits</div>
-                <div class="stat-sub">Valid & Current</div>
+            <div class="kpi-card">
+                <span class="kpi-label">Projected Revenue Pool</span>
+                <span class="kpi-value">₱{{ number_format($estimatedRevenue) }}</span>
+                <span class="kpi-trend" style="background: var(--green-bg); color: var(--green);">FINANCIAL SUSTAINABILITY</span>
             </div>
-
-            <div class="stat-card s-amber">
-                <div class="stat-ico ico-amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                <div class="stat-eyebrow">Action Needed</div>
-                <div class="stat-val" style="color:var(--amber)">{{ $expiringPermits }}</div>
-                <div class="stat-lbl">Expiring Soon</div>
-                <div class="stat-sub">Within 30 days</div>
+            <div class="kpi-card">
+                <span class="kpi-label">Renewals Finalized</span>
+                <span class="kpi-value">{{ $renewedPermits }}</span>
+                <span class="kpi-trend" style="background: var(--purple-bg); color: var(--purple);">GOVERNANCE COMPLIANCE</span>
             </div>
-
-            <div class="stat-card s-red">
-                <div class="stat-ico ico-red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-                <div class="stat-eyebrow">Needs Renewal</div>
-                <div class="stat-val" style="color:var(--red)">{{ $expiredPermits }}</div>
-                <div class="stat-lbl">Expired</div>
-                <div class="stat-sub">{{ $urgentExpiring ?? 0 }} urgent &nbsp;·&nbsp; {{ $expiringSoon ?? 0 }} in 30 days</div>
-            </div>
-
-            <div class="stat-card s-blue">
-                <div class="stat-ico ico-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-                <div class="stat-eyebrow">This Year ({{ now()->year }})</div>
-                <div class="stat-val" style="color:var(--blue)">{{ $newPermits }}</div>
-                <div class="stat-lbl">New Permits</div>
-                <div class="stat-sub">{{ $permitsThisMonth ?? 0 }} this month &nbsp;·&nbsp; {{ $permitsThisWeek ?? 0 }} this week</div>
-            </div>
-
-            <div class="stat-card s-teal">
-                <div class="stat-ico ico-teal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
-                <div class="stat-eyebrow">Deceased Records</div>
-                <div class="stat-val" style="color:var(--teal)">{{ $totalDeceased }}</div>
-                <div class="stat-lbl">Total on File</div>
-                <div class="stat-sub">{{ $deceasedThisYear ?? 0 }} this year &nbsp;·&nbsp; {{ $deceasedThisMonth ?? 0 }} this month</div>
-            </div>
-
-            <div class="stat-card s-grad">
-                <div class="stat-ico ico-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-                <div class="stat-eyebrow">Potential</div>
-                <div class="stat-val sm" style="color:var(--green)">₱{{ number_format($estimatedRevenue ?? 0) }}</div>
-                <div class="stat-lbl">Expected Revenue</div>
-                <div class="stat-sub">Active & Overdue Permits</div>
-            </div>
-
-            <div class="stat-card s-purple">
-                <div class="stat-ico ico-purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg></div>
-                <div class="stat-eyebrow">Renewals</div>
-                <div class="stat-val" style="color:var(--purple)">{{ $renewedPermits }}</div>
-                <div class="stat-lbl">Renewed This Year</div>
-                <div class="stat-sub">{{ now()->year }} renewals processed</div>
-            </div>
-
         </div>
 
-        {{-- RENEWALS & EXPIRY --}}
-        <div class="section-label">Renewals &amp; Expiry Alerts</div>
-        <div class="alerts-row">
-
-            <div class="panel">
-                <div class="panel-hd">
-                    <span class="panel-hd-t">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>
-                        Renewals Processed
-                        <span style="font-size:10px;color:var(--muted);font-weight:400">(permits originally from a previous year)</span>
-                    </span>
+        <!-- ANALYTICS GRID -->
+        <div class="report-grid fade-up d2">
+            <div class="panel-box">
+                <div class="panel-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Registration Trends (Monthly)
                 </div>
-                <div class="renew-cells">
-                    <div class="renew-cell">
-                        <div class="renew-num">{{ $renewalsThisWeek ?? 0 }}</div>
-                        <div class="renew-lbl">This Week</div>
-                        <div class="renew-sub">{{ now()->startOfWeek()->format('M d') }}–{{ now()->format('M d') }}</div>
-                    </div>
-                    <div class="renew-cell">
-                        <div class="renew-num">{{ $renewalsThisMonth ?? 0 }}</div>
-                        <div class="renew-lbl">This Month</div>
-                        <div class="renew-sub">{{ now()->format('F Y') }}</div>
-                    </div>
-                    <div class="renew-cell">
-                        <div class="renew-num">{{ $renewalsThisYear ?? 0 }}</div>
-                        <div class="renew-lbl">This Year</div>
-                        <div class="renew-sub">Jan–{{ now()->format('M Y') }}</div>
-                    </div>
+                <div style="height: 250px;">
+                    <canvas id="monthlyTrendChartAudit"></canvas>
                 </div>
             </div>
 
-            <div class="alert-card" style="border-left:3px solid var(--red)">
-                <div class="alert-ico" style="background:var(--red-bg)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div class="panel-box">
+                <div class="panel-title">Service Compliance Health</div>
+                <div class="status-pill-lg" style="border-left: 4px solid var(--green);">
+                    <span style="font-weight: 600; color: var(--data-label);">Active & Compliant</span>
+                    <span style="font-size: 20px; font-weight: 800; font-family:var(--mono);">{{ $activePermits }}</span>
                 </div>
-                <div>
-                    <div class="alert-tag" style="color:var(--red)">Urgent</div>
-                    <div class="alert-num" style="color:var(--red)">{{ $urgentExpiring ?? 0 }}</div>
-                    <div class="alert-lbl">Expiring in 7 Days</div>
-                    <div class="alert-sub">Contact holders now</div>
+                <div class="status-pill-lg" style="border-left: 4px solid var(--amber);">
+                    <span style="font-weight: 600; color: var(--data-label);">Upcoming Expirations</span>
+                    <span style="font-size: 20px; font-weight: 800; font-family:var(--mono);">{{ $expiringSoon }}</span>
                 </div>
-            </div>
-
-            <div class="alert-card" style="border-left:3px solid var(--amber)">
-                <div class="alert-ico" style="background:var(--amber-bg)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <div class="status-pill-lg" style="border-left: 4px solid var(--red);">
+                    <span style="font-weight: 600; color: var(--data-label);">Expired / Overdue</span>
+                    <span style="font-size: 20px; font-weight: 800; font-family:var(--mono);">{{ $expiredPermits }}</span>
                 </div>
-                <div>
-                    <div class="alert-tag" style="color:var(--amber)">Warning</div>
-                    <div class="alert-num" style="color:var(--amber)">{{ $expiringSoon ?? 0 }}</div>
-                    <div class="alert-lbl">Expiring in 30 Days</div>
-                    <div class="alert-sub">Incl. {{ $urgentExpiring ?? 0 }} urgent</div>
+                <div class="status-pill-lg" style="border-left: 4px solid var(--blue); background: var(--accent-soft);">
+                    <span style="font-weight: 600; color: var(--blue);">System Records</span>
+                    <span style="font-size: 20px; font-weight: 800; font-family:var(--mono); color: var(--blue);">{{ $totalDeceased }}</span>
                 </div>
             </div>
-
         </div>
 
-        {{-- ANALYTICS --}}
-        <div class="section-label">Analytics</div>
-        <div class="chart-row">
-
-            <div class="panel">
-                <div class="panel-hd">
-                    <span class="panel-hd-t">Monthly Permits — {{ now()->year }}</span>
-                    <span class="panel-hd-s">Busiest: {{ $busiestMonth ?? '—' }} ({{ $busiestCount ?? 0 }})</span>
-                </div>
-                @php
-                    $mos   = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-                    $maxV  = max(array_merge($monthlyData ?? [0], [1]));
-                    $peakI = array_search($maxV, $monthlyData ?? []);
-                @endphp
-                <div class="monthly-grid">
-                    @foreach($mos as $i => $m)
-                    @php $c = $monthlyData[$i] ?? 0; @endphp
-                    <div class="mo-col">
-                        <div class="mo-count">{{ $c }}</div>
-                        <div class="mo-bar-wrap">
-                            <div class="mo-bar {{ $i === $peakI ? 'peak' : '' }}"
-                                 style="height:{{ $maxV > 0 ? max(4, round(($c/$maxV)*100)) : 4 }}%"></div>
-                        </div>
-                        <div class="mo-lbl">{{ $m }}</div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-hd">
-                    <span class="panel-hd-t">Permit Type Breakdown</span>
-                    <span class="panel-hd-s">All time</span>
-                </div>
-                @php
-                    $fL = ['cemented'=>'Cemented','niche_1st'=>'1st Floor Niche','niche_2nd'=>'2nd Floor Niche','niche_3rd'=>'3rd Floor Niche','niche_4th'=>'4th Floor Niche','bone_niches'=>'Bone Niches'];
-                    // Note: Revenue breakdown per row is now an estimation based on the overall Expected Revenue logic
-                    $fTotal = array_sum(array_values($feeCounts ?? []));
-                    $fRev   = $estimatedRevenue ?? 0;
-                    $fMax   = max(array_merge(array_values($feeCounts ?? []), [1]));
-                @endphp
-                <table class="fee-tbl">
-                    <thead><tr><th>Type</th><th style="text-align:center">Count</th><th style="text-align:right">Expected</th></tr></thead>
-                    <tbody>
-                        @foreach($fL as $k => $lbl)
-                        @php $c = $feeCounts[$k]??0; @endphp
-                        <tr>
-                            <td><div style="display:flex;align-items:center"><div class="fee-bar" style="width:{{ $fMax>0?max(4,round(($c/$fMax)*36)):4 }}px"></div>{{ $lbl }}</div></td>
-                            <td class="c">{{ $c }}</td>
-                            <td class="r" style="color:var(--muted); font-size: 11px;">(Incl.)</td>
-                        </tr>
-                        @endforeach
-                        <tr class="tot">
-                            <td>TOTAL EXPECTED</td>
-                            <td class="c">{{ $fTotal }}</td>
-                            <td class="r">₱{{ number_format($fRev) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-        {{-- RECENT --}}
-        <div class="section-label">Recent Permit Applications</div>
-        <div class="panel">
-            <div class="panel-hd">
-                <span class="panel-hd-t">Latest Activity</span>
-                <a href="{{ route('permits.index') }}" style="font-size:11px;color:var(--blue);text-decoration:none;font-weight:600">View all →</a>
-            </div>
-            <table class="rec-tbl">
-                <thead>
-                    <tr><th>Permit No.</th><th>Deceased</th><th>Type</th><th>Requestor</th><th>Date</th><th>Expiry</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                    @forelse($recentPermits ?? [] as $p)
-                    @php
-                        // Updated status display to use helper mapping or explicit match
-                        $status = $p->status;
-                        $badgeClass = match($status) {
-                            'active'   => 'b-active',
-                            'expiring' => 'b-expiring',
-                            'expired'  => 'b-expired',
-                            default    => 'b-active',
-                        };
-                        $statusText = match($status) {
-                            'active'   => 'Active',
-                            'expiring' => 'Expiring Soon',
-                            'expired'  => 'Expired',
-                            default    => 'Active',
-                        };
-                    @endphp
-                    <tr>
-                        <td class="pno">{{ $p->permit_number }}</td>
-                        <td class="nm">{{ optional($p->deceased)->last_name }}, {{ optional($p->deceased)->first_name }}</td>
-                        <td>{{ ucfirst(str_replace('_',' ',$p->permit_type)) }}</td>
-                        <td>{{ $p->applicant_name ?? '—' }}</td>
-                        <td>{{ $p->created_at->format('M d, Y') }}</td>
-                        <td>{{ $p->expiry_date ? $p->expiry_date->format('M d, Y') : '—' }}</td>
-                        <td><span class="badge {{ $badgeClass }}">{{ $statusText }}</span></td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;font-size:13px">No permits yet.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+        <!-- FINANCIAL HUB -->
+        <div class="section-label" style="margin-bottom: 1.5rem;">Financial Breakdown Audit</div>
+        <table class="summary-table fade-up d3">
+            <thead>
+                <tr>
+                    <th width="45%">Burial Service Category</th>
+                    <th style="text-align: center;">Record Count</th>
+                    <th style="text-align: right;">Service rate</th>
+                    <th style="text-align: right;">Accumulated revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($revenueBreakdown as $row)
+                <tr>
+                    <td style="font-weight: 700; color: var(--section-title);">{{ $row['label'] }}</td>
+                    <td style="text-align: center; font-weight: 700; font-family: var(--mono);">{{ $row['count'] }}</td>
+                    <td style="text-align: right; color: var(--data-label);">₱{{ number_format($row['unitPrice']) }}</td>
+                    <td style="text-align: right; font-weight: 800; color: var(--green); font-family: var(--mono);">₱{{ number_format($row['total']) }}</td>
+                </tr>
+                @endforeach
+                <tr class="total-row">
+                    <td>TOTAL ESTIMATED GROSS</td>
+                    <td style="text-align: center;">{{ array_sum(array_column($revenueBreakdown, 'count')) }}</td>
+                    <td></td>
+                    <td style="text-align: right; font-family: var(--mono);">₱{{ number_format($estimatedRevenue) }}</td>
+                </tr>
+            </tbody>
+        </table>
 
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// Monthly chart
+const monthlyData = @json($monthlyData ?? []);
+const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+new Chart(document.getElementById('monthlyTrendChartAudit').getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: months,
+        datasets: [{
+            data: monthlyData,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.04)',
+            borderWidth: 4,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#3b82f6',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#0f172a',
+                titleFont: { family: 'DM Mono', size: 12, weight: '700' },
+                bodyFont:  { family: 'DM Mono', size: 13 },
+                padding: 15,
+                displayColors: false,
+                callbacks: {
+                    label: item => ` ${item.raw} Permits Issuance`
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { font: { family: 'DM Mono', size: 10 }, color: '#94a3b8', maxTicksLimit: 6 },
+                grid: { color: 'rgba(0,0,0,0.03)' },
+                border: { display: false }
+            },
+            x: {
+                ticks: { font: { family: 'DM Mono', size: 10, weight: '700' }, color: '#64748b' },
+                grid: { display: false },
+                border: { display: false }
+            }
+        }
+    }
+});
+</script>
 </body>
 </html>

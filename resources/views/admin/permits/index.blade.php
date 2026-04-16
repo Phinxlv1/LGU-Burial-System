@@ -39,8 +39,17 @@
         .topbar-date { font-size: 11px; color: #94a3b8; font-weight: 400; }
         .role-tag { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 20px; letter-spacing: .06em; text-transform: uppercase; }
         .content { padding: 1.75rem; }
-        .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; min-width: min-content; }
-        .panel-header { position: relative; padding: .9rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; } /* removed space-between so search bar can break flow */
+        .panel { 
+            background: #fff; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            min-width: min-content; 
+            display: flex;
+            flex-direction: column;
+            min-height: 600px; /* Ensures enough space for 10 rows + pagination without scrolling */
+        }
+        .panel-header { position: relative; padding: .9rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; flex-shrink: 0; }
         .panel-header h3 { font-size: 13px; font-weight: 600; color: #0f172a; letter-spacing: -.01em; }
 
         /* ── Search Bar ── */
@@ -56,12 +65,16 @@
         .empty-row td { text-align: center; color: #94a3b8; padding: 2.5rem; font-size: 13px; font-family: 'DM Mono', monospace; }
 
 
-        /* ── Scrollable table ── */
-        .table-scroll { max-height: 75vh; overflow-x: auto; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d1d5db transparent; }
-        .table-scroll::-webkit-scrollbar { width: 6px; }
-        .table-scroll::-webkit-scrollbar-track { background: transparent; }
-        .table-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-        .table-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        /* ── Table Container ── */
+        .table-scroll { 
+            flex: 1;
+            overflow-x: auto; 
+            overflow-y: hidden; 
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+        }
+        /* Completely hide scrollbars for Chrome, Safari and Opera */
+        .table-scroll::-webkit-scrollbar { display: none; }
         .table-scroll thead th { position: sticky; top: 0; z-index: 2; }
 
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -241,6 +254,13 @@
     html.dark .pager { border-top-color: #2d3148 !important; }
     html.dark .pager-info { color: #64748b !important; }
 
+    /* ── Floating Action Button (FAB) ── */
+    .fab { position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; background: #1a2744; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 1000; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; border: none; outline: none; }
+    .fab:hover { transform: scale(1.1) rotate(90deg); background: #2563eb; box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+    .fab svg { width: 24px; height: 24px; }
+    html.dark .fab { background: #3b82f6; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    html.dark .fab:hover { background: #60a5fa; }
+
     </style>
 </head>
 <body>
@@ -266,103 +286,22 @@
         <div class="panel">
             <div class="panel-header">
                 <h3>All Burial Permits
-                    <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:.5rem">{{ $permits->count() }} records</span>
+                    <span id="totalRecords" style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:.5rem">{{ $permits->total() }} records</span>
                 </h3>
-                <div class="search-group" style="position: absolute !important; right: 1.25rem !important; top: 50% !important; transform: translateY(-50%) !important;">
+                <form action="{{ route('permits.index') }}" method="GET" class="search-group" style="position: absolute !important; right: 1.25rem !important; top: 50% !important; transform: translateY(-50%) !important;">
+                    @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
+                    @if(request('direction')) <input type="hidden" name="direction" value="{{ request('direction') }}"> @endif
+                    @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
+                    
                     <div class="search-icon">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     </div>
-                    <input type="text" class="search-input" placeholder="Search by name or permit no…" oninput="filterTable(this.value)">
-                </div>
+                    <input type="text" name="q" class="search-input" id="liveSearchInput" autocomplete="off" placeholder="Search by name or permit no…" value="{{ request('q') }}">
+                </form>
 
             </div>
-            <div class="table-scroll">
-            <table>
-                <colgroup><col/><col/><col/><col/><col/><col/><col/></colgroup>
-                <thead>
-                    <tr>
-                        <th><a href="{{ $sortUrl('permit_number') }}" class="sort-link {{ request('sort')==='permit_number'?'active':'' }}">Permit No. {!! $sortIcon('permit_number') !!}</a></th>
-                        <th><a href="{{ $sortUrl('last_name') }}"     class="sort-link {{ request('sort')==='last_name'?'active':'' }}">Deceased {!! $sortIcon('last_name') !!}</a></th>
-                        <th><a href="{{ $sortUrl('permit_type') }}"   class="sort-link {{ request('sort')==='permit_type'?'active':'' }}">Type {!! $sortIcon('permit_type') !!}</a></th>
-                        <th><a href="{{ $sortUrl('date_of_death') }}" class="sort-link {{ request('sort')==='date_of_death'?'active':'' }}">Date of Death {!! $sortIcon('date_of_death') !!}</a></th>
-                        <th style="text-align:center">
-                            <a href="{{ $sortUrl('renewal_count') }}" class="sort-link {{ request('sort')==='renewal_count'?'active':'' }}" style="justify-content:center">
-                                Renewals {!! $sortIcon('renewal_count') !!}
-                            </a>
-                        </th>
-                        <th><a href="{{ $sortUrl('status') }}" class="sort-link {{ request('sort', 'status')==='status'?'active':'' }}">Status {!! $sortIcon('status') !!}</a></th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($permits as $permit)
-                    @php
-                        $cs = $permit->status;
-                    @endphp
-                           <tr class="permit-row {{ $cs === 'expired' ? 'row-expired' : ($cs === 'expiring' ? 'row-expiring' : '') }}"
-    onclick="window.location='{{ route('permits.show', $permit) }}'"
-    style="cursor:pointer;">
-                        <td>
-                            <span class="permit-no">{{ $permit->permit_number }}</span>
-                            @if($cs === 'expired')
-                                <span style="font-size:10px;font-weight:700;color:#ef4444;margin-left:4px;vertical-align:middle">⚠</span>
-                            @elseif($cs === 'expiring')
-                                <span style="font-size:10px;font-weight:700;color:#f59e0b;margin-left:4px;vertical-align:middle">⏰</span>
-                            @endif
-                        </td>
-                        <td>
-                            {{ $permit->deceased->full_name }}
-                        </td>
-                        <td style="font-size:12px;color:#6b7280;text-transform:capitalize">{{ ucfirst(str_replace('_',' ',$permit->permit_type)) }}</td>
-                        <td style="font-size:12px;color:#6b7280">{{ optional(optional($permit->deceased)->date_of_death)->format('M d, Y') ?? '—' }}</td>
-                        <td style="text-align:center">
-                            @if(($permit->renewal_count ?? 0) > 0)
-                                <span style="font-size:12px;font-weight:700;color:#f59e0b;background:#fef3c7;padding:2px 8px;border-radius:4px">{{ $permit->renewal_count }}×</span>
-                            @else
-                                <span style="font-size:12px;color:#d1d5db">—</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if($cs === 'expired')
-                                <span class="badge badge-red" style="font-weight:700">⚠ Expired</span>
-                            @elseif($cs === 'expiring')
-                                <span class="badge badge-yellow" style="font-weight:700">⏰ Expiring Soon</span>
-                            @else
-                                <span class="badge badge-green">✓ Active</span>
-                            @endif
-                        </td>
-                        <td>
-                            <div class="actions-cell" onclick="event.stopPropagation()">
-                                <a href="{{ route('permits.show', $permit) }}" class="btn-action">
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    View
-                                </a>
-                                <a href="{{ route('permits.print', $permit) }}"
-                                   class="btn-action btn-print"
-                                   onclick="handlePrint(event, this, '{{ $permit->permit_number }}')"
-                                   title="Download filled permit as .docx">
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                                    Print
-                                </a>
-                                @if($cs === 'expired' || $cs === 'expiring')
-                                <form method="POST" action="{{ route('permits.renew', $permit) }}" style="display:inline" onsubmit="return confirm('Renew this permit?')">
-                                    @csrf
-                                    <button type="submit" class="btn-action btn-renew">
-                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>
-                                        Renew
-                                    </button>
-                                </form>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" style="text-align:center;color:#9ca3af;padding:2.5rem">No permits yet.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            <div id="table-container" style="transition: opacity 0.2s ease;">
+                @include('admin.permits.partials.table')
             </div>
 
         </div>
@@ -515,12 +454,7 @@ if (window.location.hash === '#new' || @json(session('open_modal'))) {
 })();
 
 function filterTable(q) {
-    q = q.toLowerCase();
-    document.querySelectorAll('.permit-row').forEach(row => {
-        const no  = row.querySelector('.permit-no')?.textContent.toLowerCase() ?? '';
-        const dec = row.querySelectorAll('td')[1]?.textContent.toLowerCase() ?? '';
-        row.style.display = (no.includes(q) || dec.includes(q)) ? '' : 'none';
-    });
+    // Client-side filtering removed in favor of Server-side search for pagination compatibility
 }
 
 function handlePrint(e, link, permitNo) {
@@ -538,12 +472,83 @@ function handlePrint(e, link, permitNo) {
     setTimeout(() => link.classList.remove('loading'), 2000);
 }
 
-// ── AUTO-FOCUS SEARCH ──
+// ── AUTO-FOCUS AND LIVE SEARCH ──
 document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) searchInput.focus();
+    const searchInput = document.getElementById('liveSearchInput');
+    const searchForm = document.querySelector('.search-group');
+    const tableContainer = document.getElementById('table-container');
+    const totalRecords = document.getElementById('totalRecords');
+    let timeout = null;
+
+    if (searchForm) {
+        // Prevent generic form submission
+        searchForm.addEventListener('submit', (e) => e.preventDefault());
+    }
+
+    if (searchInput) {
+        searchInput.focus();
+
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(timeout);
+            const query = e.target.value;
+            timeout = setTimeout(() => fetchResults(query), 300);
+        });
+    }
+
+    // Intercept clicks on pagination or sorting links to keep it seamless
+    if (tableContainer) {
+        tableContainer.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && (link.classList.contains('pager-btn') || link.classList.contains('sort-link'))) {
+                e.preventDefault();
+                fetchResultsByUrl(link.href);
+            }
+        });
+    }
+
+    function fetchResultsByUrl(urlString) {
+        tableContainer.style.opacity = '0.5';
+        
+        fetch(urlString, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            const total = response.headers.get('X-Total-Records');
+            if(total !== null && totalRecords) {
+                totalRecords.textContent = total + ' records';
+            }
+            return response.text();
+        })
+        .then(html => {
+            tableContainer.innerHTML = html;
+            tableContainer.style.opacity = '1';
+            window.history.replaceState({}, '', urlString);
+        })
+        .catch(err => {
+            console.error('Fetch failed:', err);
+            tableContainer.style.opacity = '1';
+        });
+    }
+
+    function fetchResults(query) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', query);
+        url.searchParams.delete('page'); // reset to page 1 on fresh search
+        if (!query) url.searchParams.delete('q');
+        fetchResultsByUrl(url.toString());
+    }
 });
 </script>
+
+    <!-- FAB: New Permit -->
+    <button onclick="openPM()" class="fab" title="New Burial Permit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
 
 </body>
 </html>

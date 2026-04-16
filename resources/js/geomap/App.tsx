@@ -242,6 +242,22 @@ function App() {
       <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 1000, pointerEvents: 'none' }}>
         <div style={{ ...island, display: 'flex', alignItems: 'center', gap: '20px', pointerEvents: 'auto', maxWidth: '600px' }}>
           <PlotSearch pointsData={pointsData} onSelect={handleFlyTo} />
+          <a
+            href="/support/manual#cemetery-map"
+            title="How to use the map"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'rgba(255,255,255,0.4)',
+              transition: 'color 0.2s',
+              cursor: 'pointer'
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.color = '#3b82f6')}
+            onMouseOut={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </a>
         </div>
       </div>
 

@@ -19,6 +19,13 @@
         html.dark tbody tr:hover td:first-child { box-shadow: inset 4px 0 0 #6366f1 !important; }
 
         .deceased-name { font-weight: 500; color: var(--text-1); }
+
+        /* ── Floating Action Button (FAB) ── */
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; background: #1a2744; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 1000; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; border: none; outline: none; }
+        .fab:hover { transform: scale(1.1) rotate(90deg); background: #2563eb; box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+        .fab svg { width: 24px; height: 24px; }
+        html.dark .fab { background: #3b82f6; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        html.dark .fab:hover { background: #60a5fa; }
     </style>
 </head>
 <body>
@@ -288,5 +295,13 @@ new Chart(document.getElementById('monthlyChart').getContext('2d'), {
 });
 </script>
 @livewireScripts
+    <!-- FAB: New Permit -->
+    <a href="{{ route('permits.index') }}#new" class="fab" title="New Burial Permit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </a>
+
 </body>
 </html>

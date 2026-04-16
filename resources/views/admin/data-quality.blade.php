@@ -1,6 +1,6 @@
 {{-- ══════════════════════════════════════════════════════════
 Data Quality Scanner — Standalone Page
-Route: superadmin.dataquality (or wherever you register it)
+Route: admin.dataquality
 Controller should pass: $scanResults (optional, can be null — JS fetches live)
 ══════════════════════════════════════════════════════════ --}}
 <!DOCTYPE html>
@@ -1068,7 +1068,7 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
 <body>
 
     {{-- Sidebar --}}
-    @include('superadmin.partials.sidebar')
+    @include('admin.partials.sidebar')
 
     <div class="main">
 
@@ -1083,7 +1083,12 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
                 </a>
                 <span class="topbar-sep">/</span>
                 <div>
-                    <div class="topbar-title">Data Quality Scanner</div>
+                    <div class="topbar-title">
+            Data Quality Scanner
+            <a href="{{ route('support.manual') }}#data-quality" class="help-link-trigger" title="About data quality scanning" style="display:inline-flex; vertical-align:middle; margin-left:8px; color:var(--accent); opacity:0.6; transition:opacity .15s;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </a>
+        </div>
                     <div class="topbar-date">{{ now()->format('l, F d, Y') }}</div>
                 </div>
         </div>
