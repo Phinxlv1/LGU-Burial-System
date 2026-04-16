@@ -383,6 +383,7 @@
 </div>
 
 @include('admin.partials.permit-modal')
+@include('admin.partials.renewal-modal')
 
 <script>
 function closeModal() { document.getElementById('permitModal').classList.remove('open'); }

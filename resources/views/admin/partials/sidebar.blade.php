@@ -332,6 +332,8 @@
         font-weight: 600;
         color: #fff;
         flex-shrink: 0;
+        overflow: hidden;
+        position: relative;
     }
 
     .user-name {
@@ -738,7 +740,13 @@
         </button>
 
         <div class="user-info">
-            <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+            <div class="user-avatar" id="sidebarAvatar">
+                @if(auth()->user()->profile_photo)
+                    <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+                @else
+                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                @endif
+            </div>
             <div>
                 <div class="user-name">{{ auth()->user()->name }}</div>
                 <div class="user-role">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</div>
@@ -804,11 +812,22 @@
     }
 
     function toggleSection(header) {
-        header.parentElement.classList.toggle('is-collapsed');
+        const group = header.parentElement;
+        const isCollapsed = group.classList.toggle('is-collapsed');
+        if (group.id) {
+            localStorage.setItem('lgu_nav_' + group.id, isCollapsed ? '1' : '0');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
         updateDarkLabel(document.documentElement.classList.contains('dark'));
+        
+        // Restore nav group collapsed states
+        document.querySelectorAll('.nav-group').forEach(group => {
+            if (group.id && localStorage.getItem('lgu_nav_' + group.id) === '1') {
+                group.classList.add('is-collapsed');
+            }
+        });
     });
 
     // ── Global Shortcuts ──
@@ -857,3 +876,5 @@
         if (searchInput) searchInput.focus();
     });
 </script>
+
+@include('admin.partials.persistence')

@@ -63,6 +63,7 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
 
         .topbar-left {
             display: flex;
+            flex-direction: row !important;
             align-items: center;
             gap: .75rem;
         }
@@ -797,7 +798,11 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
         }
 
         html.dark .topbar-sep {
-            color: #334155 !important;
+            color: #475569 !important;
+        }
+
+        html.dark .help-link-trigger {
+            color: #818cf8 !important;
         }
 
         html.dark .role-tag {
@@ -1075,13 +1080,6 @@ Controller should pass: $scanResults (optional, can be null — JS fetches live)
         {{-- Top Bar --}}
         <div class="topbar">
             <div class="topbar-left">
-                <a href="{{ route('settings.index') }}" class="topbar-back">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                    Settings
-                </a>
-                <span class="topbar-sep">/</span>
                 <div>
                     <div class="topbar-title">
             Data Quality Scanner

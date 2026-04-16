@@ -253,9 +253,10 @@ class BurialPermitController extends Controller
             'applicant_name' => $request->requestor_name,
             'applicant_relationship' => $request->applicant_relationship ?? '',
             'applicant_contact' => $request->applicant_contact ?? '',
+            'or_number' => $request->or_number ?? null,
             'status' => 'active',
             'issued_date' => now(),
-            'expiry_date' => now()->addYears((int) ($this->loadSettings()['permit_expiry_years'] ?? 5)),
+            'expiry_date' => $request->filled('expiry_date') ? $request->expiry_date : now()->addYears((int) ($this->loadSettings()['permit_expiry_years'] ?? 5)),
             'processed_by' => Auth::id(),
         ]);
 

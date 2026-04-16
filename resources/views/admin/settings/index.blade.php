@@ -11,6 +11,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Settings — LGU Carmen</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Cropper.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'DM Sans', sans-serif; background: #f0f2f5; color: #111827; -webkit-font-smoothing: antialiased; display: flex; min-height: 100vh; }
@@ -348,6 +350,10 @@
     html.dark hr { border-color: #2d3148 !important; }
     html.dark .docs-empty { color: #374151 !important; }
     html.dark .lightbox { background: rgba(0,0,0,.92) !important; }
+    html.dark #photoDropzone { background: #181b29 !important; border-color: #374151 !important; }
+    html.dark #dropzoneTxt { color: #94a3b8 !important; }
+    html.dark #avatarPreview { border-color: #2d3148 !important; }
+    html.dark .profile-name-display { color: #e2e8f0 !important; }
 
     </style>
 </head>
@@ -369,6 +375,11 @@
         {{-- LEFT NAV --}}
         <div class="settings-nav">
             <div class="snav-card">
+                <div class="snav-item" onclick="showSection('profile',this)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    My Profile
+                </div>
+                <div class="snav-divider"></div>
                 <div class="snav-item active" onclick="showSection('general',this)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
                     General
@@ -404,6 +415,61 @@
 
         {{-- RIGHT BODY --}}
         <div class="settings-body">
+
+        {{-- MY PROFILE --}}
+            <div class="section-card" id="section-profile">
+                <div class="section-head"><h2>My Profile</h2><p>Update your profile picture displayed in the sidebar.</p></div>
+                <div class="section-body">
+                    <div class="divider-label">Profile Picture</div>
+
+                    {{-- Current avatar preview --}}
+                    <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap">
+                        <div id="avatarPreview" style="width:80px;height:80px;border-radius:12px;background:#1a2744;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0;border:3px solid #e5e7eb;">
+                            @if(auth()->user()->profile_photo)
+                                <img id="avatarPreviewImg" src="{{ asset('storage/' . auth()->user()->profile_photo) }}" style="width:100%;height:100%;object-fit:cover;" alt="Profile">
+                            @else
+                                <span id="avatarInitials">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                <img id="avatarPreviewImg" src="" style="width:100%;height:100%;object-fit:cover;display:none;" alt="Profile">
+                            @endif
+                        </div>
+                        <div>
+                            <div style="font-size:14px;font-weight:600;color:#111827" class="profile-name-display">{{ auth()->user()->name }}</div>
+                            <div style="font-size:12px;color:#9ca3af;margin-top:2px">{{ ucfirst(str_replace('_',' ', auth()->user()->role)) }}</div>
+                            <div style="font-size:11px;color:#9ca3af;margin-top:6px">JPG, PNG, GIF or WebP · Max 2MB</div>
+                        </div>
+                    </div>
+
+                    {{-- Upload form --}}
+                    <form method="POST" action="{{ route('settings.profile.update') }}" enctype="multipart/form-data" id="photoUploadForm">
+                        @csrf
+                        <div id="photoDropzone" style="border:2px dashed #d1d5db;border-radius:10px;padding:2rem 1rem;text-align:center;cursor:pointer;transition:all .15s;position:relative;background:#fafafa;">
+                            <input type="file" name="photo" id="photoInput" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;">
+                            <div style="width:40px;height:40px;background:#f3f4f6;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                            <div style="font-size:13px;font-weight:500;color:#374151" id="dropzoneTxt">Click to upload or drag & drop a photo</div>
+                            <div id="dropzoneFilename" style="font-size:12px;color:#6366f1;margin-top:4px;display:none;"></div>
+                        </div>
+
+                        @error('photo')
+                            <div style="color:#ef4444;font-size:12px;margin-top:.4rem">{{ $message }}</div>
+                        @enderror
+
+                        <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.85rem">
+                            @if(auth()->user()->profile_photo)
+                                <form method="POST" action="{{ route('settings.profile.delete') }}" onsubmit="return confirm('Remove your profile photo?')" style="margin:0">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn-danger">Remove Photo</button>
+                                </form>
+                            @endif
+                            <button type="submit" class="btn-primary" id="uploadBtn" disabled>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Upload Photo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
             {{-- GENERAL --}}
             <div class="section-card active" id="section-general">
@@ -599,6 +665,20 @@
     </div>
 </div>
 
+{{-- CROP MODAL --}}
+<div class="modal-overlay" id="cropModal">
+    <div class="modal" style="max-width:500px">
+        <div class="modal-header"><h3>Crop Profile Photo</h3></div>
+        <div class="modal-body" style="padding:0;background:#000;display:flex;align-items:center;justify-content:center;height:400px;overflow:hidden">
+            <img id="cropImage" src="" style="max-width:100%;max-height:100%;display:block;">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="cancelCrop()">Cancel</button>
+            <button type="button" class="btn-primary" onclick="applyCrop()">Apply Crop</button>
+        </div>
+    </div>
+</div>
+
 {{-- TOASTS --}}
 @if(session('success'))
 <div class="toast" id="sToast">
@@ -610,6 +690,8 @@
     <div class="toast-body"><div class="toast-icon green" id="aToastIcon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="toast-title" id="aToastTitle">Done</div><div class="toast-sub" id="aToastSub"></div></div></div>
     <div class="toast-bar" style="background:#e5e7eb"><div class="toast-bar-fill" id="aToastBar" style="background:#10b981"></div></div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
 <script>
 const CSRF   = document.querySelector('meta[name="csrf-token"]').content;
@@ -692,6 +774,119 @@ function setTheme(theme) {
 
 // Sync UI on load
 syncAppearanceUI();
+
+/* ══════════════════════════
+   PROFILE PHOTO UPLOAD
+══════════════════════════ */
+(function() {
+    const input       = document.getElementById('photoInput');
+    const uploadBtn   = document.getElementById('uploadBtn');
+    const dropzone    = document.getElementById('photoDropzone');
+    const dropzoneTxt = document.getElementById('dropzoneTxt');
+    const filename    = document.getElementById('dropzoneFilename');
+    const previewImg  = document.getElementById('avatarPreviewImg');
+    const initials    = document.getElementById('avatarInitials');
+
+    if (!input) return; // Profile section might not exist (superadmin)
+
+    let cropper = null;
+    let croppedBlob = null;
+    const cropModal = document.getElementById('cropModal');
+    const cropImg   = document.getElementById('cropImage');
+
+    window.cancelCrop = function() {
+        cropModal.classList.remove('open');
+        if (cropper) { cropper.destroy(); cropper = null; }
+        input.value = ''; // Reset input
+    };
+
+    window.applyCrop = function() {
+        if (!cropper) return;
+        const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
+        canvas.toBlob(blob => {
+            croppedBlob = blob;
+            const url = URL.createObjectURL(blob);
+            
+            // Update preview
+            if (previewImg) {
+                previewImg.src = url;
+                previewImg.style.display = 'block';
+            }
+            if (initials) initials.style.display = 'none';
+
+            dropzoneTxt.textContent = 'Photo ready to upload (Cropped)';
+            uploadBtn.disabled      = false;
+            dropzone.style.borderColor = '#6366f1';
+            dropzone.style.background  = '#f5f3ff';
+
+            cropModal.classList.remove('open');
+            cropper.destroy();
+            cropper = null;
+        }, 'image/jpeg', 0.9);
+    };
+
+    function handleFile(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            cropImg.src = e.target.result;
+            cropModal.classList.add('open');
+            
+            // Initialize cropper after modal is visible to ensure proper dimensions
+            setTimeout(() => {
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(cropImg, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    background: false,
+                    autoCropArea: 1,
+                    responsive: true,
+                });
+            }, 100);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    input.addEventListener('change', () => { if (input.files[0]) handleFile(input.files[0]); });
+
+    // Drag and drop
+    dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.style.borderColor = '#6366f1'; dropzone.style.background = '#f5f3ff'; });
+    dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = '#d1d5db'; dropzone.style.background = '#fafafa'; });
+    dropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    });
+
+    // Intercept form submission to send cropped blob
+    document.getElementById('photoUploadForm').onsubmit = function(e) {
+        if (!croppedBlob) return true; // Fallback to normal upload if no crop
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        // Replace the "photo" field with our cropped blob
+        formData.set('photo', croppedBlob, 'profile_photo.jpg');
+
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<div class="spinner"></div>Uploading...';
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRF-TOKEN': CSRF }
+        })
+        .then(r => r.ok ? window.location.reload() : Promise.reject())
+        .catch(() => {
+            toast('Upload Failed', 'There was an error updating your photo.', false);
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Photo';
+        });
+
+        return false;
+    };
+})();
 
 /* ══════════════════════════
    DATA QUALITY SCANNER

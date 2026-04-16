@@ -265,8 +265,15 @@
                 <div class="topbar-date">{{ now()->format('l, j F Y · H:i') }}</div>
             </div>
         </div>
-        <div class="topbar-right">
+        <div class="topbar-right" style="display:flex;align-items:center;gap:10px;">
             <span class="role-pill">⚡ Super Admin</span>
+            <div style="width:34px;height:34px;border-radius:50%;overflow:hidden;border:2px solid #e2e8f0;flex-shrink:0;background:#1a2744;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;">
+                @if(auth()->user()->profile_photo)
+                    <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;">
+                @else
+                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                @endif
+            </div>
         </div>
     </div>
 
@@ -371,8 +378,12 @@
                         </td>
                         <td class="td-user">
                             <div class="user-chip {{ $chipRoleClass }}">
-                                <div class="user-avatar">
-                                    {{ $avatar }}
+                                <div class="user-avatar" style="overflow:hidden;">
+                                    @if(!$isSys && $log->user?->profile_photo)
+                                        <img src="{{ asset('storage/' . $log->user->profile_photo) }}" alt="{{ $userName }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                    @else
+                                        {{ $avatar }}
+                                    @endif
                                 </div>
                                 <span class="user-name">
                                     {{ $isSys ? 'System Action' : $userName }}

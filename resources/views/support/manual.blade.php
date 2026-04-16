@@ -131,6 +131,22 @@
             display: inline-flex;
             margin-right: 8px;
         }
+
+        /* ── Dark Mode Overrides ── */
+        html.dark body { background: #0f172a; color: #f1f5f9; }
+        html.dark .manual-sidebar { background: #111827; border-color: #1e293b; }
+        html.dark .feature-card { background: #1e293b; border-color: #334155; }
+        html.dark .doc-section h1 { color: #f8fafc; }
+        html.dark .doc-section h2 { color: #818cf8; }
+        html.dark .doc-section p { color: #cbd5e1; }
+        html.dark .nav-link { color: #94a3b8; }
+        html.dark .nav-link:hover { background: #1e293b; color: #f8fafc; }
+        html.dark .nav-link.active { background: rgba(99,102,241,0.15); color: #818cf8; }
+        html.dark .nav-group-title { color: #64748b; }
+        html.dark kbd { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+        html.dark .feature-icon { background: rgba(99,102,241,0.15); color: #818cf8; }
+        html.dark table th { color: #f8fafc; border-bottom: 2px solid #334155; }
+        html.dark table td { color: #cbd5e1; border-bottom: 1px solid #1e293b; }
     </style>
 </head>
 <body class="dark:bg-[#0f1117]">
@@ -139,8 +155,8 @@
     <div class="main">
         <header class="topbar">
             <div class="topbar-left">
-                <div class="topbar-title">Knowledge Center</div>
-                <div class="topbar-date">System Documentation & User Manual</div>
+                <div class="topbar-title">User Manual</div>
+                <div class="topbar-date">System Tutorial & Guide</div>
             </div>
             <div class="topbar-right">
                 <a href="{{ auth()->user()->role === 'super_admin' ? route('superadmin.dashboard') : route('dashboard') }}" class="btn-xs">
@@ -162,8 +178,8 @@
                 
                 <div class="nav-group-title">ADVANCED TOOLS</div>
                 <a href="#reports" class="nav-link">Reports & Exports</a>
+                <a href="#data-quality" class="nav-link">Data Quality Scanner</a>
                 @if(auth()->user()->role === 'super_admin')
-                    <a href="#data-quality" class="nav-link">Data Quality Scanner</a>
                     <a href="#settings" class="nav-link">System Settings</a>
                 @endif
             </aside>
@@ -240,13 +256,11 @@
                     <p>Access consolidated revenue reports based on burial and renewal fees defined in your system settings.</p>
                 </section>
 
-                @if(auth()->user()->role === 'super_admin')
                 <section id="data-quality" class="doc-section">
                     <h1>Data Quality Scanner</h1>
                     <p>To ensure database integrity, the system runs an 11-point scan identifying duplicates, missing links, and logical errors in the deceased records.</p>
                     <p>Check this module regularly to fix "Swapped Names" or "Duplicate Permits" flagged by the AI engine.</p>
                 </section>
-                @endif
             </main>
         </div>
     </div>
@@ -255,30 +269,37 @@
         // Enhanced scrollspy for the sidebar
         const sections = document.querySelectorAll('.doc-section');
         const navLinks = document.querySelectorAll('.nav-link');
+        let isClicking = false;
 
         function updateActiveLink() {
+            if (isClicking) return; // Prevent scroll override during smooth-scroll
+
             let current = '';
-            const scrollPos = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollPos = window.pageYOffset;
+            const triggerPos = scrollPos + 100; // Trigger line slightly below top header
             
-            // Check if we're at the bottom of the page
-            if (window.innerHeight + scrollPos >= document.documentElement.scrollHeight - 50) {
+            // Check mathematically which section overlaps the trigger line using viewport coordinates
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                // If the section's top is above our trigger line (150px) AND its bottom is below it
+                if (rect.top <= 150 && rect.bottom > 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            // Fallback for extremely short pages: if we hit absolute bottom, force the last section
+            if (!current && (window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 10)) {
                 current = sections[sections.length - 1].getAttribute('id');
-            } else {
-                sections.forEach(section => {
-                    const sectionTop = section.offsetTop;
-                    // Adjust trigger point for better feel
-                    if (scrollPos >= sectionTop - 120) {
-                        current = section.getAttribute('id');
+            }
+
+            if (current) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + current) {
+                        link.classList.add('active');
                     }
                 });
             }
-
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href').includes(current)) {
-                    link.classList.add('active');
-                }
-            });
         }
 
         // Optimized scroll listener
@@ -291,11 +312,15 @@
         // Initial call to set active state
         document.addEventListener('DOMContentLoaded', updateActiveLink);
         
-        // Handle immediate highlight on click
+        // Handle immediate highlight on click and pause scroll tracking
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
+                isClicking = true;
                 navLinks.forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
+
+                // Resume scroll tracking after smooth scroll finishes
+                setTimeout(() => { isClicking = false; }, 800);
             });
         });
     </script>

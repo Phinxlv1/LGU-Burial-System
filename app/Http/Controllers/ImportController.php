@@ -238,12 +238,12 @@ class ImportController extends Controller
     {
         try {
             if (! Schema::hasTable('import_logs')) {
-                return new LengthAwarePaginator([], 0, 15);
+                return new LengthAwarePaginator([], 0, 5);
             }
 
-            return ImportLog::with('user')->latest()->paginate(15);
+            return ImportLog::with('user')->latest()->paginate(5);
         } catch (\Throwable) {
-            return new LengthAwarePaginator([], 0, 15);
+            return new LengthAwarePaginator([], 0, 5);
         }
     }
 

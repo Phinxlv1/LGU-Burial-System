@@ -9,6 +9,11 @@
     @include('admin.partials.design-system')
     <style>
         /* Component specific overrides if any */
+        html, body { overflow: hidden !important; height: 100vh !important; }
+        .main { overflow: hidden !important; height: 100vh !important; }
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+
         .dropzone { border: 2px dashed var(--border); border-radius: 12px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; transition: all .15s; position: relative; background: var(--surface); }
         .dropzone:hover, .dropzone.drag-over { border-color: var(--navy); background: var(--surface-2); }
 
@@ -182,19 +187,38 @@
                                     </ul>
                                 @endif
                             @else
-                                <span style="color:#d1d5db;font-size:12px">—</span>
+                                <span style="color:#6b7280;font-size:12px;font-weight:500;">0 skipped</span>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr class="empty-row"><td colspan="6">No uploads yet.</td></tr>
                     @endforelse
+
+                    {{-- Pad with invisible rows to keep pagination locked in place --}}
+                    @if(count($logs) > 0 && count($logs) < 5)
+                        @for($i = count($logs); $i < 5; $i++)
+                            <tr style="visibility: hidden;">
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        @endfor
+                    @elseif(count($logs) === 0)
+                        @for($i = 1; $i < 5; $i++)
+                            <tr style="visibility: hidden;">
+                                <td colspan="6">&nbsp;</td>
+                            </tr>
+                        @endfor
+                    @endif
                 </tbody>
             </table>
 
             @if($logs->hasPages())
             <div class="pager">
-                <span class="pager-info">Showing {{ $logs->firstItem() }}–{{ $logs->lastItem() }} of {{ $logs->total() }}</span>
                 <div class="pager-btns">
                     @if($logs->onFirstPage())
                         <span class="pager-btn disabled">‹ Prev</span>

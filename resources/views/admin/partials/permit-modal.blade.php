@@ -35,6 +35,17 @@ onclick="document.getElementById('permitModal').classList.add('open')"
                         value="{{ old('applicant_contact') }}">
                 </div>
 
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
+                    <div class="form-group">
+                        <label class="form-label">O.R. Number <span style="font-weight:400;text-transform:none;font-size:10px;color:#9ca3af">optional</span></label>
+                        <input type="text" name="or_number" class="form-control" placeholder="Receipt number" value="{{ old('or_number') }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Expiry Date</label>
+                        <input type="date" id="pm_expiry_date" name="expiry_date" class="form-control" value="{{ old('expiry_date', now()->addYears(5)->format('Y-m-d')) }}">
+                    </div>
+                </div>
+
                 {{-- DECEASED INFO --}}
                 <div class="section-divider" style="margin-top:.5rem">Deceased Information</div>
 

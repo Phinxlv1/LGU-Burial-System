@@ -67,9 +67,9 @@
                             Print
                         </a>
                         @if($cs === 'expired' || $cs === 'expiring')
-                        <form method="POST" action="{{ route('permits.renew', $permit) }}" style="display:inline" onsubmit="return confirm('Renew this permit?')">
+                        <form id="renew-form-{{ $permit->id }}" method="POST" action="{{ route('permits.renew', $permit) }}" style="display:inline">
                             @csrf
-                            <button type="submit" class="btn-action btn-renew">
+                            <button type="button" class="btn-action btn-renew" onclick="openRenewModal('{{ $permit->permit_number }}', '{{ str_replace('\'', '\\\'', $permit->deceased->full_name) }}', 'renew-form-{{ $permit->id }}')">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>
                                 Renew
                             </button>
@@ -83,6 +83,21 @@
                 <td colspan="7" style="text-align:center;color:#9ca3af;padding:2.5rem">No permits yet.</td>
             </tr>
             @endforelse
+
+            {{-- Pad with invisible rows to keep pagination locked in place --}}
+            @if($permits->count() > 0 && $permits->count() < 10)
+                @for($i = $permits->count(); $i < 10; $i++)
+                    <tr style="visibility: hidden;">
+                        <td colspan="7">&nbsp;</td>
+                    </tr>
+                @endfor
+            @elseif($permits->count() === 0)
+                @for($i = 1; $i < 10; $i++)
+                    <tr style="visibility: hidden;">
+                        <td colspan="7">&nbsp;</td>
+                    </tr>
+                @endfor
+            @endif
         </tbody>
     </table>
 </div>

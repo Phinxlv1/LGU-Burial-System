@@ -57,6 +57,8 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/settings/users/{user}',   [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
         Route::get('/settings/dataquality/scan',  [SettingsController::class, 'dataQualityScan'])->name('settings.dataquality.scan');
         Route::post('/settings/dataquality/update', [SettingsController::class, 'updateRecord'])->name('settings.dataquality.update');
+        Route::post('/settings/profile-photo',       [SettingsController::class, 'updateProfilePhoto'])->name('settings.profile.update');
+        Route::delete('/settings/profile-photo',     [SettingsController::class, 'deleteProfilePhoto'])->name('settings.profile.delete');
     });
 
     // ── Admin + Super Admin ──

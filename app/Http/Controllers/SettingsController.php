@@ -209,6 +209,48 @@ class SettingsController extends Controller
             ->with('success', "{$name} removed successfully.");
     }
 
+    // ──────────────────────────────────────────────────
+    // POST /settings/profile-photo   — upload profile photo
+    // ──────────────────────────────────────────────────
+    public function updateProfilePhoto(Request $request)
+    {
+        $request->validate([
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+
+        $user = auth()->user();
+
+        // Delete old photo from disk if exists
+        if ($user->profile_photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_photo)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+        }
+
+        // Store the new photo
+        $path = $request->file('photo')->store('profile-photos', 'public');
+
+        $user->update(['profile_photo' => $path]);
+
+        return redirect()->route('settings.index')
+            ->with('success', 'Profile photo updated successfully.');
+    }
+
+    // ──────────────────────────────────────────────────
+    // DELETE /settings/profile-photo   — remove profile photo
+    // ──────────────────────────────────────────────────
+    public function deleteProfilePhoto()
+    {
+        $user = auth()->user();
+
+        if ($user->profile_photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_photo)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+        }
+
+        $user->update(['profile_photo' => null]);
+
+        return redirect()->route('settings.index')
+            ->with('success', 'Profile photo removed.');
+    }
+
     public function dataQualityScan()
     {
         $issues = [];
